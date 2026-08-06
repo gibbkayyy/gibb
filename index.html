@@ -157,7 +157,6 @@
             box-shadow: 0 0 10px rgba(0,255,100,0.1);
         }
         
-        /* 3-Column Layout: Left (Ideas), Center (Carousel & Logo), Right (Weather/Telemetry) */
         .hud-main-layout {
             display: flex;
             flex: 1;
@@ -166,7 +165,6 @@
             padding: 0 20px;
         }
 
-        /* Left Column: Ideas & Quick Configs */
         .hud-side-panel {
             width: 280px;
             background: rgba(2, 15, 7, 0.75);
@@ -192,7 +190,6 @@
             opacity: 0.85;
         }
 
-        /* Center Column: Logo stacked vertically with Carousel */
         .hud-center-column {
             display: flex;
             flex-direction: column;
@@ -210,7 +207,6 @@
             100% { transform: scale(1.03); filter: drop-shadow(0 0 50px rgba(0, 255, 100, 1)); }
         }
 
-        /* Perfectly Balanced Smooth Carousel */
         .carousel-container {
             height: 160px;
             width: 380px;
@@ -544,12 +540,14 @@
 
     <script>
         const PASSWORD = "prki3210";
-        let jarvisVoice = null;
+        const ELEVENLABS_API_KEY = "sk_e864efb78d397ab5853ce9574c086059eba068a476277e7d";
+        const ELEVENLABS_VOICE_ID = "C1npRmjB19a6yNkEucvx";
+        
         let currentCarouselIndex = 1;
+        let activeAudio = null;
 
         window.addEventListener("load", () => {
             runBootSequence();
-            initVoices();
             updateHUDClock();
             setInterval(updateHUDClock, 1000);
             measureTelemetry();
@@ -560,7 +558,7 @@
         async function runBootSequence() {
             let steps = [
                 "INITIALIZING KERNEL MATRIX...",
-                "LOADING NEURAL VOICE SYNTHESIS MODULES...",
+                "LOADING ELEVENLABS NEURAL VOICE MODULES...",
                 "CALIBRATING HOLOGRAPHIC RENDERING NODES...",
                 "SYSTEM VERIFIED. READY FOR AUTHORISATION."
             ];
@@ -626,35 +624,43 @@
             }
         }
 
-        // --- Forced Deep Male Voice & Zero Delay Speech Engine ---
-        function initVoices() {
-            if (!('speechSynthesis' in window)) return;
-            let voices = window.speechSynthesis.getVoices();
-            
-            jarvisVoice = voices.find(v => 
-                (v.name.includes("Male") || v.name.includes("David") || v.name.includes("George") || v.name.includes("Oliver") || v.name.includes("Daniel") || v.name.includes("Mark") || v.name.includes("James") || (v.name.includes("Google") && v.name.includes("en-GB"))) && 
-                v.lang.startsWith("en")
-            ) || voices.find(v => v.lang.startsWith("en") && !v.name.toLowerCase().includes("female") && !v.name.toLowerCase().includes("zira") && !v.name.toLowerCase().includes("hazel")) || voices[0];
-        }
-
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = initVoices;
-        }
-
-        function speakJarvis(text) {
+        // --- Instant ElevenLabs High-Performance Voice Engine ---
+        async function speakJarvis(text) {
             if (!text) return;
-            if (!('speechSynthesis' in window)) return;
             
-            window.speechSynthesis.cancel();
-            
-            let speech = new SpeechSynthesisUtterance(text);
-            speech.rate = 1.12;
-            speech.pitch = 0.65;
-            
-            if (!jarvisVoice) initVoices();
-            if (jarvisVoice) speech.voice = jarvisVoice;
-            
-            window.speechSynthesis.speak(speech);
+            // Stop any currently playing audio instantly to remove lag/overlap
+            if (activeAudio) {
+                activeAudio.pause();
+                activeAudio = null;
+            }
+
+            try {
+                let response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}?optimize_streaming_latency=0`, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'audio/mpeg',
+                        'Content-Type': 'application/json',
+                        'xi-api-key': ELEVENLABS_API_KEY
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        model_id: "eleven_monolingual_v1",
+                        voice_settings: {
+                            stability: 0.5,
+                            similarity_boost: 0.75
+                        }
+                    })
+                });
+
+                if (!response.ok) throw new Error("ElevenLabs API request failed");
+
+                let blob = await response.blob();
+                let audioUrl = URL.createObjectURL(blob);
+                activeAudio = new Audio(audioUrl);
+                activeAudio.play();
+            } catch (err) {
+                console.error("ElevenLabs Speech Error:", err);
+            }
         }
 
         function checkPassword() {
@@ -720,7 +726,6 @@
         function updateCarouselView() {
             let track = document.getElementById("carousel-track");
             let items = track.children;
-            // Perfectly centered offset calculation matching each item slot (~55px gap spacing)
             let offset = (1 - currentCarouselIndex) * 55;
             track.style.transform = `translateY(${offset}px)`;
 
@@ -743,7 +748,10 @@
         }
 
         function goHome() {
-            window.speechSynthesis.cancel();
+            if (activeAudio) {
+                activeAudio.pause();
+                activeAudio = null;
+            }
             document.getElementById("chat-view").style.display = "none";
             document.getElementById("translate-view").style.display = "none";
             let home = document.getElementById("home-screen");
