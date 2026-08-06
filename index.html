@@ -535,15 +535,6 @@
                 </div>
 
                 <div class="setting-group">
-                    <label>🧠 Voice Profile</label>
-                    <select id="voice-selector" onchange="changeVoice(this.value)">
-                        <option value="C1npRmjB19a6yNkEucvx">Adam / Deep Male</option>
-                        <option value="EXAVITQu4vr4xnSDxMaL">Bella / Smooth</option>
-                        <option value="ErXwobaYiN019PkySvjV">Antony / Authoritative</option>
-                    </select>
-                </div>
-
-                <div class="setting-group">
                     <label>🧹 Data Core</label>
                     <button class="settings-btn" onclick="clearMemory()">Wipe Saved Memory</button>
                 </div>
@@ -632,11 +623,8 @@
 
     <script>
         const PASSWORD = "prki3210";
-        const ELEVENLABS_API_KEY = "sk_e864efb78d397ab5853ce9574c086059eba068a476277e7d";
         
-        let ELEVENLABS_VOICE_ID = "C1npRmjB19a6yNkEucvx";
         let currentCarouselIndex = 1;
-        let activeAudio = null;
         let isMuted = false;
         let masterVolume = 1.0;
 
@@ -653,7 +641,7 @@
         async function runBootSequence() {
             let steps = [
                 "INITIALIZING KERNEL MATRIX...",
-                "LOADING ELEVENLABS NEURAL VOICE MODULES...",
+                "LOADING SYNTHESIZER VOICE MODULES...",
                 "CALIBRATING HOLOGRAPHIC RENDERING NODES...",
                 "SYSTEM VERIFIED. READY FOR AUTHORISATION."
             ];
@@ -734,7 +722,7 @@
             if (isMuted) {
                 btn.innerText = "MUTE: ON";
                 btn.classList.add("active");
-                if (activeAudio) activeAudio.pause();
+                window.speechSynthesis.cancel();
             } else {
                 btn.innerText = "MUTE: OFF";
                 btn.classList.remove("active");
@@ -745,13 +733,7 @@
         function updateVolume(val) {
             masterVolume = val / 100;
             document.getElementById("vol-val").innerText = `${val}%`;
-            if (activeAudio) activeAudio.volume = masterVolume;
             localStorage.setItem("gibb_volume", val);
-        }
-
-        function changeVoice(voiceId) {
-            ELEVENLABS_VOICE_ID = voiceId;
-            localStorage.setItem("gibb_voice_id", voiceId);
         }
 
         function clearMemory() {
@@ -780,51 +762,55 @@
                 document.getElementById("vol-val").innerText = `${savedVol}%`;
                 masterVolume = savedVol / 100;
             }
-
-            let savedVoice = localStorage.getItem("gibb_voice_id");
-            if (savedVoice) {
-                ELEVENLABS_VOICE_ID = savedVoice;
-                document.getElementById("voice-selector").value = savedVoice;
-            }
         }
 
-        // --- Instant ElevenLabs High-Performance Voice Engine ---
-        async function speakJarvis(text) {
-            if (!text || isMuted) return;
-            
-            if (activeAudio) {
-                activeAudio.pause();
-                activeAudio = null;
+        // --- High-Performance Lag-Free Native Voice Engine (Anti-Female Filter) ---
+        function speakJarvis(text) {
+            if (!text || isMuted || !('speechSynthesis' in window)) return;
+
+            // Instantly clear queue to remove speech delay
+            window.speechSynthesis.cancel();
+
+            let utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1.05; // Snappy speed
+            utterance.pitch = 0.7;  // Deep authoritative tone
+            utterance.volume = masterVolume;
+
+            let voices = window.speechSynthesis.getVoices();
+            let selectedVoice = null;
+
+            // Strict search for a robust English male voice (avoiding female fallbacks like Zira/Hazel)
+            for (let v of voices) {
+                let nameLower = v.name.toLowerCase();
+                if (v.lang.startsWith('en')) {
+                    if (nameLower.includes('male') || nameLower.includes('david') || nameLower.includes('george') || nameLower.includes('daniel') || nameLower.includes('mark') || nameLower.includes('ryan')) {
+                        selectedVoice = v;
+                        break;
+                    }
+                }
             }
 
-            try {
-                let response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${ELEVENLABS_VOICE_ID}?optimize_streaming_latency=0`, {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'audio/mpeg',
-                        'Content-Type': 'application/json',
-                        'xi-api-key': ELEVENLABS_API_KEY
-                    },
-                    body: JSON.stringify({
-                        text: text,
-                        model_id: "eleven_monolingual_v1",
-                        voice_settings: {
-                            stability: 0.5,
-                            similarity_boost: 0.75
-                        }
-                    })
-                });
-
-                if (!response.ok) throw new Error("ElevenLabs API request failed");
-
-                let blob = await response.blob();
-                let audioUrl = URL.createObjectURL(blob);
-                activeAudio = new Audio(audioUrl);
-                activeAudio.volume = masterVolume;
-                activeAudio.play();
-            } catch (err) {
-                console.error("ElevenLabs Speech Error:", err);
+            // Fallback to first available English voice if specific match isn't found, avoiding known female identifiers
+            if (!selectedVoice) {
+                for (let v of voices) {
+                    let nameLower = v.name.toLowerCase();
+                    if (v.lang.startsWith('en') && !nameLower.includes('zira') && !nameLower.includes('hazel') && !nameLower.includes('helena') && !nameLower.includes('susan')) {
+                        selectedVoice = v;
+                        break;
+                    }
+                }
             }
+
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Ensure voices load asynchronously in some browsers
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
         }
 
         function checkPassword() {
@@ -912,9 +898,8 @@
         }
 
         function goHome() {
-            if (activeAudio) {
-                activeAudio.pause();
-                activeAudio = null;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
             }
             document.getElementById("chat-view").style.display = "none";
             document.getElementById("translate-view").style.display = "none";
