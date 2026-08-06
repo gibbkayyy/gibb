@@ -7,9 +7,9 @@ from audio_recorder_streamlit import audio_recorder
 import os
 import io
 
-st.set_page_config(page_title="JARVIS AI System", page_icon="⚡", layout="wide")
+st.set_page_config(page_title="G.I.B.B. AI System", page_icon="🤖", layout="wide")
 
-st.title("⚡ JARVIS: Core Systems Online")
+st.title("🤖 G.I.B.B.: Core Systems Online")
 st.write("Advanced AI assistant with memory, text, voice, and vision capabilities.")
 
 # Get Gemini API Key from environment or sidebar input
@@ -37,7 +37,7 @@ if api_key:
     # ---------------------------------------------------------
     if mode == "💬 Text Chat & Memory":
         st.header("💬 Text Interface & Memory Matrix")
-        st.write("Jarvis remembers everything discussed in this session.")
+        st.write("G.I.B.B. remembers everything discussed in this session.")
 
         # Render chat history
         for message in st.session_state.chat_session.get_history():
@@ -47,7 +47,7 @@ if api_key:
                     if part.text:
                         st.markdown(part.text)
 
-        user_input = st.chat_input("Enter command for Jarvis...")
+        user_input = st.chat_input("Enter command for G.I.B.B....")
         if user_input:
             with st.chat_message("user"):
                 st.markdown(user_input)
@@ -68,23 +68,23 @@ if api_key:
     # ---------------------------------------------------------
     elif mode == "🎙️ Voice Command (Speech-to-Speech)":
         st.header("🎙️ Voice Command Center")
-        st.write("Record your voice command. Jarvis will process it, answer, and speak back.")
+        st.write("Record your voice command. G.I.B.B. will process it, answer, and speak back.")
 
         audio_bytes = audio_recorder(text="Click to record voice", icon_size="3x")
 
         if audio_bytes:
             st.audio(audio_bytes, format="audio/wav")
             
-            if st.button("Transmit Audio to Jarvis"):
+            if st.button("Transmit Audio to G.I.B.B."):
                 with st.spinner("Analyzing audio input..."):
                     response = client.models.generate_content(
                         model=model_name,
                         contents=[
                             types.Part.from_bytes(data=audio_bytes, mime_type="audio/wav"),
-                            "Listen to this voice command, transcribe it, and respond concisely like Jarvis."
+                            "Listen to this voice command, transcribe it, and respond concisely as G.I.B.B."
                         ]
                     )
-                    st.markdown("### Jarvis Response:")
+                    st.markdown("### G.I.B.B. Response:")
                     st.write(response.text)
                     
                     # Generate speech audio output
@@ -116,4 +116,4 @@ if api_key:
                     st.markdown(analysis.text)
 
 else:
-    st.info("⚠️ Please enter your Gemini API Key in the sidebar to initialize Jarvis.")
+    st.info("⚠️ Please enter your Gemini API Key in the sidebar to initialize G.I.B.B.")
