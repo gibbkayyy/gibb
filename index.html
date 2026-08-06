@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G.I.B.B. AI Interface</title>
+    <title>G.I.B.B. System Interface</title>
     <style>
         :root {
             --bg-color: #03080c;
@@ -50,15 +50,7 @@
             overflow: hidden;
         }
 
-        /* LOGO IMAGE STYLING */
-        .gibb-logo-img {
-            width: 45px;
-            height: 45px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 8px var(--accent-green));
-        }
-
-        /* AUTHENTICATION SCREEN */
+        /* PASSWORD LOCK SCREEN */
         #auth-screen {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -80,54 +72,66 @@
             width: 100%;
             max-width: 420px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .auth-card h1 {
+        .logo-ring {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 2px dashed var(--accent-green);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--glow-green);
+            margin-bottom: 20px;
+            position: relative;
+            animation: pulseGlow 3s infinite alternate;
+        }
+
+        .logo-ring img {
+            width: 75px;
+            height: 75px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 8px var(--accent-green));
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 8px rgba(0, 255, 102, 0.2); }
+            100% { box-shadow: 0 0 20px rgba(0, 255, 102, 0.6); }
+        }
+
+        .auth-card h3 {
             color: var(--accent-green);
-            letter-spacing: 4px;
-            margin-bottom: 5px;
-            font-size: 26px;
-        }
-
-        .auth-card p {
-            font-size: 12px;
-            color: #88a0b0;
-            margin-bottom: 25px;
-        }
-
-        .input-group {
-            margin-bottom: 16px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 11px;
-            color: var(--accent-green);
-            margin-bottom: 6px;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            font-size: 15px;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
         }
 
-        .input-group input, .input-group select {
+        .auth-card input {
             width: 100%;
             padding: 12px;
             background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(0, 255, 102, 0.25);
+            border: 1px solid var(--accent-green);
             color: var(--accent-green);
+            text-align: center;
             border-radius: 4px;
             outline: none;
-            font-size: 14px;
+            font-size: 16px;
+            letter-spacing: 3px;
+            margin-bottom: 15px;
         }
 
-        .input-group input:focus, .input-group select:focus {
-            border-color: var(--accent-green);
+        .auth-card input:focus {
             box-shadow: var(--glow-green);
         }
 
-        .btn {
+        .auth-btn {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             background: rgba(0, 255, 102, 0.1);
             border: 1px solid var(--accent-green);
             color: var(--accent-green);
@@ -136,48 +140,24 @@
             cursor: pointer;
             border-radius: 4px;
             transition: all 0.2s;
-            margin-top: 10px;
         }
 
-        .btn:hover {
+        .auth-btn:hover {
             background: var(--accent-green);
             color: #000;
             box-shadow: var(--glow-green);
         }
 
-        .auth-toggle { margin-top: 15px; font-size: 12px; color: #88a0b0; cursor: pointer; }
-        .auth-toggle span { color: var(--accent-green); text-decoration: underline; }
-
-        /* HEADER */
-        .header {
-            padding: 15px 25px;
+        /* HUD TOP BAR */
+        .hud-top-bar {
+            padding: 12px 20px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: rgba(0, 0, 0, 0.4);
-        }
-
-        .user-status {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 13px;
-        }
-
-        .nav-btn {
-            padding: 7px 14px;
-            background: transparent;
-            border: 1px solid rgba(0, 255, 102, 0.3);
-            color: rgba(0, 255, 102, 0.8);
-            font-size: 11px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        .nav-btn:hover {
-            border-color: var(--accent-green);
-            background: rgba(0, 255, 102, 0.1);
+            font-size: 12px;
+            letter-spacing: 1px;
             color: var(--accent-green);
         }
 
@@ -200,6 +180,7 @@
             font-size: 11px;
             cursor: pointer;
             white-space: nowrap;
+            transition: 0.2s;
         }
 
         .carousel-item:hover { border-color: var(--accent-green); box-shadow: var(--glow-green); }
@@ -211,12 +192,136 @@
             display: none;
             flex-direction: column;
             overflow: hidden;
+            position: relative;
         }
         .view-section.active-view {
             display: flex;
         }
 
-        /* CHAT BOX */
+        /* DASHBOARD GRID (HUD Layout) */
+        .dashboard-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 280px 1fr 280px;
+            gap: 20px;
+            padding: 25px;
+            align-items: center;
+            overflow-y: auto;
+        }
+
+        .hud-box {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .hud-box h4 {
+            font-size: 12px;
+            color: var(--accent-green);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 6px;
+            letter-spacing: 1px;
+        }
+
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .setting-group label {
+            font-size: 11px;
+            color: var(--accent-green);
+        }
+
+        .theme-swatches {
+            display: flex;
+            gap: 8px;
+        }
+
+        .swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #fff;
+        }
+
+        .settings-btn {
+            padding: 8px;
+            background: rgba(0, 255, 102, 0.1);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .settings-btn:hover { background: var(--accent-green); color: #000; }
+        
+        input[type="range"] { width: 100%; accent-color: var(--accent-green); cursor: pointer; }
+
+        /* CENTRAL REACTOR DISPLAY */
+        .center-reactor {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            text-align: center;
+        }
+
+        .reactor-core {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-green);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: var(--glow-green);
+            background: rgba(0, 255, 102, 0.05);
+            animation: pulseGlow 3s infinite alternate;
+        }
+
+        .reactor-core img {
+            width: 95px;
+            height: 95px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px var(--accent-green));
+        }
+
+        .terminal-launch-btn {
+            padding: 14px 28px;
+            background: rgba(0, 255, 102, 0.12);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            font-weight: bold;
+            letter-spacing: 2px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+
+        .terminal-launch-btn:hover {
+            background: var(--accent-green);
+            color: #000;
+            box-shadow: var(--glow-green);
+        }
+
+        /* TELEMETRY DATA */
+        .telemetry-data {
+            font-size: 11px;
+            line-height: 1.6;
+            color: rgba(209, 247, 255, 0.8);
+        }
+
+        /* CHAT VIEW */
         .chat-box {
             flex: 1;
             padding: 25px;
@@ -238,7 +343,7 @@
             background: rgba(0, 0, 0, 0.4);
         }
 
-        .input-area input, .input-area select {
+        .input-area input {
             flex: 1;
             padding: 14px;
             background: rgba(0, 0, 0, 0.6);
@@ -296,24 +401,16 @@
             font-size: 14px;
         }
 
-        /* SETTINGS MODAL */
-        .modal { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(3, 8, 12, 0.95); z-index: 50; justify-content: center; align-items: center; }
-        .modal-content { background: var(--panel-bg); border: 1px solid var(--accent-green); padding: 30px; border-radius: 4px; width: 90%; max-width: 500px; box-shadow: var(--glow-green); max-height: 90vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: var(--accent-green); letter-spacing: 2px; }
-        .close-btn { background: none; border: none; color: var(--danger-color); font-size: 24px; cursor: pointer; }
-
-        .hud-card { display: flex !important; flex-direction: column !important; visibility: visible !important; gap: 15px; }
-        .setting-group { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
-        .setting-group label { font-size: 0.8rem; font-weight: bold; color: var(--accent-green); text-transform: uppercase; }
-        
-        .theme-swatches { display: flex; gap: 10px; margin-top: 5px; }
-        .swatch { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; transition: transform 0.2s; }
-        .swatch:hover { transform: scale(1.1); }
-
-        .settings-btn { padding: 10px; background: rgba(0, 255, 102, 0.1); border: 1px solid var(--accent-green); color: var(--accent-green); cursor: pointer; border-radius: 4px; font-weight: bold; }
-        .settings-btn:hover { background: var(--accent-green); color: #000; }
-        
-        input[type="range"] { width: 100%; accent-color: var(--accent-green); cursor: pointer; }
+        .api-input-box {
+            background: #000c03;
+            border: 1px solid var(--accent-green);
+            padding: 10px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -322,60 +419,89 @@
 
         <div id="auth-screen">
             <div class="auth-card">
-                <img src="gibblogo.png" alt="G.I.B.B. Logo" class="gibb-logo-img" style="width: 70px; height: 70px; margin: 0 auto 15px auto; display: block;" onerror="this.style.display='none'">
-                <h1 id="auth-title">G.I.B.B. SYSTEM</h1>
-                <p id="auth-sub">INITIALIZE LOGIN CREDENTIALS</p>
-                
-                <div id="auth-error" style="color: var(--danger-color); font-size: 12px; margin-bottom: 10px; display: none;"></div>
-
-                <div class="input-group" id="name-group" style="display: none;">
-                    <label>OPERATOR NAME</label>
-                    <input type="text" id="auth-name" placeholder="User">
+                <div class="logo-ring">
+                    <img src="gibblogo.png" alt="G.I.B.B. Logo" onerror="this.style.display='none'">
                 </div>
-
-                <div class="input-group">
-                    <label>EMAIL ADDRESS</label>
-                    <input type="email" id="auth-email" placeholder="user@domain.com">
-                </div>
-
-                <div class="input-group">
-                    <label>PASSWORD</label>
-                    <input type="password" id="auth-password" placeholder="••••••••">
-                </div>
-
-                <button class="btn" id="auth-btn" onclick="handleAuth()">LOGIN</button>
-
-                <div class="auth-toggle" onclick="toggleAuthMode()">
-                    <span id="toggle-text">Need an account? Register Profile</span>
-                </div>
+                <h3>🔐 Enter Authorised Password:</h3>
+                <div id="auth-error" style="color: var(--danger-color); font-size: 11px; margin-bottom: 8px; display: none;"></div>
+                <input type="password" id="auth-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') verifyPassword()">
+                <button class="auth-btn" onclick="verifyPassword()">Initialise G.I.B.B.</button>
             </div>
         </div>
 
-        <div class="header">
-            <div class="user-status">
-                <img src="gibblogo.png" alt="G.I.B.B." class="gibb-logo-img" onerror="this.style.display='none'">
-                <div style="display: flex; flex-direction: column;">
-                    <span style="font-weight: bold; letter-spacing: 2px; color: var(--accent-green);">G.I.B.B. INTERFACE</span>
-                    <span id="display-user" style="color: rgba(0, 255, 102, 0.7); font-size: 11px;">System Offline</span>
-                </div>
-            </div>
-            <div class="user-status">
-                <button class="nav-btn" onclick="openSettings()">⚙️ SETTINGS</button>
-                <button class="nav-btn" style="border-color: var(--danger-color); color: var(--danger-color);" onclick="logout()">LOGOUT</button>
-            </div>
+        <div class="hud-top-bar">
+            <div id="live-datetime">DATE: Thu, 6 Aug 2026 // TIME: --:--:--</div>
+            <div id="fps-res">FPS: 60 // RES: 1396x765</div>
         </div>
 
         <div class="system-carousel">
-            <div class="carousel-item active-item" onclick="switchView('chat', this)">Main Chat</div>
+            <div class="carousel-item active-item" onclick="switchView('dashboard', this)">System HUD</div>
+            <div class="carousel-item" onclick="switchView('chat', this)">Terminal Chat</div>
             <div class="carousel-item" onclick="switchView('translation', this)">Translation Module</div>
-            <div class="carousel-item" onclick="openSettings()">System Config</div>
             <div class="carousel-item" onclick="clearCurrentChat()">Clear History</div>
+            <div class="carousel-item" onclick="lockSystem()">Lock Terminal</div>
         </div>
 
-        <div class="view-section active-view" id="view-chat">
+        <div class="view-section active-view" id="view-dashboard">
+            <div class="dashboard-grid">
+                <div class="hud-box">
+                    <h4>⚙️ SYSTEM SETTINGS</h4>
+                    
+                    <div class="api-input-box">
+                        <label style="font-size: 11px; color: var(--accent-green); font-weight: bold;">⚡ API Key (Groq)</label>
+                        <input type="password" id="groq-key-input" placeholder="gsk_..." oninput="saveGroqKey(this.value)" style="width: 100%; background: #010a04; color: var(--accent-green); border: 1px solid var(--accent-green); padding: 8px; border-radius: 4px; font-family: inherit; font-size: 0.85rem; outline: none;">
+                    </div>
+
+                    <div class="setting-group">
+                        <label>🎨 HUD Theme / Color</label>
+                        <div class="theme-swatches">
+                            <div class="swatch" style="background: #00ff66;" onclick="setTheme('#00ff66', 'rgba(0,255,100,0.8)')"></div>
+                            <div class="swatch" style="background: #00bfff;" onclick="setTheme('#00bfff', 'rgba(0,191,255,0.8)')"></div>
+                            <div class="swatch" style="background: #ffaa00;" onclick="setTheme('#ffaa00', 'rgba(255,170,0,0.8)')"></div>
+                            <div class="swatch" style="background: #ff3366;" onclick="setTheme('#ff3366', 'rgba(255,51,102,0.8)')"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <label>🔊 Audio Mute Toggle</label>
+                        <button class="settings-btn" id="mute-btn" onclick="toggleMute()">MUTE: OFF</button>
+                    </div>
+
+                    <div class="setting-group">
+                        <label>🎚️ Master Volume: <span id="vol-val">100%</span></label>
+                        <input type="range" id="volume-slider" min="0" max="100" value="100" oninput="updateVolume(this.value)">
+                    </div>
+
+                    <div class="setting-group">
+                        <label>💾 Data Core</label>
+                        <button class="settings-btn" style="border-color: var(--danger-color); color: var(--danger-color);" onclick="clearCurrentChat()">Wipe Saved Memory</button>
+                    </div>
+                </div>
+
+                <div class="center-reactor">
+                    <div class="reactor-core">
+                        <img src="gibblogo.png" alt="G.I.B.B." onerror="this.style.display='none'">
+                    </div>
+                    <button class="terminal-launch-btn" onclick="switchView('chat', document.querySelectorAll('.carousel-item')[1])">💬 Terminal Chat</button>
+                    <span style="font-size: 11px; letter-spacing: 2px; color: var(--accent-green); opacity: 0.8;">SYSTEM ONLINE</span>
+                </div>
+
+                <div class="hud-box">
+                    <h4>🌐 TELEMETRY & WEATHER</h4>
+                    <div class="telemetry-data">
+                        <div><strong>LOCATION:</strong> Amsterdam, North Holland, The Netherlands</div>
+                        <div style="margin-top: 8px;"><strong>IP NODE:</strong> 86.54.29.49</div>
+                        <div style="margin-top: 8px;"><strong>ISP:</strong> Black HOST Ltd</div>
+                        <div style="margin-top: 8px;"><strong>ATMOSPHERE:</strong> Optimal / Nominal</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="view-section" id="view-chat">
             <div class="chat-box" id="chat-box">
                 <div class="message bot-msg">
-                    System initialized. Welcome back.
+                    G.I.B.B. neural core initialized. Systems fully operational.
                 </div>
             </div>
 
@@ -412,152 +538,88 @@
                         <textarea id="output-text" readonly placeholder="Translation will display here..." style="opacity: 0.8;"></textarea>
                     </div>
                 </div>
-                <button class="btn" onclick="executeTranslation()">EXECUTE TRANSLATION</button>
-            </div>
-        </div>
-
-        <div class="modal" id="settings-modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 style="color: var(--accent-green); border-bottom: 1px solid var(--accent-green); padding-bottom: 8px; width: 100%;">⚙️ SYSTEM SETTINGS</h4>
-                    <button class="close-btn" onclick="closeSettings()">×</button>
-                </div>
-                
-                <div class="hud-card" style="display: flex !important; flex-direction: column !important; visibility: visible !important;">
-                    <div style="background: #000c03; border: 2px solid var(--accent-green); padding: 12px; border-radius: 6px; display: flex; flex-direction: column; gap: 6px;">
-                        <label style="font-size: 0.8rem; font-weight: bold; color: var(--accent-green);">⚡ API Key (Groq Core)</label>
-                        <input type="password" id="groq-key-input" placeholder="gsk_..." oninput="saveGroqKey(this.value)" style="width: 100%; background: #010a04; color: var(--accent-green); border: 1px solid var(--accent-green); padding: 10px; border-radius: 4px; font-family: inherit; font-size: 0.9rem; box-sizing: border-box; outline: none;">
-                    </div>
-
-                    <div class="setting-group">
-                        <label>🎨 HUD Theme / Color</label>
-                        <div class="theme-swatches">
-                            <div class="swatch" style="background: #00ff66;" onclick="setTheme('#00ff66', 'rgba(0,255,100,0.8)')"></div>
-                            <div class="swatch" style="background: #00bfff;" onclick="setTheme('#00bfff', 'rgba(0,191,255,0.8)')"></div>
-                            <div class="swatch" style="background: #ffaa00;" onclick="setTheme('#ffaa00', 'rgba(255,170,0,0.8)')"></div>
-                            <div class="swatch" style="background: #ff3366;" onclick="setTheme('#ff3366', 'rgba(255,51,102,0.8)')"></div>
-                        </div>
-                    </div>
-
-                    <div class="setting-group">
-                        <label>🔊 Audio Mute Toggle</label>
-                        <button class="settings-btn" id="mute-btn" onclick="toggleMute()">MUTE: OFF</button>
-                    </div>
-
-                    <div class="setting-group">
-                        <label>🎚️ Master Volume: <span id="vol-val">100%</span></label>
-                        <input type="range" id="volume-slider" min="0" max="100" value="100" oninput="updateVolume(this.value)">
-                    </div>
-
-                    <div class="setting-group">
-                        <label>USER EMAIL (READ ONLY)</label>
-                        <input type="text" id="profile-email-input" readonly style="opacity: 0.6; color: var(--text-color); background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); padding: 10px; border-radius: 4px;">
-                    </div>
-                </div>
+                <button class="terminal-launch-btn" onclick="executeTranslation()">EXECUTE TRANSLATION</button>
             </div>
         </div>
 
     </div>
 
     <script>
-        let isSignUp = false;
-        let currentUser = null;
+        // Set your desired passcode here:
+        const CORRECT_PASSWORD = "gibb"; 
+
         let conversationHistory = [];
         let isMuted = false;
         let masterVolume = 1.0;
 
         window.addEventListener('load', () => {
-            const savedSession = localStorage.getItem('gibb_original_session');
-            if (savedSession) {
-                currentUser = JSON.parse(savedSession);
-                initInterface();
-            }
-        });
+            // Live clock updater
+            setInterval(() => {
+                const now = new Date();
+                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const dStr = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+                const tStr = now.toTimeString().split(' ')[0];
+                document.getElementById('live-datetime').innerText = `DATE: ${dStr} // TIME: ${tStr}`;
+            }, 1000);
 
-        function toggleAuthMode() {
-            isSignUp = !isSignUp;
-            document.getElementById('auth-title').innerText = isSignUp ? "REGISTER PROFILE" : "G.I.B.B. SYSTEM";
-            document.getElementById('auth-sub').innerText = isSignUp ? "NEW OPERATOR REGISTRATION" : "INITIALIZE LOGIN CREDENTIALS";
-            document.getElementById('auth-btn').innerText = isSignUp ? "CREATE ACCOUNT" : "LOGIN";
-            document.getElementById('name-group').style.display = isSignUp ? "block" : "none";
-            document.getElementById('toggle-text').innerText = isSignUp ? "Already have a profile? Login" : "Need an account? Register Profile";
-            document.getElementById('auth-error').style.display = "none";
-        }
+            // Dynamic resolution tracking
+            window.addEventListener('resize', () => {
+                document.getElementById('fps-res').innerText = `FPS: 60 // RES: ${window.innerWidth}x${window.innerHeight}`;
+            });
+            document.getElementById('fps-res').innerText = `FPS: 60 // RES: ${window.innerWidth}x${window.innerHeight}`;
 
-        function handleAuth() {
-            const email = document.getElementById('auth-email').value.trim();
-            const password = document.getElementById('auth-password').value.trim();
-            const name = document.getElementById('auth-name').value.trim() || "User";
-            const errDiv = document.getElementById('auth-error');
+            // Load saved API key & chat history
+            const savedKey = localStorage.getItem('gibb_apikey') || "";
+            document.getElementById('groq-key-input').value = savedKey;
 
-            if (!email || !password) {
-                errDiv.innerText = "Error: Email and Password required.";
-                errDiv.style.display = "block";
-                return;
-            }
-
-            let accounts = JSON.parse(localStorage.getItem('gibb_original_accounts')) || {};
-
-            if (isSignUp) {
-                if (accounts[email]) {
-                    errDiv.innerText = "Error: Account already exists.";
-                    errDiv.style.display = "block";
-                    return;
-                }
-                accounts[email] = { name, email, password, groqApiKey: "", history: [] };
-                localStorage.setItem('gibb_original_accounts', JSON.stringify(accounts));
-                currentUser = accounts[email];
-            } else {
-                if (!accounts[email] || accounts[email].password !== password) {
-                    errDiv.innerText = "Authentication Failure: Check credentials.";
-                    errDiv.style.display = "block";
-                    return;
-                }
-                currentUser = accounts[email];
-            }
-
-            localStorage.setItem('gibb_original_session', JSON.stringify(currentUser));
-            initInterface();
-        }
-
-        function initInterface() {
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('display-user').innerText = `USER: ${currentUser.name.toUpperCase()}`;
-            document.getElementById('groq-key-input').value = currentUser.groqApiKey || "";
-            document.getElementById('profile-email-input').value = currentUser.email;
-
-            conversationHistory = [
-                {
-                    role: "system",
-                    content: `You are G.I.B.B., an intelligent, direct, and helpful assistant. Address the user as ${currentUser.name}. Keep responses clear, professional, and concise.`
-                }
-            ];
-
-            if (currentUser.history && currentUser.history.length > 0) {
-                currentUser.history.forEach(msg => {
-                    conversationHistory.push(msg);
+            const savedHistory = localStorage.getItem('gibb_chat_history');
+            if (savedHistory) {
+                conversationHistory = JSON.parse(savedHistory);
+                conversationHistory.forEach(msg => {
                     if (msg.role !== 'system') {
                         appendMessage(msg.content, msg.role === 'user' ? 'user-msg' : 'bot-msg', false);
                     }
                 });
             } else {
-                appendMessage(`Welcome back, ${currentUser.name}. How can I assist you today?`, 'bot-msg');
+                conversationHistory = [{ role: "system", content: "You are G.I.B.B., an advanced AI terminal assistant. Keep responses clear, concise, and professional." }];
             }
 
-            speakResponse(`Welcome back, ${currentUser.name}.`);
+            // Check if already authenticated in this tab session
+            if (sessionStorage.getItem('gibb_authenticated') === 'true') {
+                document.getElementById('auth-screen').style.display = 'none';
+            }
+        });
+
+        function verifyPassword() {
+            const pwd = document.getElementById('auth-password').value;
+            const errDiv = document.getElementById('auth-error');
+
+            if (pwd === CORRECT_PASSWORD) {
+                sessionStorage.setItem('gibb_authenticated', 'true');
+                document.getElementById('auth-screen').style.display = 'none';
+                speakResponse("System unlocked. Welcome back.");
+            } else {
+                errDiv.innerText = "ACCESS DENIED: INVALID PASSCODE";
+                errDiv.style.display = "block";
+                document.getElementById('auth-password').value = "";
+            }
         }
 
-        function logout() {
-            saveAccountHistory();
-            localStorage.removeItem('gibb_original_session');
-            location.reload();
+        function lockSystem() {
+            sessionStorage.removeItem('gibb_authenticated');
+            document.getElementById('auth-password').value = "";
+            document.getElementById('auth-error').style.display = "none";
+            document.getElementById('auth-screen').style.display = 'flex';
         }
 
         function switchView(viewName, element) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
             document.querySelectorAll('.carousel-item').forEach(el => el.classList.remove('active-item'));
 
-            if (viewName === 'chat') {
+            if (viewName === 'dashboard') {
+                document.getElementById('view-dashboard').classList.add('active-view');
+            } else if (viewName === 'chat') {
                 document.getElementById('view-chat').classList.add('active-view');
             } else if (viewName === 'translation') {
                 document.getElementById('view-translation').classList.add('active-view');
@@ -565,39 +627,14 @@
             if (element) element.classList.add('active-item');
         }
 
-        function openSettings() {
-            document.getElementById('settings-modal').style.display = 'flex';
-        }
-
-        function closeSettings() {
-            document.getElementById('settings-modal').style.display = 'none';
-        }
-
         function saveGroqKey(val) {
-            currentUser.groqApiKey = val.trim();
-            updateAccountStorage();
-        }
-
-        function updateAccountStorage() {
-            let accounts = JSON.parse(localStorage.getItem('gibb_original_accounts')) || {};
-            if (accounts[currentUser.email]) {
-                accounts[currentUser.email].groqApiKey = currentUser.groqApiKey;
-                accounts[currentUser.email].history = currentUser.history;
-                localStorage.setItem('gibb_original_accounts', JSON.stringify(accounts));
-            }
-            localStorage.setItem('gibb_original_session', JSON.stringify(currentUser));
-        }
-
-        function saveAccountHistory() {
-            currentUser.history = conversationHistory.filter(m => m.role !== 'system');
-            updateAccountStorage();
+            localStorage.setItem('gibb_apikey', val.trim());
         }
 
         function clearCurrentChat() {
             conversationHistory = [conversationHistory[0]];
-            currentUser.history = [];
-            updateAccountStorage();
-            document.getElementById('chat-box').innerHTML = '<div class="message bot-msg">Memory wiped. Ready for new input.</div>';
+            localStorage.removeItem('gibb_chat_history');
+            document.getElementById('chat-box').innerHTML = '<div class="message bot-msg">Memory cleared. Ready for new input.</div>';
         }
 
         function setTheme(color, glow) {
@@ -623,10 +660,10 @@
             chatBox.appendChild(msgDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            if (save && currentUser) {
+            if (save) {
                 const role = className.includes('user-msg') ? 'user' : 'assistant';
-                currentUser.history.push({ role, content: text });
-                saveAccountHistory();
+                conversationHistory.push({ role, content: text });
+                localStorage.setItem('gibb_chat_history', JSON.stringify(conversationHistory));
             }
             return msgDiv;
         }
@@ -639,20 +676,20 @@
             appendMessage(text, 'user-msg');
             inputField.value = '';
 
-            if (!currentUser.groqApiKey) {
-                appendMessage("API key missing. Please check system settings.", 'bot-msg');
-                speakResponse("API key missing. Please check system settings.");
+            const apiKey = localStorage.getItem('gibb_apikey');
+            if (!apiKey) {
+                appendMessage("API key missing. Please enter your Groq key in the System HUD settings.", 'bot-msg');
+                speakResponse("API key missing.");
                 return;
             }
 
-            conversationHistory.push({ role: "user", content: text });
             let loadingDots = appendMessage('...', 'bot-msg', false);
 
             try {
                 let res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
                     headers: {
-                        "Authorization": `Bearer ${currentUser.groqApiKey}`,
+                        "Authorization": `Bearer ${apiKey}`,
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
@@ -668,7 +705,6 @@
 
                 if (data.choices && data.choices.length > 0) {
                     let reply = data.choices[0].message.content;
-                    conversationHistory.push({ role: "assistant", content: reply });
                     appendMessage(reply, 'bot-msg');
                     speakResponse(reply);
                 } else {
@@ -684,14 +720,15 @@
             const sourceText = document.getElementById('source-text').value.trim();
             const targetLang = document.getElementById('target-lang').value;
             const outputField = document.getElementById('output-text');
+            const apiKey = localStorage.getItem('gibb_apikey');
 
             if (!sourceText) {
                 outputField.value = "Please enter text to translate.";
                 return;
             }
 
-            if (!currentUser.groqApiKey) {
-                outputField.value = "Error: Groq API key missing in settings.";
+            if (!apiKey) {
+                outputField.value = "Error: Groq API key missing in System HUD settings.";
                 return;
             }
 
@@ -701,7 +738,7 @@
                 let res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
                     headers: {
-                        "Authorization": `Bearer ${currentUser.groqApiKey}`,
+                        "Authorization": `Bearer ${apiKey}`,
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
