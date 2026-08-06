@@ -6,26 +6,23 @@
     <title>G.I.B.B. System - Secure Core</title>
     <style>
         :root {
-            /* Full Green/Black Overhaul */
-            --bg-color: #000000;
-            --panel-bg: rgba(0, 30, 0, 0.9);
-            --border-color: rgba(0, 255, 0, 0.4);
+            --bg-color: #030803;
+            --panel-bg: rgba(0, 20, 0, 0.92);
+            --border-color: rgba(0, 255, 0, 0.45);
             --text-color: #00ff00;
             --accent-color: #00ff00;
             --accent-glow: rgba(0, 255, 0, 0.6);
             --danger-color: #ff4444;
 
-            /* Chat Specific Styling */
-            --chat-bg: #e6ffec; /* Light Green */
-            --chat-text: #000000; /* Black */
-            --chat-bubble-gibb: rgba(0, 0, 0, 0.05); /* Very faint chat bubble */
+            --chat-bg: #e6ffec;
+            --chat-text: #000000;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Courier New', Courier, monospace; /* Terminal Font */
+            font-family: 'Courier New', Courier, monospace;
         }
 
         body {
@@ -39,7 +36,25 @@
             position: relative;
         }
 
-        /* SCREEN MANAGEMENT */
+        /* Animated Tech Grid Background */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: gridMove 25s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-40px, -40px); }
+        }
+
         .screen {
             display: none;
             width: 100%;
@@ -51,37 +66,60 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            z-index: 1;
         }
 
         .screen.active {
             display: flex;
         }
 
-        /* 2. CUSTOM CODE-GENERATED LOGO */
+        /* Perfectly Centered Logo with Inner Designs & Orbiting Rings */
         .logo-container {
             position: relative;
-            width: 250px;
-            height: 250px;
+            width: 260px;
+            height: 260px;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .gibb-text-logo {
-            font-size: 3.5rem;
+            font-size: 3rem;
             font-weight: bold;
             color: var(--accent-color);
             z-index: 10;
             text-shadow: 0 0 20px var(--accent-glow);
-            letter-spacing: 4px;
+            letter-spacing: 3px;
+            text-align: center;
+            width: 100%;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* Orbiting Rings remain */
+        /* Cool Inner Design Pattern inside rings */
+        .inner-design-grid {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 1px dotted rgba(0, 255, 0, 0.3);
+            background: radial-gradient(circle, rgba(0,255,0,0.08) 0%, transparent 70%);
+            animation: pulseCore 4s ease-in-out infinite;
+        }
+
+        @keyframes pulseCore {
+            0%, 100% { transform: scale(0.95); opacity: 0.6; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        /* Outer Orbiting Ring (Clockwise) */
         .orbit-ring-outer {
             position: absolute;
-            width: 230px;
-            height: 230px;
+            width: 240px;
+            height: 240px;
             border-radius: 50%;
             border: 2px solid rgba(0, 255, 0, 0.6);
             animation: spinClockwise 12s linear infinite;
@@ -98,12 +136,13 @@
             left: calc(50% - 5px);
         }
 
+        /* Inner Orbiting Ring (Anti-Clockwise) */
         .orbit-ring-inner {
             position: absolute;
             width: 190px;
             height: 190px;
             border-radius: 50%;
-            border: 1px dashed rgba(0, 255, 0, 0.3);
+            border: 1px dashed rgba(0, 255, 0, 0.4);
             animation: spinCounterClockwise 8s linear infinite;
         }
 
@@ -111,7 +150,7 @@
             position: absolute;
             width: 6px;
             height: 6px;
-            background-color: rgba(0, 255, 0, 0.7);
+            background-color: rgba(0, 255, 0, 0.8);
             border-radius: 50%;
             bottom: -3px;
             left: calc(50% - 3px);
@@ -127,7 +166,7 @@
             100% { transform: rotate(-360deg); }
         }
 
-        /* 3. AUTH SCREEN (Green Overhaul) */
+        /* Panels & Forms */
         .panel {
             background: var(--panel-bg);
             border: 2px solid var(--border-color);
@@ -135,15 +174,16 @@
             border-radius: 12px;
             width: 100%;
             max-width: 420px;
-            box-shadow: 0 0 25px rgba(0, 255, 0, 0.2);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.15);
             text-align: center;
+            backdrop-filter: blur(10px);
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 12px 16px;
             margin-bottom: 15px;
-            background: rgba(0, 255, 0, 0.1);
+            background: rgba(0, 255, 0, 0.08);
             border: 1px solid var(--border-color);
             border-radius: 4px;
             color: var(--text-color);
@@ -151,9 +191,14 @@
             outline: none;
         }
 
-        input:focus {
+        input:focus, select:focus {
             border-color: var(--accent-color);
             box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        select option {
+            background: var(--bg-color);
+            color: var(--text-color);
         }
 
         .btn {
@@ -174,13 +219,6 @@
             box-shadow: 0 0 15px var(--accent-glow);
         }
 
-        .link-text {
-            margin-top: 15px;
-            font-size: 0.9rem;
-            color: #88ff88;
-            cursor: pointer;
-        }
-
         .error-msg {
             color: var(--danger-color);
             font-size: 0.85rem;
@@ -188,7 +226,7 @@
             display: none;
         }
 
-        /* 4. MAIN MENU LAYOUT (Settings Left, Location Right) */
+        /* Main Menu Layout (Settings Left, Location Right) */
         .main-menu-layout {
             display: grid;
             grid-template-columns: 320px 1fr 320px;
@@ -208,6 +246,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            backdrop-filter: blur(10px);
         }
 
         .widget-box {
@@ -227,7 +266,6 @@
             font-weight: bold;
         }
 
-        /* Carousel (Center Panel) */
         .center-menu-panel {
             display: flex;
             flex-direction: column;
@@ -242,7 +280,7 @@
             justify-content: center;
             gap: 20px;
             height: 120px;
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
         .carousel-btn {
@@ -270,7 +308,7 @@
             box-shadow: 0 0 20px var(--accent-glow);
         }
 
-        /* 5. FULLSCREEN CHAT INTERFACE (Black Text, Light Green BG) */
+        /* Fullscreen Chat Interface */
         .chat-container {
             width: 100vw;
             height: 100vh;
@@ -280,11 +318,12 @@
             color: var(--chat-text);
             overflow: hidden;
             border: none;
+            z-index: 2;
         }
 
         .chat-header {
             padding: 15px 30px;
-            background: #cdffda; /* Slightly darker header */
+            background: #cdffda;
             border-bottom: 1px solid #a3e0b2;
             display: flex;
             justify-content: space-between;
@@ -310,7 +349,6 @@
             font-family: inherit;
         }
 
-        /* User Message (Dark Green/White) */
         .message.user {
             background: #006400; 
             color: #ffffff;
@@ -318,9 +356,8 @@
             border-bottom-right-radius: 2px;
         }
 
-        /* G.I.B.B. Message (Black Text, Default BG) */
         .message.gibb {
-            background: #f0fff4; /* Faint bubble */
+            background: #f0fff4;
             color: var(--chat-text);
             align-self: flex-start;
             border-bottom-left-radius: 2px;
@@ -355,16 +392,25 @@
 
     <div id="auth-screen" class="screen active">
         <div class="logo-container">
+            <div class="inner-design-grid"></div>
             <div class="orbit-ring-outer"><div class="dot-outer"></div></div>
             <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
             <div class="gibb-text-logo">G.I.B.B.</div>
         </div>
         
         <div class="panel">
-            <h2 id="auth-title" style="margin-bottom: 20px; letter-spacing: 2px;">SECURE LOG IN</h2>
+            <h2 style="margin-bottom: 15px; letter-spacing: 2px;">INITIALIZE PROFILE</h2>
             <div id="auth-error" class="error-msg"></div>
-            <input type="password" id="password-input" placeholder="ACCESS KEY">
-            <button class="btn" id="auth-action-btn" onclick="handleAuth()">UNLOC CORE</button>
+            
+            <input type="text" id="username-input" placeholder="Enter Username">
+            
+            <select id="gender-input">
+                <option value="" disabled selected>Select Title Preference</option>
+                <option value="sir">Male (Sir)</option>
+                <option value="miss">Female (Miss)</option>
+            </select>
+
+            <button class="btn" onclick="initializeProfile()">ESTABLISH CONNECTION</button>
         </div>
     </div>
 
@@ -375,21 +421,23 @@
                 <div>
                     <h3 style="margin-bottom: 20px; text-shadow: 0 0 10px var(--accent-glow);">CORE SETTINGS</h3>
                     <div class="widget-box">
-                        <div class="widget-title">Access Key Status</div>
-                        <p style="font-size: 0.9rem; color: #10b981;">✓ Key Verified & Permanent</p>
+                        <div class="widget-title">Access Key Input</div>
+                        <input type="text" id="access-key-input" placeholder="Enter key..." style="margin-bottom: 8px; font-size: 0.85rem; padding: 8px;" value="gibb">
+                        <p style="font-size: 0.75rem; color: #88ff88;">Key provides secure system entry.</p>
                     </div>
                     <div class="widget-box">
-                        <div class="widget-title">System Remembrance</div>
-                        <p style="font-size: 0.85rem;">Neural history is being permanently logged to local core storage.</p>
+                        <div class="widget-title">Remembrance Status</div>
+                        <p style="font-size: 0.85rem; color: #10b981;">✓ Chats remembered permanently.</p>
                     </div>
                 </div>
                 <div>
-                    <button class="btn" style="border-color: var(--danger-color); color: #ff8888;" onclick="logout()">LOG OUT</button>
+                    <button class="btn" style="border-color: var(--danger-color); color: #ff8888; font-size: 0.85rem;" onclick="clearProfileData()">RESET PROFILE</button>
                 </div>
             </div>
 
             <div class="center-menu-panel">
                 <div class="logo-container">
+                    <div class="inner-design-grid"></div>
                     <div class="orbit-ring-outer"><div class="dot-outer"></div></div>
                     <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
                     <div class="gibb-text-logo">G.I.B.B.</div>
@@ -415,8 +463,8 @@
                     </div>
                 </div>
                 <div class="widget-box" style="margin-bottom: 0;">
-                    <div class="widget-title">System Status</div>
-                    <p style="font-size: 0.85rem; color: #10b981;">OPTIMAL</p>
+                    <div class="widget-title">Status</div>
+                    <p style="font-size: 0.85rem; color: #10b981;">CONNECTED</p>
                 </div>
             </div>
         </div>
@@ -428,8 +476,7 @@
                 <span style="font-weight: bold; letter-spacing: 2px;">G.I.B.B. NEURAL CONNECT</span>
                 <button style="background: #006400; border: none; color: white; cursor: pointer; padding: 6px 12px; border-radius: 4px;" onclick="openMenu()">SYSTEM MENU</button>
             </div>
-            <div class="chat-messages" id="chat-messages">
-                </div>
+            <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-area">
                 <input type="text" id="chat-input" placeholder="Type a message to G.I.B.B...." onkeypress="checkEnter(event)">
                 <button class="btn" onclick="sendMessage()">SEND</button>
@@ -438,22 +485,27 @@
     </div>
 
     <script>
-        // State and Permanent Storage (Remembrance)
         let carouselIndex = 0;
-        let db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { chatHistory: [] };
+        
+        // Permanent persistent storage database
+        let db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { 
+            profile: null,
+            chatHistory: [] 
+        };
 
         window.addEventListener('DOMContentLoaded', () => {
             updateResolution();
             window.addEventListener('resize', updateResolution);
             
-            // FPS counter
+            // FPS counter loop
             let frameCount = 0;
             let lastTime = performance.now();
             function countFPS() {
                 frameCount++;
                 let currentTime = performance.now();
                 if (currentTime - lastTime >= 1000) {
-                    document.getElementById('fps-counter').innerText = frameCount;
+                    const fpsEl = document.getElementById('fps-counter');
+                    if(fpsEl) fpsEl.innerText = frameCount;
                     frameCount = 0;
                     lastTime = currentTime;
                 }
@@ -461,8 +513,8 @@
             }
             requestAnimationFrame(countFPS);
 
-            // Check if user session already exists permanently
-            if (localStorage.getItem('gibb_unlocked') === 'true') {
+            // Check if profile exists; stay logged in permanently unless user clears it
+            if (db.profile && db.profile.honorific) {
                 showMenuScreen();
             } else {
                 showAuthScreen();
@@ -474,20 +526,24 @@
             if(display) display.innerText = `${window.innerWidth}x${window.innerHeight}`;
         }
 
-        // 1. Password Screen replaced with Access Key UNLOCK
-        function handleAuth() {
-            const pass = document.getElementById('password-input').value.trim();
+        function initializeProfile() {
+            const user = document.getElementById('username-input').value.trim();
+            const honorific = document.getElementById('gender-input').value;
             const errorBox = document.getElementById('auth-error');
 
-            // Set simple key 'gibb' for unlock testing
-            if (pass !== 'gibb') {
-                errorBox.innerText = "ACCESS DENIED: Invalid Key.";
+            if (!honorific) {
+                errorBox.innerText = "Please select your title preference (Sir or Miss).";
                 errorBox.style.display = 'block';
                 return;
             }
 
-            localStorage.setItem('gibb_unlocked', 'true');
+            db.profile = { name: user || "User", honorific: honorific };
+            saveDatabase();
             showMenuScreen();
+        }
+
+        function saveDatabase() {
+            localStorage.setItem('gibb_permanent_db', JSON.stringify(db));
         }
 
         function showAuthScreen() {
@@ -506,7 +562,7 @@
             showMenuScreen();
         }
 
-        // Carousel Logic (Center Panel navigation)
+        // Carousel Logic
         function selectCarouselOption(index) {
             carouselIndex = index;
             updateCarouselUI();
@@ -518,6 +574,7 @@
         function updateCarouselUI() {
             const btn0 = document.getElementById('c-btn-0');
             const btn1 = document.getElementById('c-btn-1');
+            if (!btn0 || !btn1) return;
             if (carouselIndex === 0) {
                 btn0.className = "carousel-btn big";
                 btn1.className = "carousel-btn small";
@@ -534,7 +591,6 @@
             }
         });
 
-        // Dashboard Screen (Chat)
         function showDashboard() {
             document.getElementById('auth-screen').classList.remove('active');
             document.getElementById('menu-screen').classList.remove('active');
@@ -542,14 +598,14 @@
             loadChatHistory();
         }
 
-        // LOAD history from db for remembrance
         function loadChatHistory() {
             const container = document.getElementById('chat-messages');
-            container.innerHTML = ''; // Clear temporary welcome
+            container.innerHTML = '';
             const history = db.chatHistory || [];
+            const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
             
             if (history.length === 0) {
-                appendMessage(`System Core initialized, Sire. Secure channel established.`, 'gibb', false);
+                appendMessage(`System Core initialized, ${honorific}. Secure channel established.`, 'gibb', false);
             } else {
                 history.forEach(msg => {
                     appendMessage(msg.text, msg.sender, false);
@@ -567,7 +623,7 @@
 
             if (save) {
                 db.chatHistory.push({ text, sender });
-                localStorage.setItem('gibb_permanent_db', JSON.stringify(db));
+                saveDatabase();
             }
         }
 
@@ -584,14 +640,27 @@
             input.value = '';
 
             setTimeout(() => {
-                let reply = `Acknowledged, Sire. Permanent history remembrance is active. Your channel is secure.`;
+                const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
+                const lowerText = text.toLowerCase();
+                let reply = "";
+
+                if (lowerText.includes('who made you') || lowerText.includes('creator') || lowerText.includes('created you')) {
+                    reply = `gibbkayyy made me, ${honorific}.`;
+                } else {
+                    reply = `Acknowledged, ${honorific}. Permanent history remembrance is active.`;
+                }
+
                 appendMessage(reply, 'gibb');
             }, 600);
         }
 
-        function logout() {
-            localStorage.removeItem('gibb_unlocked');
-            showAuthScreen();
+        // Only clears when user explicitly requests via reset button
+        function clearProfileData() {
+            if (confirm("Are you sure you want to reset your profile and chat memory?")) {
+                localStorage.removeItem('gibb_permanent_db');
+                db = { profile: null, chatHistory: [] };
+                showAuthScreen();
+            }
         }
     </script>
 </body>
