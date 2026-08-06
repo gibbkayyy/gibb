@@ -243,11 +243,11 @@
             display: flex; padding: 20px 30px; border-top: 1px solid var(--border-color); background: var(--panel-bg); gap: 15px; backdrop-filter: blur(10px);
         }
         
-        /* Voice Screen Activation Animations */
+        /* Voice Screen Glide & Fade Animations */
         #voice-screen {
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.6s ease;
+            transition: opacity 0.4s ease;
         }
         #voice-screen.active {
             opacity: 1;
@@ -255,19 +255,19 @@
         }
 
         .voice-anim-logo {
-            transform: scale(0.6) translateY(40px);
-            opacity: 0;
-            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(0.6) translateY(60px);
+            opacity: 0.2;
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
         #voice-screen.active .voice-anim-logo {
-            transform: scale(1.25) translateY(0);
+            transform: scale(0.95) translateY(0); /* Balanced size, nicely centered */
             opacity: 1;
         }
 
         .voice-status-text, #voice-transcript {
             opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.8s ease 0.4s;
+            transform: translateY(15px);
+            transition: opacity 0.8s ease 0.3s, transform 0.8s ease 0.3s;
         }
         #voice-screen.active .voice-status-text,
         #voice-screen.active #voice-transcript {
@@ -276,8 +276,8 @@
         }
 
         .voice-status-text {
-            margin-top: 25px; font-size: 1.1rem; letter-spacing: 2px; color: var(--accent-color);
-            text-shadow: 0 0 15px var(--accent-glow); animation: pulseText 2s infinite;
+            margin-top: 20px; font-size: 1.05rem; letter-spacing: 2px; color: var(--accent-color);
+            text-shadow: 0 0 12px var(--accent-glow); animation: pulseText 2s infinite;
         }
         @keyframes pulseText { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 
@@ -817,11 +817,10 @@
                         speak(aiReply);
                     }
                 } else {
-                    throw new Error("Invalid response format from Groq API");
+                    throw new Error(data.error?.message || "Invalid response format from Groq API");
                 }
             } catch (err) {
-                console.error("Detailed Neural Link Error:", err);
-                const errText = "Neural link communication error. Check console details.";
+                const errText = "Neural link network connection error or invalid key response.";
                 db.chatHistory.push({ role: 'gibb', content: errText });
                 saveDatabase();
                 renderChatHistory();
