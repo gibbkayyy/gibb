@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G.I.B.B. AI Interface</title>
+    <title>G.I.B.B. AI OS v2.5</title>
     <style>
         :root {
-            --bg-color: #080c10;
-            --panel-bg: #0d1520;
+            --bg-color: #03080c; /* Deep space black/blue */
+            --panel-bg: rgba(5, 12, 20, 0.9);
             --accent-green: #00ff88;
             --accent-cyan: #00e1ff;
             --text-color: #d1f7ff;
-            --border-color: rgba(0, 255, 136, 0.3);
+            --border-color: rgba(0, 225, 255, 0.25);
             --danger-color: #ff3366;
+            --glow-green: 0 0 10px rgba(0, 255, 136, 0.4);
+            --glow-cyan: 0 0 10px rgba(0, 225, 255, 0.4);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Courier New', Courier, monospace;
         }
 
         body {
@@ -32,30 +34,75 @@
             overflow: hidden;
             background-image: 
                 radial-gradient(circle at 50% 50%, rgba(0, 225, 255, 0.05) 0%, transparent 80%),
-                linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
-            background-size: 100% 100%, 30px 30px, 30px 30px;
+                repeating-linear-gradient(transparent 0px, transparent 2px, rgba(0, 225, 255, 0.02) 2px, rgba(0, 225, 255, 0.02) 4px);
+            background-size: 100% 100%, 100% 4px;
         }
 
-        .container {
-            width: 95%;
-            max-width: 1000px;
-            height: 90vh;
+        .main-wrapper {
+            width: 98%;
+            max-width: 1100px;
+            height: 92vh;
             background: var(--panel-bg);
             border: 1px solid var(--border-color);
-            box-shadow: 0 0 25px rgba(0, 255, 136, 0.15);
-            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(0, 225, 255, 0.15);
+            border-radius: 4px;
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
         }
 
-        /* AUTHENTICATION SCREEN */
+        /* ------------------- JARVIS LOGO ANIMATION ------------------- */
+        .jarvis-logo {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Outer clockwise ring */
+        .jarvis-logo .ring-outer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-top-color: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: var(--glow-green);
+            animation: rotateClockwise 3s linear infinite;
+        }
+
+        /* Inner anti-clockwise, smaller, faded ring */
+        .jarvis-logo .ring-inner {
+            position: absolute;
+            width: 65%;
+            height: 65%;
+            border: 2px solid transparent;
+            border-bottom-color: rgba(0, 225, 255, 0.3);
+            border-radius: 50%;
+            animation: rotateAntiClockwise 1.5s linear infinite;
+        }
+
+        /* Dots in the middle */
+        .jarvis-logo .dot-center {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--accent-cyan);
+        }
+
+        @keyframes rotateClockwise { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes rotateAntiClockwise { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
+
+        /* ------------------- AUTHENTICATION SCREEN ------------------- */
         #auth-screen {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--bg-color);
+            background: rgba(3, 8, 12, 0.98);
             z-index: 100;
             display: flex;
             justify-content: center;
@@ -66,20 +113,20 @@
 
         .auth-card {
             background: var(--panel-bg);
-            border: 1px solid var(--accent-green);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
-            padding: 30px;
-            border-radius: 8px;
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 0 25px rgba(0, 225, 255, 0.2);
+            padding: 35px;
+            border-radius: 4px;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             text-align: center;
         }
 
         .auth-card h1 {
-            color: var(--accent-green);
-            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            letter-spacing: 4px;
             margin-bottom: 5px;
-            font-size: 26px;
+            font-size: 28px;
         }
 
         .auth-card p {
@@ -89,7 +136,7 @@
         }
 
         .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
             text-align: left;
         }
 
@@ -97,34 +144,35 @@
             display: block;
             font-size: 11px;
             color: var(--accent-cyan);
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
         }
 
-        .input-group input {
+        .input-group input, .input-group select {
             width: 100%;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--border-color);
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(0, 225, 255, 0.2);
             color: var(--accent-green);
             border-radius: 4px;
             outline: none;
+            font-size: 14px;
         }
 
-        .input-group input:focus {
+        .input-group input:focus, .input-group select:focus {
             border-color: var(--accent-cyan);
-            box-shadow: 0 0 8px rgba(0, 225, 255, 0.3);
+            box-shadow: var(--glow-cyan);
         }
 
         .btn {
             width: 100%;
-            padding: 12px;
-            background: rgba(0, 255, 136, 0.15);
-            border: 1px solid var(--accent-green);
-            color: var(--accent-green);
+            padding: 14px;
+            background: rgba(0, 225, 255, 0.1);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
             font-weight: bold;
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
             cursor: pointer;
             border-radius: 4px;
             transition: all 0.2s;
@@ -132,299 +180,357 @@
         }
 
         .btn:hover {
-            background: var(--accent-green);
+            background: var(--accent-cyan);
             color: #000;
-            box-shadow: 0 0 15px var(--accent-green);
+            box-shadow: var(--glow-cyan);
         }
 
-        .auth-toggle {
-            margin-top: 15px;
-            font-size: 12px;
-            color: #88a0b0;
-            cursor: pointer;
-        }
+        .auth-toggle { margin-top: 15px; font-size: 12px; color: #88a0b0; cursor: pointer; }
+        .auth-toggle span { color: var(--accent-cyan); text-decoration: underline; }
 
-        .auth-toggle span {
-            color: var(--accent-cyan);
-            text-decoration: underline;
-        }
-
-        /* MAIN HUD INTERFACE */
+        /* ------------------- MAIN HUD INTERFACE ------------------- */
         .header {
-            padding: 15px 20px;
+            padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .logo {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--accent-green);
-            letter-spacing: 2px;
+            background: rgba(0, 0, 0, 0.4);
         }
 
         .user-status {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-size: 12px;
+            gap: 15px;
+            font-size: 13px;
         }
 
         .nav-btn {
-            padding: 6px 12px;
+            padding: 7px 14px;
             background: transparent;
-            border: 1px solid var(--accent-cyan);
-            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 225, 255, 0.3);
+            color: rgba(0, 225, 255, 0.7);
             font-size: 11px;
             cursor: pointer;
             border-radius: 4px;
         }
 
         .nav-btn:hover {
-            background: rgba(0, 225, 255, 0.2);
+            border-color: var(--accent-cyan);
+            background: rgba(0, 225, 255, 0.1);
+            color: var(--accent-cyan);
+        }
+
+        .main-chat-screen {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         .chat-box {
             flex: 1;
-            padding: 20px;
+            padding: 25px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
 
-        .message {
-            max-width: 80%;
-            padding: 12px 16px;
-            border-radius: 6px;
-            line-height: 1.5;
-            font-size: 14px;
-        }
-
-        .user-msg {
-            align-self: flex-end;
-            background: rgba(0, 225, 255, 0.1);
-            border: 1px solid var(--accent-cyan);
-            color: #fff;
-        }
-
-        .bot-msg {
-            align-self: flex-start;
-            background: rgba(0, 255, 136, 0.08);
-            border: 1px solid var(--accent-green);
-            color: var(--text-color);
-        }
+        .message { max-width: 80%; padding: 12px 18px; border-radius: 4px; line-height: 1.6; font-size: 14px; border: 1px solid transparent; }
+        .user-msg { align-self: flex-end; background: rgba(0, 225, 255, 0.05); border-color: rgba(0, 225, 255, 0.15); color: #fff; }
+        .bot-msg { align-self: flex-start; background: rgba(0, 255, 136, 0.03); border-color: rgba(0, 255, 136, 0.15); color: var(--accent-green); }
 
         .input-area {
-            padding: 15px;
+            padding: 18px;
             border-top: 1px solid var(--border-color);
             display: flex;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.3);
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.4);
         }
 
         .input-area input {
             flex: 1;
-            padding: 12px;
+            padding: 14px;
             background: rgba(0, 0, 0, 0.6);
-            border: 1px solid var(--border-color);
+            border: 1px solid rgba(0, 225, 255, 0.15);
             color: var(--accent-green);
             border-radius: 4px;
             outline: none;
+            font-size: 14px;
         }
 
         .icon-btn {
-            padding: 12px 16px;
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid var(--accent-green);
+            padding: 14px 18px;
+            background: rgba(0, 255, 136, 0.08);
+            border: 1px solid rgba(0, 255, 136, 0.2);
             color: var(--accent-green);
             cursor: pointer;
             border-radius: 4px;
+            transition: 0.2s;
         }
 
-        /* SETTINGS MODAL */
-        .modal {
-            display: none;
+        .icon-btn:hover { background: rgba(0, 255, 136, 0.15); border-color: var(--accent-green); box-shadow: var(--glow-green); }
+
+        /* ------------------- SETTINGS MODAL ------------------- */
+        .modal { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(3, 8, 12, 0.95); z-index: 50; justify-content: center; align-items: center; }
+        .modal-content { background: var(--panel-bg); border: 1px solid var(--accent-cyan); padding: 30px; border-radius: 4px; width: 90%; max-width: 500px; box-shadow: var(--glow-cyan); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; color: var(--accent-cyan); letter-spacing: 2px; }
+        .close-btn { background: none; border: none; color: var(--danger-color); font-size: 24px; cursor: pointer; }
+
+        /* ------------------- CAROUSEL / SYSTEM MODULES ------------------- */
+        .system-carousel {
+            padding: 10px 20px;
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.2);
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+        }
+
+        .carousel-item {
+            padding: 8px 16px;
+            background: rgba(0, 225, 255, 0.05);
+            border: 1px solid rgba(0, 225, 255, 0.2);
+            color: var(--accent-cyan);
+            border-radius: 20px;
+            font-size: 11px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .carousel-item:hover { border-color: var(--accent-cyan); box-shadow: var(--glow-cyan); }
+        .carousel-item.active-item { color: #000; background: var(--accent-cyan); border-color: var(--accent-cyan); font-weight: bold; }
+
+        /* ------------------- VOICE ACTIVE SCREEN (NEW PAGE ILLUSION) ------------------- */
+        #voice-active-screen {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(8, 12, 16, 0.92);
-            z-index: 50;
+            background: rgba(3, 8, 12, 0.99);
+            z-index: 90;
+            display: none; /* Controlled by JS */
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            text-align: center;
+            padding: 20px;
         }
 
-        .modal-content {
-            background: var(--panel-bg);
-            border: 1px solid var(--accent-cyan);
-            padding: 25px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 480px;
+        .huge-logo-container {
+            position: relative;
+            margin-bottom: 30px;
+            transition: 0.3s;
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            color: var(--accent-cyan);
+        #voice-active-screen .jarvis-logo {
+            width: 200px;
+            height: 200px;
         }
 
-        .close-btn {
-            background: none;
-            border: none;
-            color: var(--danger-color);
-            font-size: 20px;
-            cursor: pointer;
-        }
+        #voice-active-screen .ring-outer { border-width: 6px; box-shadow: 0 0 40px rgba(0, 255, 136, 0.6); }
+        #voice-active-screen .ring-inner { border-width: 4px; rgba(0, 225, 255, 0.5); }
+        #voice-active-screen .dot-center { width: 20px; height: 20px; box-shadow: 0 0 30px var(--accent-cyan); }
 
-        .thinking-dots span {
-            animation: blink 1.4s infinite;
-            font-weight: bold;
+        .listening-status {
+            color: var(--accent-green);
             font-size: 18px;
+            letter-spacing: 3px;
+            font-weight: bold;
+            animation: pulseText 1s infinite;
         }
-        .thinking-dots span:nth-child(2) { animation-delay: .2s; }
-        .thinking-dots span:nth-child(3) { animation-delay: .4s; }
-        @keyframes blink { 0% { opacity: .2; } 20% { opacity: 1; } 100% { opacity: .2; } }
+
+        .listening-back-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        @keyframes pulseText { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        @keyframes pulseGlow { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
     </style>
 </head>
 <body>
 
-    <div id="auth-screen">
-        <div class="auth-card">
-            <h1 id="auth-title">G.I.B.B. LOGIN</h1>
-            <p id="auth-sub">SIGN IN TO YOUR ACCOUNT</p>
-            
-            <div id="auth-error" style="color: var(--danger-color); font-size: 12px; margin-bottom: 10px; display: none;"></div>
+    <div class="main-wrapper">
 
-            <div class="input-group" id="name-group" style="display: none;">
-                <label>YOUR NAME</label>
-                <input type="text" id="auth-name" placeholder="User">
-            </div>
+        <div id="auth-screen">
+            <div class="auth-card">
+                <h1 id="auth-title">G.I.B.B. OS v2.5</h1>
+                <p id="auth-sub">INITIALIZE SYSTEM LOGIN</p>
+                
+                <div id="auth-error" style="color: var(--danger-color); font-size: 12px; margin-bottom: 10px; display: none;"></div>
 
-            <div class="input-group">
-                <label>EMAIL ADDRESS</label>
-                <input type="email" id="auth-email" placeholder="user@domain.com">
-            </div>
+                <div class="input-group" id="name-group" style="display: none;">
+                    <label>USER DESIGNATION / NAME</label>
+                    <input type="text" id="auth-name" placeholder="User / Operator">
+                </div>
 
-            <div class="input-group">
-                <label>PASSWORD</label>
-                <input type="password" id="auth-password" placeholder="••••••••">
-            </div>
+                <div class="input-group">
+                    <label>EMAIL ADDRESS</label>
+                    <input type="email" id="auth-email" placeholder="operator@domain.com">
+                </div>
 
-            <button class="btn" id="auth-btn" onclick="handleAuth()">LOGIN</button>
+                <div class="input-group">
+                    <label>SYSTEM PASSCODE / PASSWORD</label>
+                    <input type="password" id="auth-password" placeholder="••••••••">
+                </div>
 
-            <div class="auth-toggle" onclick="toggleAuthMode()">
-                <span id="toggle-text">Need an account? Sign Up</span>
+                <div class="input-group" id="gender-group" style="display: none;">
+                    <label>GENDER (FOR ADDRESS PROTOCOL)</label>
+                    <select id="auth-gender">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+
+                <button class="btn" id="auth-btn" onclick="handleAuth()">AUTHENTICATE</button>
+
+                <div class="auth-toggle" onclick="toggleAuthMode()">
+                    <span id="toggle-text">Need an account? Register System Profile</span>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="container">
+        <div id="voice-active-screen">
+            <button class="nav-btn listening-back-btn" onclick="deactivateVoiceActiveScreen()">❌ CANCEL LISTEN</button>
+            <div class="huge-logo-container">
+                <div class="jarvis-logo">
+                    <div class="ring-outer"></div>
+                    <div class="ring-inner"></div>
+                    <div class="dot-center"></div>
+                </div>
+            </div>
+            <p class="listening-status">LISTENING...</p>
+        </div>
+
         <div class="header">
-            <div class="logo">⚡ G.I.B.B. OS v2.5</div>
             <div class="user-status">
-                <span id="display-user">USER: OFFLINE</span>
-                <button class="nav-btn" onclick="openSettings()">⚙️ SETTINGS</button>
-                <button class="nav-btn" style="border-color: var(--danger-color); color: var(--danger-color);" onclick="logout()">LOGOUT</button>
+                <div class="jarvis-logo">
+                    <div class="ring-outer"></div>
+                    <div class="ring-inner"></div>
+                    <div class="dot-center"></div>
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-weight: bold; letter-spacing: 2px;">G.I.B.B. HUD v2.5</span>
+                    <span id="display-user" style="color: rgba(0, 225, 255, 0.7); font-size: 11px;">System Offline</span>
+                </div>
+            </div>
+            <div class="user-status">
+                <button class="nav-btn" onclick="openSettings()">⚙️ SYSTEM SETTINGS</button>
+                <button class="nav-btn" style="border-color: var(--danger-color); color: var(--danger-color);" onclick="logout()">SHUTDOWN / LOGOUT</button>
             </div>
         </div>
 
-        <div class="chat-box" id="chat-box">
-            <div class="message bot-msg">
-                System online. Welcome back.
+        <div class="system-carousel">
+            <div class="carousel-item active-item">Main Chat</div>
+            <div class="carousel-item" id="activate-voice-btn" onclick="activateVoiceActiveScreen()">Voice Control</div>
+            <div class="carousel-item">System Monitor</div>
+            <div class="carousel-item">Diagnostics</div>
+        </div>
+
+        <div class="main-chat-screen" id="main-chat-screen">
+            <div class="chat-box" id="chat-box">
+                <div class="message bot-msg">
+                    System initialized. Welcome back.
+                </div>
+            </div>
+
+            <div class="input-area">
+                <button class="icon-btn" onclick="toggleTextVoiceInput()" id="mic-btn">🎙️</button>
+                <input type="text" id="user-input" placeholder="Enter command or speak to Jarvis..." onkeydown="if(event.key==='Enter') sendMessage()">
+                <button class="icon-btn" onclick="sendMessage()">SEND ➣</button>
             </div>
         </div>
 
-        <div class="input-area">
-            <button class="icon-btn" onclick="toggleVoice()" id="mic-btn">🎙️</button>
-            <input type="text" id="user-input" placeholder="Enter message or ask something..." onkeydown="if(event.key==='Enter') sendMessage()">
-            <button class="icon-btn" onclick="sendMessage()">SEND ➢</button>
+        <div class="modal" id="settings-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>SYSTEM CONFIGURATION</h3>
+                    <button class="close-btn" onclick="closeSettings()">&times;</button>
+                </div>
+                
+                <div class="input-group">
+                    <label>GROQ AI API KEY</label>
+                    <input type="password" id="groq-key-input" placeholder="gsk_...">
+                </div>
+
+                <div class="input-group">
+                    <label>USER EMAIL</label>
+                    <input type="text" id="profile-email-input" readonly style="opacity: 0.6; color: rgba(211, 247, 255, 0.7);">
+                </div>
+
+                <button class="btn" onclick="saveSettings()">SAVE SYSTEM CONFIG</button>
+            </div>
         </div>
-    </div>
 
-    <div class="modal" id="settings-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>SYSTEM SETTINGS</h3>
-                <button class="close-btn" onclick="closeSettings()">&times;</button>
-            </div>
-            
-            <div class="input-group">
-                <label>GROQ API KEY</label>
-                <input type="password" id="groq-key-input" placeholder="gsk_...">
-            </div>
-
-            <div class="input-group">
-                <label>USER EMAIL</label>
-                <input type="text" id="profile-email-input" readonly style="opacity: 0.7;">
-            </div>
-
-            <button class="btn" onclick="saveSettings()">SAVE SETTINGS</button>
-        </div>
     </div>
 
     <script>
         let isSignUp = false;
         let currentUser = null;
         let conversationHistory = [];
+        let permanentVoiceHandler = null;
 
-        // Load active session on start
+        // Initialize session on startup
         window.addEventListener('load', () => {
-            const savedSession = localStorage.getItem('gibb_current_user');
+            const savedSession = localStorage.getItem('gibb_v25_session');
             if (savedSession) {
                 currentUser = JSON.parse(savedSession);
                 initInterface();
+                startPermanentWakeWordListener(); // Start wake word listener
             }
         });
 
         function toggleAuthMode() {
             isSignUp = !isSignUp;
-            document.getElementById('auth-title').innerText = isSignUp ? "CREATE ACCOUNT" : "G.I.B.B. LOGIN";
-            document.getElementById('auth-sub').innerText = isSignUp ? "REGISTER A NEW PROFILE" : "SIGN IN TO YOUR ACCOUNT";
-            document.getElementById('auth-btn').innerText = isSignUp ? "CREATE ACCOUNT" : "LOGIN";
+            document.getElementById('auth-title').innerText = isSignUp ? "REGISTER PROFILE" : "G.I.B.B. OS v2.5";
+            document.getElementById('auth-sub').innerText = isSignUp ? "NEW OPERATOR REGISTRATION" : "SIGN IN TO YOUR ACCOUNT";
+            document.getElementById('auth-btn').innerText = isSignUp ? "CREATE ACCOUNT" : "AUTHENTICATE";
             document.getElementById('name-group').style.display = isSignUp ? "block" : "none";
-            document.getElementById('toggle-text').innerText = isSignUp ? "Already have an account? Login" : "Need an account? Sign Up";
+            document.getElementById('gender-group').style.display = isSignUp ? "block" : "none"; // Show Gender during sign up
+            document.getElementById('toggle-text').innerText = isSignUp ? "Already have a profile? Login" : "Need an account? Register Profile";
             document.getElementById('auth-error').style.display = "none";
         }
 
         function handleAuth() {
             const email = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value.trim();
-            const name = document.getElementById('auth-name').value.trim() || "User";
+            const name = document.getElementById('auth-name').value.trim() || "Operator";
+            const gender = document.getElementById('auth-gender').value; // Get selected gender
             const errDiv = document.getElementById('auth-error');
 
             if (!email || !password) {
-                errDiv.innerText = "Please enter both Email and Password.";
+                errDiv.innerText = "Error: Email and Passcode required.";
                 errDiv.style.display = "block";
                 return;
             }
 
-            let accounts = JSON.parse(localStorage.getItem('gibb_accounts')) || {};
+            let accounts = JSON.parse(localStorage.getItem('gibb_v25_accounts')) || {};
 
             if (isSignUp) {
                 if (accounts[email]) {
-                    errDiv.innerText = "An account with this email already exists.";
+                    errDiv.innerText = "Error: An account with this email exists.";
                     errDiv.style.display = "block";
                     return;
                 }
-                accounts[email] = { name, email, password, groqApiKey: "" };
-                localStorage.setItem('gibb_accounts', JSON.stringify(accounts));
+                // Save name, email, password, AND gender
+                accounts[email] = { name, email, password, gender, groqApiKey: "" };
+                localStorage.setItem('gibb_v25_accounts', JSON.stringify(accounts));
                 currentUser = accounts[email];
             } else {
                 if (!accounts[email] || accounts[email].password !== password) {
-                    errDiv.innerText = "Invalid credentials. Check your email and password.";
+                    errDiv.innerText = "Authentication Failure: Check email and passcode.";
                     errDiv.style.display = "block";
                     return;
                 }
                 currentUser = accounts[email];
             }
 
-            localStorage.setItem('gibb_current_user', JSON.stringify(currentUser));
+            localStorage.setItem('gibb_v25_session', JSON.stringify(currentUser));
             initInterface();
+            startPermanentWakeWordListener(); // Start wake word listener after login
         }
 
         function initInterface() {
@@ -433,19 +539,24 @@
             document.getElementById('groq-key-input').value = currentUser.groqApiKey || "";
             document.getElementById('profile-email-input').value = currentUser.email;
 
+            // Determine salutation based on gender
+            const salutation = currentUser.gender === 'female' ? 'miss' : 'sir';
+
             // System prompt
             conversationHistory = [
                 {
                     role: "system",
-                    content: `You are G.I.B.B., a smart, helpful AI assistant. Address the user as ${currentUser.name}. Keep your responses direct, clear, intelligent, and concise.`
+                    content: `You are G.I.B.B., a highly intelligent, direct, and helpful AI OS, styled after the Jarvis interface. Address the user as ${currentUser.name} and use the polite salutation ${salutation}. Keep your responses direct, concise, smart, and professional.`
                 }
             ];
 
-            appendMessage(`Welcome back, ${currentUser.name}. How can I help you today?`, 'bot-msg');
+            // Setup finished. Speak startup greeting.
+            speakJarvis(`Ready when you are, ${salutation}.`);
+            appendMessage(`Connection established, ${salutation}. Ready for your input.`, 'bot-msg');
         }
 
         function logout() {
-            localStorage.removeItem('gibb_current_user');
+            localStorage.removeItem('gibb_v25_session');
             location.reload();
         }
 
@@ -461,18 +572,18 @@
             const key = document.getElementById('groq-key-input').value.trim();
             currentUser.groqApiKey = key;
 
-            let accounts = JSON.parse(localStorage.getItem('gibb_accounts')) || {};
+            let accounts = JSON.parse(localStorage.getItem('gibb_v25_accounts')) || {};
             if (accounts[currentUser.email]) {
                 accounts[currentUser.email].groqApiKey = key;
-                localStorage.setItem('gibb_accounts', JSON.stringify(accounts));
+                localStorage.setItem('gibb_v25_accounts', JSON.stringify(accounts));
             }
-            localStorage.setItem('gibb_current_user', JSON.stringify(currentUser));
+            localStorage.setItem('gibb_v25_session', JSON.stringify(currentUser));
 
             closeSettings();
-            appendMessage("Settings saved successfully. Groq API Key updated.", 'bot-msg');
+            appendMessage("System config updated. Groq AI API Key saved to profile.", 'bot-msg');
         }
 
-        function appendMessage(text, className, isThinking = false) {
+        function appendMessage(text, className) {
             const chatBox = document.getElementById('chat-box');
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${className}`;
@@ -491,13 +602,13 @@
             inputField.value = '';
 
             if (!currentUser.groqApiKey) {
-                appendMessage("Please open ⚙️ SETTINGS and save your Groq API key to start chatting.", 'bot-msg');
-                speak("API key missing. Please enter your Groq API key in system settings.");
+                appendMessage("SIR, Please open ⚙️ SETTINGS and save your Groq AI key to enable responses.", 'bot-msg');
+                speakJarvis("API key missing. Please check system settings.");
                 return;
             }
 
             conversationHistory.push({ role: "user", content: text });
-            let loadingDots = appendMessage('<div class="thinking-dots"><span>.</span><span>.</span><span>.</span></div>', 'bot-msg', true);
+            let loadingDots = appendMessage('...', 'bot-msg');
 
             try {
                 let res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -521,32 +632,31 @@
                     let reply = data.choices[0].message.content;
                     conversationHistory.push({ role: "assistant", content: reply });
                     appendMessage(reply, 'bot-msg');
-                    speak(reply);
+                    speakJarvis(reply);
                 } else {
-                    appendMessage("Error: AI returned invalid response format.", 'bot-msg');
+                    appendMessage("System Error: Invalid response from AI network.", 'bot-msg');
                 }
             } catch (err) {
                 document.getElementById('chat-box').removeChild(loadingDots);
-                appendMessage("Connection error: Unable to reach Groq server.", 'bot-msg');
+                appendMessage("Connection Error: Unable to reach Groq Server cluster.", 'bot-msg');
             }
         }
 
-        function speak(text) {
+        // Jarvis Speech Synthesis
+        function speakJarvis(text) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 let cleanText = text.replace(/[*#_`]/g, '');
                 let utter = new SpeechSynthesisUtterance(cleanText);
-                utter.rate = 1.0;
-                utter.pitch = 0.9;
+                utter.rate = 1.1; 
+                utter.pitch = 0.95;
                 window.speechSynthesis.speak(utter);
             }
         }
 
-        function toggleVoice() {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert("Speech recognition is not supported on this browser.");
-                return;
-            }
+        // Temporary Mic activation on chat screen
+        function toggleTextVoiceInput() {
+            if (!('webkitSpeechRecognition' in window)) { alert("Speech Recognition Not Supported."); return; }
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const recognition = new SpeechRecognition();
             recognition.lang = 'en-US';
@@ -567,6 +677,138 @@
 
             recognition.start();
         }
+
+        // ------------------- NEW PERMANENT VOICE HANDLING PROTOCOLS ------------------- //
+
+        // 1. Activate the full-screen listening page (ILLUSION of new page)
+        function activateVoiceActiveScreen() {
+            // Hide main interface. Show large logo. Speak active phrase.
+            document.getElementById('voice-active-screen').style.display = 'flex';
+            document.getElementById('main-chat-screen').style.display = 'none';
+
+            // Determine salutation based on gender
+            const salutation = currentUser.gender === 'female' ? 'miss' : 'sir';
+            speakJarvis(`Awaiting your command, ${salutation}.`);
+
+            startListeningForActiveCommand(); // Start mic for actual command
+        }
+
+        // 2. Hide full-screen listening page, back to chat
+        function deactivateVoiceActiveScreen() {
+            document.getElementById('voice-active-screen').style.display = 'none';
+            document.getElementById('main-chat-screen').style.display = 'flex';
+        }
+
+        // 3. Main Wake Word Listener Protocol (runs always)
+        function startPermanentWakeWordListener() {
+            if (!('webkitSpeechRecognition' in window) && permanentVoiceHandler == null) return;
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            permanentVoiceHandler = new SpeechRecognition();
+            permanentVoiceHandler.continuous = true;
+            permanentVoiceHandler.lang = 'en-US';
+
+            permanentVoiceHandler.onresult = (event) => {
+                const resultIndex = event.resultIndex;
+                const transcript = event.results[resultIndex][0].transcript.trim().toLowerCase();
+
+                // Look for the exact activation phrases
+                if (transcript.includes('activate voice control') || transcript.includes('do voice control')) {
+                    activateVoiceActiveScreen();
+                }
+            };
+
+            permanentVoiceHandler.onerror = (err) => {
+                // Ignore background mic errors
+                if(err.error === 'no-speech') return;
+                console.error("WakeWord Error:", err);
+            };
+
+            // Restart automatically if it ends
+            permanentVoiceHandler.onend = () => {
+                if (currentUser) permanentVoiceHandler.start(); 
+            };
+
+            permanentVoiceHandler.start();
+        }
+
+        // 4. Awaiting specific command on full screen HUD
+        function startListeningForActiveCommand() {
+            if (!('webkitSpeechRecognition' in window)) return;
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const commandRecognition = new SpeechRecognition();
+            commandRecognition.lang = 'en-US';
+
+            commandRecognition.onresult = (event) => {
+                const commandText = event.results[0][0].transcript.trim().toLowerCase();
+                
+                handleVoiceCommandInput(commandText); // Process the actual command
+                
+                deactivateVoiceActiveScreen(); // go back after one command
+            };
+
+            commandRecognition.onerror = (err) => {
+                deactivateVoiceActiveScreen();
+            }
+
+            commandRecognition.start();
+        }
+
+        // 5. PROCESS THE SPOKEN COMMAND (News, Weather, Maps)
+        function handleVoiceCommandInput(command) {
+            console.log("Processing Command:", command);
+
+            // Gutter salutation from account memory
+            const salutation = currentUser.gender === 'female' ? 'miss' : 'sir';
+
+            if (command.includes('weather')) {
+                pullUpWeatherPlaceHolder();
+            } else if (command.includes('news')) {
+                pullUpNewsPlaceholder();
+            } else if (command.includes('map') || command.includes('maps')) {
+                pullUpGoogleMapsPlaceholder(command);
+            } else {
+                // If it doesn't match a fixed tool, send it to the Groq AI as a chat message
+                const inputField = document.getElementById('user-input');
+                inputField.value = command; // Populate input
+                sendMessage(); // Send to AI
+            }
+        }
+
+        // ------------------- TOOL PLACEHOLDERS ------------------- //
+        
+        //Weather placeholder logic (requires a Weather API key like OpenWeatherMap)
+        function pullUpWeatherPlaceHolder() {
+            const salutation = currentUser.gender === 'female' ? 'miss' : 'sir';
+            alert(`TOOL ACCESS PROTOCOL: Fetching live weather. SIR/MISS, YOU MUST ADD YOUR Weather API key in the 'pullUpWeatherPlaceHolder' function.`);
+            // speakJarvis(`TOOL ACCESS PROTOCOL: LIVE WEATHER.`);
+            appendMessage(`Accessing weather protocols. *Note: API key required for live data.*`, 'bot-msg');
+        }
+
+        // News placeholder logic (requires a News API key)
+        function pullUpNewsPlaceholder() {
+            const salutation = currentUser.gender === 'female' ? 'miss' : 'sir';
+            alert(`TOOL ACCESS PROTOCOL: Fetching headlines. SIR/MISS, YOU MUST ADD YOUR News API key in the 'pullUpNewsPlaceholder' function.`);
+            appendMessage(`Accessing news protocols. *Note: API key required for live headlines.*`, 'bot-msg');
+        }
+
+        // Open Maps placeholder logic (uses generic Google Search queries based on voice input)
+        function pullUpGoogleMapsPlaceholder(command) {
+            const salutation = currentUser.gender === 'female' ? 'miss' : 'sir';
+            appendMessage(`Accessing Google Maps protocols...`, 'bot-msg');
+            speakJarvis(`Initializing Google Maps search.`);
+            
+            // Extract the location part if possible (simple split example)
+            const mapQuery = command.replace('map of', '').replace('open map for', '').replace('maps', '').trim();
+
+            if (mapQuery) {
+                // If the user specified a location, search Google Maps directly
+                window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`, '_blank');
+            } else {
+                // Otherwise, just open Google Maps homepage
+                window.open(`https://www.google.com/maps`, '_blank');
+            }
+        }
+
     </script>
 </body>
 </html>
