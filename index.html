@@ -262,7 +262,7 @@
         </div>
         <div class="panel" style="max-width: 450px;">
             <h2 style="margin-bottom: 15px; letter-spacing: 2px;">MICROPHONE ACCESS REQUIRED</h2>
-            <p style="font-size: 0.9rem; color: #88ff88; margin-bottom: 25px; line-height: 1.5;">G.I.B.B. requires live microphone access to maintain continuous perpetual wake recognition ("Hey GIBB").</p>
+            <p style="font-size: 0.9rem; color: #88ff88; margin-bottom: 25px; line-height: 1.5;">G.I.B.B. requires live microphone access to maintain continuous perpetual wake recognition ("Hey GIBB" or "Activate Voice Control").</p>
             <button class="btn" onclick="requestMicrophoneAccess()" style="padding: 15px; font-size: 1.1rem; box-shadow: 0 0 20px var(--accent-glow);">ACTIVATE MICROPHONE</button>
         </div>
     </div>
@@ -330,7 +330,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 15px; font-size: 0.8rem; color: #88ff88; text-align: center;">Perpetual Wake Engine Enabled ("Hey GIBB")</p>
+                <p style="margin-top: 15px; font-size: 0.8rem; color: #88ff88; text-align: center;">Perpetual Wake Engine Enabled ("Hey GIBB" / "Activate Voice Control")</p>
             </div>
 
             <div class="sidebar-panel">
@@ -627,8 +627,6 @@
 
         function speakWelcomeMsg() {
             if (hasSpokenWelcome) return;
-            const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
-            speak(`Ready when you are, ${honorific}. Perpetual microphone engine is locked active.`);
             hasSpokenWelcome = true;
         }
 
@@ -684,7 +682,7 @@
             
             globalRecognition = new SpeechRecognition();
             globalRecognition.continuous = true;
-            globalRecognition.interimResults = true;
+            globalRecognition.interimResults = false; // Set to false so it only processes final distinct utterances, eliminating double typing
             globalRecognition.lang = 'en-US';
 
             globalRecognition.onresult = async (event) => {
@@ -700,11 +698,11 @@
                     transcriptDisplay.innerText = fullSentence;
                 }
 
-                const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
                 const honorificTitle = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
+                const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
 
-                // Check if user says "Hey Gibb" anywhere to trigger Voice Control screen activation
-                if (lowerText.includes("hey gibb") || lowerText.includes("hey, gibb")) {
+                // Check if user says "Hey Gibb" or "Activate Voice Control" anywhere to trigger Voice Control screen activation
+                if (lowerText.includes("hey gibb") || lowerText.includes("hey, gibb") || lowerText.includes("activate voice control")) {
                     try { globalRecognition.stop(); } catch(e){}
                     
                     activateVoiceScreen();
@@ -714,7 +712,6 @@
 
                 // If Voice Control screen is open, route spoken questions directly to Groq API
                 if (document.getElementById('voice-screen').classList.contains('active') && lowerText.length > 0) {
-                    // Avoid triggering on raw partial noise unless a distinct command or query finishes
                     let query = fullSentence.trim();
                     if (query.length > 3 && !query.toLowerCase().includes("voice control is active")) {
                         try { globalRecognition.stop(); } catch(e){}
@@ -877,8 +874,8 @@
             const text = input.value.trim();
             if (!text) return;
             
+            input.value = ''; // Clear input immediately to prevent double processing triggers
             appendMessage(text, 'user');
-            input.value = '';
 
             if (!db.savedKey || !db.savedKey.startsWith('gsk_')) {
                 appendMessage("ERROR: Please input a valid Groq API Key (gsk_...) in the left settings panel.", 'gibb');
