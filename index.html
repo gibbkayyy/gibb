@@ -262,7 +262,7 @@
         </div>
         <div class="panel" style="max-width: 450px;">
             <h2 style="margin-bottom: 15px; letter-spacing: 2px;">MICROPHONE ACCESS REQUIRED</h2>
-            <p style="font-size: 0.9rem; color: #88ff88; margin-bottom: 25px; line-height: 1.5;">G.I.B.B. requires live microphone access to maintain continuous wake-word listening ("Hey GIBB") and voice control.</p>
+            <p style="font-size: 0.9rem; color: #88ff88; margin-bottom: 25px; line-height: 1.5;">G.I.B.B. requires live microphone access to maintain continuous perpetual wake recognition ("Hey GIBB").</p>
             <button class="btn" onclick="requestMicrophoneAccess()" style="padding: 15px; font-size: 1.1rem; box-shadow: 0 0 20px var(--accent-glow);">ACTIVATE MICROPHONE</button>
         </div>
     </div>
@@ -357,7 +357,7 @@
             <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
             <div class="gibb-text-logo" style="font-size: 2rem;">G.I.B.B.</div>
         </div>
-        <div class="voice-status-text">PERPETUAL VOICE HUD ACTIVE... (Say "Hey, G.I.B.B. [question]")</div>
+        <div class="voice-status-text" id="voice-hud-msg">VOICE CONTROL ACTIVE</div>
         <div id="voice-transcript" style="margin-top: 15px; font-size: 0.95rem; font-style: italic; color: #88ff88; max-width: 600px; text-align: center; height: 30px;">[Listening continuously...]</div>
         
         <button class="btn" style="position: absolute; bottom: 30px; width: auto; padding: 10px 25px; font-size: 0.9rem;" onclick="deactivateVoiceScreen()">MENU</button>
@@ -603,7 +603,6 @@
         }
 
         function speak(text, callback) {
-            // Temporarily pause recognition to prevent feedback loop from AI's own voice
             if (globalRecognition) {
                 try { globalRecognition.stop(); } catch(e){}
             }
@@ -617,7 +616,6 @@
             
             utterance.onend = () => {
                 if (callback) callback();
-                // Resume perpetual microphone capture
                 if (isPerpetualListening && globalRecognition) {
                     setTimeout(() => {
                         try { globalRecognition.start(); } catch(e){}
@@ -652,7 +650,7 @@
             
             setTimeout(() => {
                 if (index === 0) showDashboard();
-                if (index === 1) activateVoiceScreen();
+                if (index === 1) activateVoiceScreenViaManual();
                 if (index === 2) showTranslation();
             }, 300);
         }
@@ -680,7 +678,7 @@
             }
         });
 
-        // 100% UNSTOPPABLE PERPETUAL MICROPHONE RECOGNITION ENGINE
+        // 100% UNSTOPPABLE PERPETUAL MICROPHONE RECOGNITION ENGINE CONNECTED TO GROQ & VOICE CONTROL WAKE
         function initPerpetualListeningEngine() {
             if (!SpeechRecognition) return;
             
@@ -702,13 +700,23 @@
                     transcriptDisplay.innerText = fullSentence;
                 }
 
-                if (lowerText.includes("hey gibb") || lowerText.includes("hey, gibb")) {
-                    let parts = lowerText.split(/hey,?\s+gibb[.,]?\s*/i);
-                    let questionQuery = parts[1] ? parts[1].trim() : "";
-                    
-                    const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
+                const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
+                const honorificTitle = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
 
-                    if (questionQuery.length > 0) {
+                // Check if user says "Hey Gibb" anywhere to trigger Voice Control screen activation
+                if (lowerText.includes("hey gibb") || lowerText.includes("hey, gibb")) {
+                    try { globalRecognition.stop(); } catch(e){}
+                    
+                    activateVoiceScreen();
+                    speak(`Voice Control Is Active, ${honorificTitle}`);
+                    return;
+                }
+
+                // If Voice Control screen is open, route spoken questions directly to Groq API
+                if (document.getElementById('voice-screen').classList.contains('active') && lowerText.length > 0) {
+                    // Avoid triggering on raw partial noise unless a distinct command or query finishes
+                    let query = fullSentence.trim();
+                    if (query.length > 3 && !query.toLowerCase().includes("voice control is active")) {
                         try { globalRecognition.stop(); } catch(e){}
                         
                         if (!db.savedKey || !db.savedKey.startsWith('gsk_')) {
@@ -718,29 +726,24 @@
                             return;
                         }
 
-                        const aiAnswer = await callGroqAPI(questionQuery);
+                        const aiAnswer = await callGroqAPI(query);
                         speak(aiAnswer, () => {
                             restartPerpetualListener();
                         });
-                    } else {
-                        speak(`Yes, ${honorific}? Perpetual audio receiver standing by.`);
                     }
                 }
             };
 
             globalRecognition.onerror = (e) => {
-                // Silently swallow harmless browser timeout/no-speech errors to ensure never stopping
                 console.warn("Speech recognition warning:", e.error);
             };
 
-            // BULLETPROOF SELF-RESTART BINDING: Never turns off permanently
             globalRecognition.onend = () => {
                 if (isPerpetualListening) {
                     setTimeout(() => {
                         try {
                             globalRecognition.start();
                         } catch(err) {
-                            // If context failed or closed, recreate cleanly
                             initPerpetualListeningEngine();
                         }
                     }, 150);
@@ -769,8 +772,14 @@
         function activateVoiceScreen() {
             switchScreen('voice-screen');
             document.getElementById('voice-transcript').innerText = '[Listening continuously...]';
-            const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
-            speak(`Perpetual Voice HUD active, ${honorific}. Say "Hey GIBB" anytime.`);
+            const honorificTitle = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
+            document.getElementById('voice-hud-msg').innerText = `Voice Control Is Active, ${honorificTitle}`;
+        }
+
+        function activateVoiceScreenViaManual() {
+            activateVoiceScreen();
+            const honorificTitle = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
+            speak(`Voice Control Is Active, ${honorificTitle}`);
         }
 
         function deactivateVoiceScreen() {
@@ -782,12 +791,10 @@
             const apiKey = db.savedKey;
             if (!apiKey) return "Groq API key is missing or invalid.";
 
-            // Build historical context array from persistent chat memory storage
             let messageContext = [
                 { role: "system", content: "You are G.I.B.B., a futuristic, highly intelligent AI system assistant with full conversational context memory." }
             ];
 
-            // Push past memory turns so Groq remembers everything
             if (db.chatHistory && db.chatHistory.length > 0) {
                 db.chatHistory.forEach(item => {
                     let roleMapping = item.sender === 'user' ? 'user' : 'assistant';
@@ -795,7 +802,6 @@
                 });
             }
 
-            // Append current prompt query
             messageContext.push({ role: "user", content: promptText });
 
             try {
