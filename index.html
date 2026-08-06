@@ -7,7 +7,7 @@
     <style>
         :root {
             --bg-color: #030803;
-            --panel-bg: rgba(0, 20, 0, 0.92);
+            --panel-bg: rgba(0, 20, 0, 0.85);
             --border-color: rgba(0, 255, 0, 0.45);
             --text-color: #00ff00;
             --accent-color: #00ff00;
@@ -64,10 +64,13 @@
             justify-content: center;
             padding: 20px;
             z-index: 1;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
 
         .screen.active {
             display: flex;
+            opacity: 1;
         }
 
         /* Logo Design */
@@ -79,6 +82,7 @@
             justify-content: center;
             align-items: center;
             margin-bottom: 25px;
+            transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
         .gibb-text-logo {
@@ -88,7 +92,6 @@
             z-index: 10;
             text-shadow: 0 0 20px var(--accent-glow);
             letter-spacing: 4px;
-            /* Shifted slightly more to the right to perfectly balance the letter-spacing offset */
             transform: translateX(6px); 
             text-align: center;
             position: absolute;
@@ -110,12 +113,8 @@
         }
 
         .orbit-ring-outer {
-            position: absolute;
-            width: 240px;
-            height: 240px;
-            border-radius: 50%;
-            border: 2px solid rgba(0, 255, 0, 0.6);
-            animation: spinClockwise 12s linear infinite;
+            position: absolute; width: 240px; height: 240px; border-radius: 50%;
+            border: 2px solid rgba(0, 255, 0, 0.6); animation: spinClockwise 12s linear infinite;
         }
         .dot-outer {
             position: absolute; width: 10px; height: 10px; background-color: var(--accent-color);
@@ -136,15 +135,9 @@
 
         /* Panels & Forms */
         .panel {
-            background: var(--panel-bg);
-            border: 2px solid var(--border-color);
-            padding: 30px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 420px;
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.15);
-            text-align: center;
-            backdrop-filter: blur(10px);
+            background: var(--panel-bg); border: 2px solid var(--border-color);
+            padding: 30px; border-radius: 12px; width: 100%; max-width: 420px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.15); text-align: center; backdrop-filter: blur(10px);
         }
 
         input, select {
@@ -157,8 +150,7 @@
 
         input[type="range"] {
             -webkit-appearance: none; width: 100%; background: rgba(0, 255, 0, 0.1);
-            height: 6px; border-radius: 3px; outline: none; border: 1px solid var(--border-color);
-            margin: 10px 0; padding: 0;
+            height: 6px; border-radius: 3px; outline: none; border: 1px solid var(--border-color); margin: 10px 0;
         }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none; appearance: none; width: 16px; height: 16px;
@@ -169,7 +161,7 @@
             width: 100%; padding: 12px; background: rgba(0, 255, 0, 0.2);
             color: var(--accent-color); border: 2px solid var(--border-color);
             border-radius: 4px; font-size: 1rem; font-weight: bold;
-            cursor: pointer; transition: all 0.3s;
+            cursor: pointer; transition: all 0.3s; margin-bottom: 10px;
         }
         .btn:hover { background: rgba(0, 255, 0, 0.4); box-shadow: 0 0 15px var(--accent-glow); }
 
@@ -177,20 +169,38 @@
 
         /* Main Menu Layout */
         .main-menu-layout {
-            display: grid;
-            grid-template-columns: 320px 1fr 320px;
+            display: grid; grid-template-columns: 320px 1fr 320px;
             width: 100vw; height: 100vh; padding: 30px; gap: 30px; align-items: center;
         }
 
+        /* HOLOGRAPHIC SIDEBARS */
         .sidebar-panel {
-            background: var(--panel-bg); border: 2px solid var(--border-color);
+            background: linear-gradient(135deg, rgba(0,255,0,0.05) 0%, rgba(0,15,0,0.85) 100%);
+            border: 1px solid rgba(0, 255, 0, 0.5);
             border-radius: 12px; padding: 25px; height: 100%; display: flex;
-            flex-direction: column; justify-content: space-between; backdrop-filter: blur(10px);
+            flex-direction: column; justify-content: space-between; 
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.15), inset 0 0 20px rgba(0, 255, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Holographic Scanline Effect */
+        .sidebar-panel::after {
+            content: ""; position: absolute; top: -100%; left: 0; width: 100%; height: 50%;
+            background: linear-gradient(to bottom, transparent, rgba(0,255,0,0.15), transparent);
+            animation: scanline 6s linear infinite; pointer-events: none; opacity: 0.5;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(400%); }
         }
 
         .widget-box {
             background: rgba(0, 255, 0, 0.05); border: 1px solid rgba(0, 255, 0, 0.3);
             border-radius: 8px; padding: 15px; margin-bottom: 15px;
+            box-shadow: inset 0 0 10px rgba(0,255,0,0.05);
         }
         .widget-title {
             font-size: 0.85rem; color: #88ff88; text-transform: uppercase;
@@ -204,52 +214,43 @@
 
         .carousel-container {
             display: flex; align-items: center; justify-content: center;
-            gap: 20px; height: 120px; margin-top: 10px;
+            gap: 15px; height: 120px; margin-top: 10px; width: 100%;
         }
 
         .carousel-btn {
-            background: var(--panel-bg); border: 2px solid var(--border-color);
-            color: var(--accent-color); padding: 15px 25px; border-radius: 4px;
+            background: rgba(0, 20, 0, 0.8); border: 2px solid var(--border-color);
+            color: var(--accent-color); padding: 15px 20px; border-radius: 4px;
             cursor: pointer; transition: all 0.4s ease; font-weight: bold;
         }
-        .carousel-btn.small { transform: scale(0.8); opacity: 0.4; font-size: 0.9rem; }
-        .carousel-btn.big { transform: scale(1.1); opacity: 1; font-size: 1.2rem; border-color: var(--accent-color); box-shadow: 0 0 20px var(--accent-glow); }
+        .carousel-btn.small { transform: scale(0.8); opacity: 0.4; font-size: 0.8rem; }
+        .carousel-btn.big { transform: scale(1.1); opacity: 1; font-size: 1.1rem; border-color: var(--accent-color); box-shadow: 0 0 20px var(--accent-glow); }
 
         /* Chat Interface */
         .chat-container {
-            width: 100%; height: 100%; display: flex; flex-direction: column;
-            background: transparent; color: var(--text-color); overflow: hidden;
+            width: 100%; height: 100%; display: flex; flex-direction: column; background: transparent; overflow: hidden;
         }
-
         .chat-header {
             padding: 20px 30px; background: var(--panel-bg); border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center; color: var(--accent-color);
-            backdrop-filter: blur(10px);
+            display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);
         }
-
         .chat-messages {
             flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
             background: rgba(0, 10, 0, 0.7); backdrop-filter: blur(5px);
         }
-
-        .message {
-            max-width: 75%; padding: 14px 18px; border-radius: 8px; font-size: 1rem; line-height: 1.5;
-        }
-        .message.user {
-            background: var(--accent-color); color: #000000; align-self: flex-end;
-            border-bottom-right-radius: 2px; font-weight: bold;
-        }
-        .message.gibb {
-            background: rgba(0, 255, 0, 0.05); color: var(--text-color); align-self: flex-start;
-            border-bottom-left-radius: 2px; border: 1px solid var(--border-color); box-shadow: 0 0 10px rgba(0,255,0,0.1);
-        }
-
+        .message { max-width: 75%; padding: 14px 18px; border-radius: 8px; font-size: 1rem; line-height: 1.5; }
+        .message.user { background: var(--accent-color); color: #000000; align-self: flex-end; border-bottom-right-radius: 2px; font-weight: bold; }
+        .message.gibb { background: rgba(0, 255, 0, 0.05); color: var(--text-color); align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid var(--border-color); box-shadow: 0 0 10px rgba(0,255,0,0.1); }
         .chat-input-area {
-            display: flex; padding: 20px 30px; border-top: 1px solid var(--border-color);
-            background: var(--panel-bg); gap: 15px; backdrop-filter: blur(10px);
+            display: flex; padding: 20px 30px; border-top: 1px solid var(--border-color); background: var(--panel-bg); gap: 15px; backdrop-filter: blur(10px);
         }
-        .chat-input-area input { margin-bottom: 0; }
-        .chat-input-area button { width: 120px; margin-bottom: 0; }
+        
+        /* Voice Active Overlay */
+        .voice-status-text {
+            margin-top: 40px; font-size: 1.5rem; letter-spacing: 2px; color: var(--accent-color);
+            text-shadow: 0 0 15px var(--accent-glow); animation: pulseText 2s infinite;
+        }
+        @keyframes pulseText { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
     </style>
 </head>
 <body>
@@ -262,17 +263,8 @@
             <div class="gibb-text-logo">G.I.B.B.</div>
         </div>
         
-        <div class="panel">
-            <h2 style="margin-bottom: 15px; letter-spacing: 2px;">LOGIN / INITIALIZE</h2>
-            <div id="auth-error" class="error-msg"></div>
-            <input type="text" id="username-input" placeholder="Enter Username">
-            <select id="gender-input">
-                <option value="" disabled selected>Select Title Preference</option>
-                <option value="sir">Male (Sir)</option>
-                <option value="miss">Female (Miss)</option>
-            </select>
-            <button class="btn" onclick="initializeProfile()">ESTABLISH CONNECTION</button>
-        </div>
+        <div class="panel" id="auth-panel">
+            </div>
     </div>
 
     <div id="loading-screen" class="screen">
@@ -308,11 +300,6 @@
                         <div class="widget-title">System Volume</div>
                         <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1" onchange="updateVolume()">
                     </div>
-
-                    <div class="widget-box">
-                        <div class="widget-title">Remembrance</div>
-                        <p style="font-size: 0.85rem; color: #10b981;">✓ Chats remembered permanently.</p>
-                    </div>
                 </div>
                 <div>
                     <button class="btn" style="border-color: var(--danger-color); color: #ff8888; font-size: 0.9rem;" onclick="logout()">LOG OUT</button>
@@ -328,8 +315,9 @@
                 </div>
 
                 <div class="carousel-container" id="carousel">
-                    <button class="carousel-btn big" id="c-btn-0" onclick="selectCarouselOption(0)">Launch Chat</button>
-                    <button class="carousel-btn small" id="c-btn-1" onclick="selectCarouselOption(1)">Translation</button>
+                    <button class="carousel-btn small" id="c-btn-0" onclick="selectCarouselOption(0)">Launch Chat</button>
+                    <button class="carousel-btn big" id="c-btn-1" onclick="selectCarouselOption(1)">Voice Control</button>
+                    <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
             </div>
 
@@ -350,29 +338,77 @@
         </div>
     </div>
 
+    <div id="voice-screen" class="screen">
+        <div class="logo-container" style="transform: scale(1.2);">
+            <div class="inner-design-grid"></div>
+            <div class="orbit-ring-outer" style="border-color: #00ff00; box-shadow: 0 0 20px #00ff00;"><div class="dot-outer"></div></div>
+            <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
+            <div class="gibb-text-logo">G.I.B.B.</div>
+        </div>
+        <div class="voice-status-text">LISTENING...</div>
+        <div id="voice-transcript" style="margin-top: 20px; font-style: italic; color: #88ff88; max-width: 600px; text-align: center; height: 30px;"></div>
+        
+        <button class="btn" style="position: absolute; bottom: 40px; width: auto; padding: 10px 30px;" onclick="deactivateVoiceControl()">SYSTEM MENU</button>
+    </div>
+
     <div id="dashboard-screen" class="screen">
         <div class="chat-container">
             <div class="chat-header">
                 <span style="font-weight: bold; letter-spacing: 2px;">G.I.B.B. NEURAL CONNECT</span>
-                <button class="btn" style="width: auto; padding: 8px 16px;" onclick="openMenu()">SYSTEM MENU</button>
+                <button class="btn" style="width: auto; padding: 8px 16px; margin-bottom: 0;" onclick="openMenu()">SYSTEM MENU</button>
             </div>
             <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-area">
                 <input type="text" id="chat-input" placeholder="Type a message to G.I.B.B...." onkeypress="checkEnter(event)">
-                <button class="btn" onclick="sendMessage()">SEND</button>
+                <button class="btn" style="width: 120px; margin-bottom: 0;" onclick="sendMessage()">SEND</button>
             </div>
         </div>
     </div>
 
     <script>
-        let carouselIndex = 0;
+        let carouselIndex = 1; // Default to Voice Control in center
         let hasSpokenWelcome = false;
         
+        // Voice Recognition Setup
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        let isVoiceActive = false;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.continuous = false; // We manually restart it after speaking
+            recognition.interimResults = true;
+            
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                
+                const display = document.getElementById('voice-transcript');
+                display.innerText = finalTranscript || interimTranscript;
+
+                if (finalTranscript) {
+                    processVoiceCommand(finalTranscript.toLowerCase());
+                }
+            };
+
+            recognition.onend = () => {
+                // If still active, wait a second and restart listening
+                if (isVoiceActive) {
+                    setTimeout(() => { if(isVoiceActive) recognition.start(); }, 500);
+                }
+            };
+        }
+        
         let db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { 
-            profile: null,
-            chatHistory: [],
-            volume: 1.0,
-            savedKey: ''
+            profile: null, chatHistory: [], volume: 1.0, savedKey: ''
         };
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -380,34 +416,60 @@
             window.addEventListener('resize', updateResolution);
             
             document.getElementById('volume-slider').value = db.volume;
-            if(db.savedKey) {
-                document.getElementById('access-key-input').value = db.savedKey;
-            }
+            if(db.savedKey) document.getElementById('access-key-input').value = db.savedKey;
             
             // FPS Loop
-            let frameCount = 0;
-            let lastTime = performance.now();
+            let frameCount = 0; let lastTime = performance.now();
             function countFPS() {
-                frameCount++;
-                let currentTime = performance.now();
+                frameCount++; let currentTime = performance.now();
                 if (currentTime - lastTime >= 1000) {
                     const fpsEl = document.getElementById('fps-counter');
                     if(fpsEl) fpsEl.innerText = frameCount;
-                    frameCount = 0;
-                    lastTime = currentTime;
+                    frameCount = 0; lastTime = currentTime;
                 }
                 requestAnimationFrame(countFPS);
             }
             requestAnimationFrame(countFPS);
 
             // AUTH / SESSION LOGIC
-            // Using sessionStorage so the user stays logged in across reloads, but logs out if the tab is closed.
             if (sessionStorage.getItem('gibb_logged_in') === 'true' && db.profile) {
                 showLoadingScreen();
             } else {
-                document.getElementById('auth-screen').classList.add('active');
+                renderAuthScreen();
+                switchScreen('auth-screen');
             }
         });
+
+        function renderAuthScreen() {
+            const panel = document.getElementById('auth-panel');
+            if (db.profile && db.profile.name) {
+                // Return User (Smart Login)
+                panel.innerHTML = `
+                    <h2 style="margin-bottom: 15px; letter-spacing: 2px;">WELCOME BACK</h2>
+                    <p style="margin-bottom: 25px; color: #88ff88;">USER: ${db.profile.name.toUpperCase()}</p>
+                    <button class="btn" onclick="quickLogin()">LOGIN</button>
+                    <button class="btn" style="background: transparent; border-color: rgba(0,255,0,0.2); font-size: 0.8rem;" onclick="clearProfileData()">CREATE NEW ACCOUNT</button>
+                `;
+            } else {
+                // New User
+                panel.innerHTML = `
+                    <h2 style="margin-bottom: 15px; letter-spacing: 2px;">INITIALIZE PROFILE</h2>
+                    <div id="auth-error" class="error-msg"></div>
+                    <input type="text" id="username-input" placeholder="Enter Username">
+                    <select id="gender-input">
+                        <option value="" disabled selected>Select Title Preference</option>
+                        <option value="sir">Male (Sir)</option>
+                        <option value="miss">Female (Miss)</option>
+                    </select>
+                    <button class="btn" onclick="initializeProfile()">ESTABLISH CONNECTION</button>
+                `;
+            }
+        }
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
 
         function updateResolution() {
             const display = document.getElementById('res-display');
@@ -417,24 +479,27 @@
         function verifyKey() {
             const inputVal = document.getElementById('access-key-input').value.trim();
             const statusEl = document.getElementById('key-status');
-            
             db.savedKey = inputVal;
             
             if (inputVal.toLowerCase() === 'gibb') {
                 statusEl.innerHTML = '🔑 KEY ACTIVE';
                 statusEl.style.color = '#10b981';
                 statusEl.style.textShadow = '0 0 5px rgba(16, 185, 129, 0.5)';
+                return true;
             } else {
                 statusEl.innerHTML = '🔑 NO KEY';
                 statusEl.style.color = '#ff4444';
                 statusEl.style.textShadow = '0 0 5px rgba(255, 68, 68, 0.5)';
+                return false;
             }
             saveDatabase();
         }
 
-        function updateVolume() {
-            db.volume = parseFloat(document.getElementById('volume-slider').value);
-            saveDatabase();
+        function updateVolume() { db.volume = parseFloat(document.getElementById('volume-slider').value); saveDatabase(); }
+
+        function quickLogin() {
+            sessionStorage.setItem('gibb_logged_in', 'true');
+            showLoadingScreen();
         }
 
         function initializeProfile() {
@@ -450,27 +515,18 @@
 
             db.profile = { name: user || "User", honorific: honorific };
             saveDatabase();
-            
             sessionStorage.setItem('gibb_logged_in', 'true');
             showLoadingScreen();
         }
 
         function showLoadingScreen() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('loading-screen').classList.add('active');
-            
-            // Reset UI states just in case
+            switchScreen('loading-screen');
             document.getElementById('loading-bar').style.width = '0%';
             document.getElementById('init-btn').style.display = 'none';
             document.getElementById('loading-text').innerText = "SYSTEM BOOTING...";
             document.getElementById('loading-text').style.animation = "pulseCore 1.5s infinite";
 
-            // Trigger Loading Animation
-            setTimeout(() => {
-                document.getElementById('loading-bar').style.width = '100%';
-            }, 100);
-
-            // Show Initialize Button after loading completes
+            setTimeout(() => { document.getElementById('loading-bar').style.width = '100%'; }, 100);
             setTimeout(() => {
                 document.getElementById('loading-text').innerText = "SYSTEM READY";
                 document.getElementById('loading-text').style.animation = "none";
@@ -478,82 +534,131 @@
             }, 2600);
         }
 
-        function completeInit() {
-            speakWelcomeMsg();
-            showMenuScreen();
+        function completeInit() { speakWelcomeMsg(); showMenuScreen(); }
+
+        function speak(text, callback) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.volume = db.volume;
+            
+            const voices = window.speechSynthesis.getVoices();
+            const maleVoice = voices.find(v => v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('mark') || v.name.toLowerCase().includes('guy'));
+            if (maleVoice) utterance.voice = maleVoice;
+            
+            if (callback) utterance.onend = callback;
+            window.speechSynthesis.speak(utterance);
         }
 
         function speakWelcomeMsg() {
             if (hasSpokenWelcome) return;
-            
-            const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
-            const text = `Ready when you are, ${honorific}.`;
-            const utterance = new SpeechSynthesisUtterance(text);
-            
-            utterance.volume = db.volume;
-            
-            // Grab a male voice for G.I.B.B.
-            const voices = window.speechSynthesis.getVoices();
-            const maleVoice = voices.find(v => 
-                v.name.toLowerCase().includes('male') || 
-                v.name.toLowerCase().includes('david') || 
-                v.name.toLowerCase().includes('mark') || 
-                v.name.toLowerCase().includes('guy')
-            );
-            
-            if (maleVoice) utterance.voice = maleVoice;
-            
-            window.speechSynthesis.speak(utterance);
+            const honorific = db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
+            speak(`Ready when you are, ${honorific}.`);
             hasSpokenWelcome = true;
         }
 
-        // Handle voice list loading async
         window.speechSynthesis.onvoiceschanged = () => {};
 
-        function saveDatabase() {
-            localStorage.setItem('gibb_permanent_db', JSON.stringify(db));
-        }
+        function saveDatabase() { localStorage.setItem('gibb_permanent_db', JSON.stringify(db)); }
 
         function showMenuScreen() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('menu-screen').classList.add('active');
+            isVoiceActive = false;
+            if(recognition) recognition.stop();
+            switchScreen('menu-screen');
             verifyKey(); 
+            updateCarouselUI();
         }
 
-        function openMenu() {
-            showMenuScreen();
-        }
+        function openMenu() { showMenuScreen(); }
 
         function selectCarouselOption(index) {
             carouselIndex = index;
             updateCarouselUI();
-            if (index === 0) {
-                setTimeout(showDashboard, 300);
-            }
+            
+            setTimeout(() => {
+                if (index === 0) showDashboard();
+                if (index === 1) activateVoiceControl();
+                // index 2 is translation (UI placeholder for now)
+            }, 300);
         }
 
         function updateCarouselUI() {
-            const btn0 = document.getElementById('c-btn-0');
-            const btn1 = document.getElementById('c-btn-1');
-            if (carouselIndex === 0) {
-                btn0.className = "carousel-btn big";
-                btn1.className = "carousel-btn small";
-            } else {
-                btn0.className = "carousel-btn small";
-                btn1.className = "carousel-btn big";
-            }
+            const buttons = [document.getElementById('c-btn-0'), document.getElementById('c-btn-1'), document.getElementById('c-btn-2')];
+            buttons.forEach((btn, i) => {
+                if (!btn) return;
+                if (i === carouselIndex) {
+                    btn.className = "carousel-btn big";
+                } else {
+                    btn.className = "carousel-btn small";
+                }
+            });
         }
 
         window.addEventListener('wheel', (e) => {
             if (document.getElementById('menu-screen').classList.contains('active')) {
-                if (e.deltaY > 0) carouselIndex = 1; else carouselIndex = 0;
+                if (e.deltaY > 0) {
+                    carouselIndex = Math.min(carouselIndex + 1, 2);
+                } else {
+                    carouselIndex = Math.max(carouselIndex - 1, 0);
+                }
                 updateCarouselUI();
             }
         });
 
+        // VOICE CONTROL LOGIC
+        function activateVoiceControl() {
+            if (db.savedKey.toLowerCase() !== 'gibb') {
+                alert("ACCESS DENIED: Valid Key Required for Voice Control.");
+                return;
+            }
+            if (!recognition) {
+                alert("Speech Recognition not supported in this browser.");
+                return;
+            }
+
+            switchScreen('voice-screen');
+            document.getElementById('voice-transcript').innerText = '';
+            
+            const honorific = db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
+            isVoiceActive = true;
+            
+            // Speak then start listening
+            speak(`Voice Control is active, ${honorific}.`, () => {
+                if(isVoiceActive) recognition.start();
+            });
+        }
+
+        function deactivateVoiceControl() {
+            isVoiceActive = false;
+            recognition.stop();
+            showMenuScreen();
+        }
+
+        function processVoiceCommand(cmd) {
+            recognition.stop(); // stop listening while processing/speaking
+            const honorific = db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
+            
+            if (cmd.includes("deactivate voice control") || cmd.includes("exit") || cmd.includes("stop")) {
+                speak("Deactivating Voice Control.", () => {
+                    deactivateVoiceControl();
+                });
+                return;
+            }
+
+            let reply = "";
+            if (cmd.includes('who made you') || cmd.includes('creator')) {
+                reply = `gibbkayyy made me, ${honorific}.`;
+            } else if (cmd.includes('hello') || cmd.includes('hi')) {
+                reply = `Greetings, ${honorific}. How can I assist you?`;
+            } else {
+                reply = `Acknowledged. I heard you say: ${cmd}`;
+            }
+
+            // Speak reply, and because recognition.onend is set up, it will restart listening if isVoiceActive is true
+            speak(reply);
+        }
+
+        // CHAT LOGIC
         function showDashboard() {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('dashboard-screen').classList.add('active');
+            switchScreen('dashboard-screen');
             loadChatHistory();
         }
 
@@ -566,9 +671,7 @@
                 const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
                 appendMessage(`System Core initialized, ${honorific}. Secure channel established.`, 'gibb', false);
             } else {
-                history.forEach(msg => {
-                    appendMessage(msg.text, msg.sender, false);
-                });
+                history.forEach(msg => appendMessage(msg.text, msg.sender, false));
             }
         }
 
@@ -580,45 +683,39 @@
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
 
-            if (save) {
-                db.chatHistory.push({ text, sender });
-                saveDatabase();
-            }
+            if (save) { db.chatHistory.push({ text, sender }); saveDatabase(); }
         }
 
-        function checkEnter(e) {
-            if (e.key === 'Enter') sendMessage();
-        }
+        function checkEnter(e) { if (e.key === 'Enter') sendMessage(); }
 
         function sendMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if (!text) return;
-
             appendMessage(text, 'user');
             input.value = '';
 
             setTimeout(() => {
-                const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
+                const honorific = db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
                 const lowerText = text.toLowerCase();
-                let reply = "";
-
-                if (lowerText.includes('who made you') || lowerText.includes('creator') || lowerText.includes('created you')) {
-                    reply = `gibbkayyy made me, ${honorific}.`;
-                } else {
-                    reply = `Acknowledged, ${honorific}. Memory stored.`;
-                }
+                let reply = (lowerText.includes('who made you') || lowerText.includes('creator')) 
+                    ? `gibbkayyy made me, ${honorific}.` 
+                    : `Acknowledged, ${honorific}. Memory stored.`;
                 appendMessage(reply, 'gibb');
             }, 600);
         }
 
         function logout() {
-            // Removes active session without deleting database memory
             sessionStorage.removeItem('gibb_logged_in');
             hasSpokenWelcome = false;
-            
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('auth-screen').classList.add('active');
+            renderAuthScreen();
+            switchScreen('auth-screen');
+        }
+
+        function clearProfileData() {
+            localStorage.removeItem('gibb_permanent_db');
+            db = { profile: null, chatHistory: [], volume: 1.0, savedKey: '' };
+            renderAuthScreen();
         }
     </script>
 </body>
