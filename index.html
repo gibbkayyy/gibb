@@ -80,8 +80,8 @@
             background: radial-gradient(circle, rgba(0,255,100,0.05) 0%, rgba(1,10,4,1) 80%);
         }
         #login-screen img {
-            width: 220px;
-            filter: drop-shadow(0 0 25px rgba(0, 255, 100, 0.8));
+            width: 280px; /* Much bigger logo */
+            filter: drop-shadow(0 0 30px rgba(0, 255, 100, 0.9));
             animation: float 3s ease-in-out infinite;
         }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
@@ -138,31 +138,60 @@
             font-size: 0.85rem;
         }
 
-        /* --- Next-Gen Home Screen --- */
+        /* --- HUD / Stark-Inspired Next-Gen Menu Screen --- */
         #home-screen {
             display: none;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
             height: 100vh;
-            gap: 35px;
+            width: 100vw;
+            box-sizing: border-box;
+            padding: 30px;
             opacity: 0;
             transition: opacity 1s ease-in-out;
+            justify-content: space-between;
         }
-        #home-screen img {
-            width: 180px;
-            filter: drop-shadow(0 0 30px rgba(0, 255, 100, 0.9));
+        .hud-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid rgba(0,255,100,0.3);
+            padding-bottom: 15px;
         }
-        .home-title {
-            font-size: 2.8rem;
+        .hud-widget {
+            background: rgba(2, 15, 7, 0.7);
+            border: 1px solid rgba(0,255,100,0.3);
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            box-shadow: 0 0 10px rgba(0,255,100,0.1);
+        }
+        .hud-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        .hud-center img {
+            width: 240px; /* Much bigger logo on menu */
+            filter: drop-shadow(0 0 35px rgba(0, 255, 100, 0.9));
+            animation: pulse 3s infinite alternate;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); filter: drop-shadow(0 0 25px rgba(0, 255, 100, 0.7)); }
+            100% { transform: scale(1.03); filter: drop-shadow(0 0 45px rgba(0, 255, 100, 1)); }
+        }
+        .menu-title {
+            font-size: 3rem;
             font-weight: 900;
-            letter-spacing: 6px;
-            text-shadow: 0 0 20px rgba(0, 255, 100, 0.8);
+            letter-spacing: 8px;
+            text-shadow: 0 0 25px rgba(0, 255, 100, 0.9);
             margin: 0;
         }
         .menu-grid {
             display: flex;
             gap: 25px;
+            justify-content: center;
         }
         .menu-btn {
             background: rgba(2, 20, 9, 0.9);
@@ -214,7 +243,7 @@
             box-shadow: 0 0 20px rgba(0, 255, 100, 0.2);
         }
         header img {
-            height: 45px;
+            height: 50px; /* Bigger logo in headers */
             filter: drop-shadow(0 0 10px rgba(0,255,100,0.6));
         }
         .back-home {
@@ -285,7 +314,7 @@
             outline: none;
             box-shadow: 0 0 10px rgba(0, 255, 100, 0.1) inset;
         }
-        .input-area button {
+        .input-area button, .translate-exec-btn {
             background: linear-gradient(135deg, #021f0e, #043818);
             color: #00ff66;
             border: 1px solid #00ff66;
@@ -296,8 +325,9 @@
             font-size: 1rem;
             font-weight: bold;
             transition: 0.3s;
+            box-shadow: 0 0 10px rgba(0,255,100,0.2);
         }
-        .input-area button:hover {
+        .input-area button:hover, .translate-exec-btn:hover {
             background-color: #00ff66;
             color: #010a04;
             box-shadow: 0 0 20px rgba(0, 255, 100, 0.9);
@@ -310,7 +340,7 @@
             flex-direction: column;
             padding: 30px;
             gap: 20px;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             width: 100%;
             box-sizing: border-box;
@@ -365,12 +395,21 @@
     </div>
 
     <div id="home-screen">
-        <img src="gibblogo.png" alt="G.I.B.B. Logo">
-        <div class="home-title">Menu</div>
-        <div class="menu-grid">
-            <button class="menu-btn" onclick="openApp('chat')">💬 Terminal Chat</button>
-            <button class="menu-btn" onclick="openApp('translate')">🌐 Translation Matrix</button>
-            <button class="menu-btn disabled">🛡️ G.I.B.B. Detect (Coming Soon)</button>
+        <div class="hud-top-bar">
+            <div class="hud-widget" id="hud-date-time">TIME/DATE MATRIX LOADING...</div>
+            <div class="hud-widget" id="hud-weather">WEATHER NODES LOADING...</div>
+        </div>
+        <div class="hud-center">
+            <img src="gibblogo.png" alt="G.I.B.B. Logo">
+            <div class="menu-title">MENU</div>
+            <div class="menu-grid">
+                <button class="menu-btn" onclick="openApp('chat')">💬 Terminal Chat</button>
+                <button class="menu-btn" onclick="openApp('translate')">🌐 Translation Matrix</button>
+                <button class="menu-btn disabled">🛡️ G.I.B.B. Detect (Coming Soon)</button>
+            </div>
+        </div>
+        <div class="hud-bottom-bar" style="text-align: center; font-size: 0.8rem; opacity: 0.6; letter-spacing: 2px;">
+            STARK OS // SECURE PROTOCOL ACTIVE
         </div>
     </div>
 
@@ -388,7 +427,7 @@
         <div class="input-area">
             <input type="text" id="user-input" placeholder="Query mathematics, language arts, science, or web databases..." onkeypress="handleKeyPress(event)">
             <button onclick="sendMessage()">Enter</button>
-            <button onclick="startListening()" title="Voice Input">🎙️</button>
+            <button onclick="startListening('chat')" title="Voice Input">🎙️</button>
         </div>
     </div>
 
@@ -413,12 +452,13 @@
                     <option value="it">Italian</option>
                     <option value="en">English (Reverse Translate)</option>
                 </select>
-                <button onclick="performTranslation()">Execute Translation</button>
+                <button class="translate-exec-btn" onclick="performTranslation()">Execute Translation</button>
+                <button onclick="startListening('translate')" title="Voice Input for Source Text">🎙️</button>
             </div>
             <div style="display: flex; gap: 20px;">
                 <div class="translate-box">
                     <label>Source Text (English or any language):</label>
-                    <textarea id="source-text" placeholder="Type text to translate..."></textarea>
+                    <textarea id="source-text" placeholder="Type or speak text to translate..."></textarea>
                 </div>
                 <div class="translate-box">
                     <label>Translated Output Stream:</label>
@@ -443,20 +483,49 @@
                 }, 800);
             }, 1200);
             initVoices();
+            updateHUDClock();
+            setInterval(updateHUDClock, 1000);
+            fetchLiveWeather();
         });
+
+        function updateHUDClock() {
+            let now = new Date();
+            let timeStr = now.toLocaleTimeString();
+            let dateStr = now.toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+            let clockElem = document.getElementById("hud-date-time");
+            if (clockElem) {
+                clockElem.innerText = `DATE: ${dateStr} // TIME: ${timeStr}`;
+            }
+        }
+
+        async function fetchLiveWeather() {
+            try {
+                // Free public geolocation/weather routing simulation or basic telemetry
+                let res = await fetch('https://ipapi.co/json/');
+                let loc = await res.json();
+                let weatherElem = document.getElementById("hud-weather");
+                if (weatherElem) {
+                    weatherElem.innerText = `LOCATION: ${loc.city}, ${loc.country_name} // STATUS: OPTIMAL`;
+                }
+            } catch(e) {
+                let weatherElem = document.getElementById("hud-weather");
+                if (weatherElem) weatherElem.innerText = `LOCATION: GLOBAL MATRIX // STATUS: NOMINAL`;
+            }
+        }
 
         function initVoices() {
             let voices = window.speechSynthesis.getVoices();
-            jarvisVoice = voices.find(v => (v.name.includes("Male") || v.name.includes("David") || v.name.includes("UK English Male") || v.name.includes("George") || v.name.includes("Oliver")) && v.lang.startsWith("en")) || voices[0];
+            // Strictly target forced male AI voices without lag delays
+            jarvisVoice = voices.find(v => (v.name.includes("Male") || v.name.includes("David") || v.name.includes("UK English Male") || v.name.includes("George") || v.name.includes("Oliver") || v.name.includes("Daniel") || v.name.includes("Mark")) && v.lang.startsWith("en")) || voices.find(v => v.lang.startsWith("en")) || voices[0];
         }
         window.speechSynthesis.onvoiceschanged = initVoices;
 
         function speakJarvis(text) {
             if (!text) return;
-            window.speechSynthesis.cancel();
+            window.speechSynthesis.cancel(); // Instantly clears queue to avoid zero-delay stuttering
             let speech = new SpeechSynthesisUtterance(text);
-            speech.rate = 1.05;
-            speech.pitch = 0.8;
+            speech.rate = 1.1; // Snappy speed to prevent audio lags
+            speech.pitch = 0.75; // Deep masculine timbre
             if (jarvisVoice) speech.voice = jarvisVoice;
             window.speechSynthesis.speak(speech);
         }
@@ -468,6 +537,8 @@
                 let home = document.getElementById("home-screen");
                 home.style.display = "flex";
                 setTimeout(() => { home.style.opacity = "1"; }, 50);
+                
+                // Instantaneous MALE Voice Announcement
                 speakJarvis("SYSTEM ONLINE");
             } else {
                 document.getElementById("error-msg").style.display = "block";
@@ -484,7 +555,9 @@
         }
 
         function goHome() {
+            // Instantly terminates speech synthesis when exiting application views (Stops AI immediately)
             window.speechSynthesis.cancel();
+            
             document.getElementById("chat-view").style.display = "none";
             document.getElementById("translate-view").style.display = "none";
             let home = document.getElementById("home-screen");
@@ -515,14 +588,19 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // --- Normal Terminal Chat (Powered by DuckDuckGo API) ---
+        // --- Smart Adaptive AI Engine (Short & Precise Responses) ---
         async function processJarvisAI(input) {
-            let lower = input.toLowerCase();
+            let lower = input.toLowerCase().trim();
             let response = "";
 
-            if (lower.includes("remember me")) {
+            // Intercept casual greetings instantly
+            if (lower === "hi" || lower === "hello" || lower === "hey" || lower === "greetings") {
                 let savedUser = localStorage.getItem("user_profile_name");
-                response = savedUser ? `I have you logged in records as ${savedUser}, sir.` : `State your designation using: Remember that my name is [name], sir.`;
+                response = savedUser ? `Systems online. Welcome back, ${savedUser}, sir.` : `Systems online. Awaiting your command, sir.`;
+            }
+            else if (lower.includes("remember me")) {
+                let savedUser = localStorage.getItem("user_profile_name");
+                response = savedUser ? `Logged in records as ${savedUser}, sir.` : `Identity unlinked. Use: Remember that my name is [name], sir.`;
             }
             else if (lower.includes("remember that") && lower.includes("is")) {
                 try {
@@ -531,17 +609,18 @@
                     let v = parts[1].trim();
                     localStorage.setItem(k, v);
                     if (k.includes("name")) localStorage.setItem("user_profile_name", v);
-                    response = `Data integrated into core records: ${k} is logged as ${v}, sir.`;
+                    response = `Logged: ${k} is ${v}, sir.`;
                 } catch(e) {
-                    response = "Formatting error in memory stream.";
+                    response = "Formatting error.";
                 }
             } 
+            // Precise Math Calculation Engine (Stops unnecessary yapping)
             else if (lower.startsWith("calculate") || lower.startsWith("solve") || /[0-9]+\s*[\+\-\*\/\^]\s*[0-9]+/.test(lower)) {
                 try {
                     let expr = lower.replace(/calculate/i, "").replace(/solve/i, "").trim();
                     response = `${eval(expr)}`;
                 } catch(e) {
-                    response = "Mathematical computation query could not be verified.";
+                    response = "Computation error.";
                 }
             } 
             else {
@@ -566,18 +645,19 @@
                 let data = await res.json();
                 
                 if (data.AbstractText) {
-                    return data.AbstractText;
+                    // Keep response concise and direct
+                    return data.AbstractText.split('.')[0] + '.';
                 } else if (data.RelatedTopics && data.RelatedTopics.length > 0 && data.RelatedTopics[0].Text) {
-                    return data.RelatedTopics[0].Text;
+                    return data.RelatedTopics[0].Text.split('.')[0] + '.';
                 } else {
-                    return `Analysis complete for "${query}". Data nodes confirm alignment with standard parameters, sir.`;
+                    return `Analysis complete, sir.`;
                 }
             } catch (err) {
-                return `Sir, network connection metrics indicate restricted access to external nodes.`;
+                return `External node connection restricted, sir.`;
             }
         }
 
-        // --- Separate Translation View (Powered by MyMemory API) ---
+        // --- Dedicated Translation Matrix Feature ---
         async function performTranslation() {
             let text = document.getElementById("source-text").value.trim();
             let targetLang = document.getElementById("target-language").value;
@@ -604,8 +684,8 @@
             }
         }
 
-        // --- Voice-to-Text Microphone Integration ---
-        function startListening() {
+        // --- Voice-to-Text Microphone Integration (Supports both Chat and Translation) ---
+        function startListening(targetApp) {
             window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
                 alert("Speech recognition matrix unavailable in this browser build.");
@@ -614,8 +694,14 @@
             let recognition = new SpeechRecognition();
             recognition.lang = 'en-US';
             recognition.onresult = function(event) {
-                document.getElementById("user-input").value = event.results[0][0].transcript;
-                sendMessage();
+                let transcript = event.results[0][0].transcript;
+                if (targetApp === 'chat') {
+                    document.getElementById("user-input").value = transcript;
+                    sendMessage();
+                } else if (targetApp === 'translate') {
+                    document.getElementById("source-text").value = transcript;
+                    performTranslation();
+                }
             };
             recognition.start();
         }
