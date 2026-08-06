@@ -262,7 +262,7 @@
         </div>
         <div class="panel" style="max-width: 450px;">
             <h2 style="margin-bottom: 15px; letter-spacing: 2px;">MICROPHONE ACCESS REQUIRED</h2>
-            <p style="font-size: 0.9rem; color: #88ff88; margin-bottom: 25px; line-height: 1.5;">G.I.B.B. requires live microphone access to maintain continuous wake recognition ("Hey Gibb" or "Activate Voice Control").</p>
+            <p style="font-size: 0.9rem; color: #88ff88; margin-bottom: 25px; line-height: 1.5;">G.I.B.B. requires live microphone access to maintain continuous wake recognition.</p>
             <button class="btn" onclick="requestMicrophoneAccess()" style="padding: 15px; font-size: 1.1rem; box-shadow: 0 0 20px var(--accent-glow);">ACTIVATE MICROPHONE</button>
         </div>
     </div>
@@ -296,7 +296,6 @@
 
     <div id="menu-screen" class="screen">
         <div class="main-menu-layout">
-            
             <div class="sidebar-panel">
                 <div>
                     <h3 style="margin-bottom: 20px; text-shadow: 0 0 10px var(--accent-glow);">CORE SETTINGS</h3>
@@ -305,7 +304,6 @@
                         <input type="password" id="access-key-input" placeholder="Paste Groq key (gsk_...)" style="margin-bottom: 8px; font-size: 0.85rem; padding: 8px;" oninput="verifyKey()">
                         <p id="key-status" style="font-size: 0.9rem; font-weight: bold; margin-top: 5px; text-shadow: 0 0 5px rgba(255,0,0,0.5);">🔑 NO KEY</p>
                     </div>
-                    
                     <div class="widget-box">
                         <div class="widget-title">System Volume</div>
                         <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1" onchange="updateVolume()">
@@ -330,7 +328,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 15px; font-size: 0.8rem; color: #88ff88; text-align: center;">Perpetual Wake Engine Enabled ("Hey Gibb" / "Activate Voice Control")</p>
+                <p style="margin-top: 15px; font-size: 0.8rem; color: #88ff88; text-align: center;">Perpetual Wake Engine Enabled</p>
             </div>
 
             <div class="sidebar-panel">
@@ -425,7 +423,8 @@
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let globalRecognition = null;
         let isPerpetualListening = true;
-        let voiceActiveMode = false; // When true, G.I.B.B. speaks answers out loud when spoken to
+        let voiceActiveMode = false;
+        let isSpeakingNow = false;
 
         let db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { 
             profile: null, chatHistory: [], volume: 1.0, savedKey: ''
@@ -452,7 +451,6 @@
                 });
             }
 
-            // FPS Counter Loop
             let frameCount = 0; let lastTime = performance.now();
             function countFPS() {
                 frameCount++; let currentTime = performance.now();
@@ -466,7 +464,6 @@
             requestAnimationFrame(countFPS);
         });
 
-        // HARDWARE MIC PERMISSION INITIALIZER
         async function requestMicrophoneAccess() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -481,11 +478,10 @@
                     switchScreen('auth-screen');
                 }
             } catch (err) {
-                alert("Microphone permission was denied. G.I.B.B. perpetual wake engine requires microphone access.");
+                alert("Microphone permission was denied.");
             }
         }
 
-        // RENDER LOGIN SCREEN
         function renderLoginScreen() {
             const panel = document.getElementById('auth-panel');
             panel.innerHTML = `
@@ -498,7 +494,6 @@
             `;
         }
 
-        // RENDER REGISTER SCREEN
         function renderRegisterScreen() {
             const panel = document.getElementById('auth-panel');
             panel.innerHTML = `
@@ -549,12 +544,12 @@
                 return;
             }
             if (!honorific) {
-                errorBox.innerText = "Please select your title preference (Sir or Miss).";
+                errorBox.innerText = "Please select your title preference.";
                 errorBox.style.display = 'block';
                 return;
             }
             if (!pass || pass.length < 4) {
-                errorBox.innerText = "Password must be at least 4 characters for security.";
+                errorBox.innerText = "Password must be at least 4 characters.";
                 errorBox.style.display = 'block';
                 return;
             }
@@ -580,18 +575,15 @@
         function verifyKey() {
             const inputVal = document.getElementById('access-key-input').value.trim();
             const statusEl = document.getElementById('key-status');
-            
             db.savedKey = inputVal;
             saveDatabase();
             
             if (inputVal.startsWith('gsk_') && inputVal.length > 20) {
                 statusEl.innerHTML = '🔑 GROQ KEY ACTIVE';
                 statusEl.style.color = '#10b981';
-                statusEl.style.textShadow = '0 0 5px rgba(16, 185, 129, 0.5)';
             } else {
                 statusEl.innerHTML = '🔑 INVALID KEY';
                 statusEl.style.color = '#ff4444';
-                statusEl.style.textShadow = '0 0 5px rgba(255, 68, 68, 0.5)';
             }
         }
 
@@ -602,7 +594,6 @@
             document.getElementById('loading-bar').style.width = '0%';
             document.getElementById('init-btn').style.display = 'none';
             document.getElementById('loading-text').innerText = "SYSTEM BOOTING...";
-            document.getElementById('loading-text').style.animation = "pulseCore 1.5s infinite";
 
             setTimeout(() => { document.getElementById('loading-bar').style.width = '100%'; }, 100);
             setTimeout(() => {
@@ -613,42 +604,36 @@
         }
 
         function completeInit() { 
-            speakWelcomeMsg(); 
             showMenuScreen(); 
             initPerpetualListeningEngine();
         }
 
         function speak(text, callback) {
-            if (globalRecognition) {
-                try { globalRecognition.stop(); } catch(e){}
+            if (!window.speechSynthesis) {
+                if (callback) callback();
+                return;
             }
+            window.speechSynthesis.cancel();
+            isSpeakingNow = true;
 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.volume = db.volume;
             
-            const voices = window.speechSynthesis.getVoices();
-            const maleVoice = voices.find(v => v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('mark') || v.name.toLowerCase().includes('guy'));
-            if (maleVoice) utterance.voice = maleVoice;
-            
             utterance.onend = () => {
+                isSpeakingNow = false;
                 if (callback) callback();
-                if (isPerpetualListening && globalRecognition) {
-                    setTimeout(() => {
-                        try { globalRecognition.start(); } catch(e){}
-                    }, 300);
-                }
+            };
+            utterance.onerror = () => {
+                isSpeakingNow = false;
+                if (callback) callback();
             };
             window.speechSynthesis.speak(utterance);
-        }
-
-        function speakWelcomeMsg() {
-            if (hasSpokenWelcome) return;
-            hasSpokenWelcome = true;
         }
 
         function saveDatabase() { localStorage.setItem('gibb_permanent_db', JSON.stringify(db)); }
 
         function showMenuScreen() {
+            voiceActiveMode = false;
             switchScreen('menu-screen');
             verifyKey(); 
             updateCarouselUI();
@@ -671,11 +656,7 @@
             const buttons = [document.getElementById('c-btn-0'), document.getElementById('c-btn-1'), document.getElementById('c-btn-2')];
             buttons.forEach((btn, i) => {
                 if (!btn) return;
-                if (i === carouselIndex) {
-                    btn.className = "carousel-btn big";
-                } else {
-                    btn.className = "carousel-btn small";
-                }
+                btn.className = (i === carouselIndex) ? "carousel-btn big" : "carousel-btn small";
             });
         }
 
@@ -705,7 +686,6 @@
             switchScreen('auth-screen');
         }
 
-        // CHAT & AI INTEGRATION (GROQ API)
         function checkEnter(e) {
             if (e.key === 'Enter') sendMessage();
         }
@@ -751,7 +731,7 @@
 
             const apiKey = db.savedKey;
             if (!apiKey || !apiKey.startsWith('gsk_')) {
-                const errText = "Error: Groq API Key missing or invalid. Please configure your key in System Settings.";
+                const errText = "Error: Groq API Key missing or invalid in System Settings.";
                 db.chatHistory.push({ role: 'gibb', content: errText });
                 saveDatabase();
                 renderChatHistory();
@@ -788,7 +768,7 @@
                     throw new Error("Invalid response format from Groq API");
                 }
             } catch (err) {
-                const errText = "Neural link communication error. Please check your API key and network.";
+                const errText = "Neural link communication error. Please check your API key.";
                 db.chatHistory.push({ role: 'gibb', content: errText });
                 saveDatabase();
                 renderChatHistory();
@@ -808,7 +788,7 @@
 
             const apiKey = db.savedKey;
             if (!apiKey || !apiKey.startsWith('gsk_')) {
-                outputEl.innerText = "Error: Groq API Key required in settings for translation engine.";
+                outputEl.innerText = "Error: Groq API Key required.";
                 return;
             }
 
@@ -824,7 +804,7 @@
                     body: JSON.stringify({
                         model: "llama-3.3-70b-versatile",
                         messages: [
-                            { role: "system", content: `You are a direct translation engine. Translate the provided user text strictly into language code: ${targetLang}. Output only the translated text.` },
+                            { role: "system", content: `Translate strictly into language code: ${targetLang}. Output only translated text.` },
                             { role: "user", content: source }
                         ]
                     })
@@ -841,12 +821,9 @@
             }
         }
 
-        // CONTINUOUS SPEECH RECOGNITION ENGINE (FIXED DUPLICATE TRIGGER & RECOGNITION LOOP)
+        // CONTINUOUS SPEECH ENGINE WITH DEDICATED LOCKOUT TO PREVENT DUPLICATE RECOGNITION
         function initPerpetualListeningEngine() {
-            if (!SpeechRecognition) {
-                console.warn("Speech recognition not supported in this browser.");
-                return;
-            }
+            if (!SpeechRecognition) return;
 
             if (globalRecognition) {
                 try { globalRecognition.stop(); } catch(e){}
@@ -858,44 +835,39 @@
             globalRecognition.lang = 'en-US';
 
             globalRecognition.onresult = (event) => {
+                if (isSpeakingNow) return; // Do not listen while GIBB is speaking
+
                 const transcript = event.results[0][0].transcript.toLowerCase().trim();
-                
                 const transcriptEl = document.getElementById('voice-transcript');
                 if (transcriptEl) transcriptEl.innerText = `Heard: "${transcript}"`;
 
-                // 1. Activation commands
+                // Wake word activation via normal speech "hey gibb" or "activate voice control"
                 if (transcript.includes('activate voice control') || transcript.includes('hey gibb')) {
                     activateVoiceScreenViaManual();
                     return;
                 }
 
-                // 2. If voice screen is active, treat any spoken phrase as a general prompt/question
+                // If user is currently in Voice Control mode, treat any statement as a live query
                 if (voiceActiveMode) {
                     sendMessage(transcript);
                 }
             };
 
-            globalRecognition.onerror = (event) => {
-                // Ignore standard no-speech errors to maintain seamless looping
-            };
+            globalRecognition.onerror = () => {};
 
             globalRecognition.onend = () => {
-                if (isPerpetualListening) {
+                if (isPerpetualListening && !isSpeakingNow) {
                     setTimeout(() => {
                         try {
                             globalRecognition.start();
-                        } catch (e) {
-                            // Already active or suppressed
-                        }
-                    }, 500);
+                        } catch (e) {}
+                    }, 400);
                 }
             };
 
             try {
                 globalRecognition.start();
-            } catch (e) {
-                console.log("Recognition start caught:", e);
-            }
+            } catch (e) {}
         }
     </script>
 </body>
