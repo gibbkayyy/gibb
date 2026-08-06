@@ -140,12 +140,12 @@
             box-shadow: 0 0 30px rgba(0, 255, 0, 0.15); text-align: center; backdrop-filter: blur(10px);
         }
 
-        input, select {
+        input, select, textarea {
             width: 100%; padding: 12px 16px; margin-bottom: 15px;
             background: rgba(0, 255, 0, 0.08); border: 1px solid var(--border-color);
             border-radius: 4px; color: var(--text-color); font-size: 1rem; outline: none;
         }
-        input:focus, select:focus { border-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-glow); }
+        input:focus, select:focus, textarea:focus { border-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-glow); }
         select option { background: var(--bg-color); color: var(--text-color); }
 
         input[type="range"] {
@@ -316,8 +316,8 @@
 
                 <div class="carousel-container" id="carousel">
                     <button class="carousel-btn small" id="c-btn-0" onclick="selectCarouselOption(0)">Launch Chat</button>
-                    <button class="carousel-btn big" id="c-btn-1" onclick="selectCarouselOption(1)">Voice Control</button>
-                    <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
+                    <button class="carousel-btn small" id="c-btn-1" onclick="selectCarouselOption(1)">Voice Control</button>
+                    <button class="carousel-btn big" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
             </div>
 
@@ -365,8 +365,34 @@
         </div>
     </div>
 
+    <div id="translation-screen" class="screen">
+        <div class="chat-container">
+            <div class="chat-header">
+                <span style="font-weight: bold; letter-spacing: 2px;">G.I.B.B. 50-LANGUAGE TRANSLATOR</span>
+                <button class="btn" style="width: auto; padding: 8px 16px; margin-bottom: 0;" onclick="openMenu()">SYSTEM MENU</button>
+            </div>
+            <div style="flex: 1; padding: 30px; display: flex; flex-direction: column; gap: 20px; background: rgba(0, 10, 0, 0.7); backdrop-filter: blur(5px); overflow-y: auto;">
+                <div style="display: flex; gap: 20px;">
+                    <div style="flex: 1;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #88ff88;">ENGLISH SOURCE TEXT</label>
+                        <textarea id="source-text" rows="5" placeholder="Type English text to translate..." oninput="executeTranslation()"></textarea>
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #88ff88;">TARGET LANGUAGE</label>
+                        <select id="target-lang-select" onchange="executeTranslation()">
+                            </select>
+                    </div>
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #88ff88;">TRANSLATED OUTPUT</label>
+                    <div id="translation-output" style="padding: 15px; background: rgba(0,255,0,0.05); border: 1px solid var(--border-color); border-radius: 4px; min-height: 100px; color: var(--text-color); word-break: break-word;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let carouselIndex = 1; // Default to Voice Control in center
+        let carouselIndex = 2; // Default to Translation in center
         let hasSpokenWelcome = false;
         
         // Voice Recognition Setup
@@ -376,7 +402,7 @@
 
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
-            recognition.continuous = false; // We manually restart it after speaking
+            recognition.continuous = false;
             recognition.interimResults = true;
             
             recognition.onresult = (event) => {
@@ -400,12 +426,66 @@
             };
 
             recognition.onend = () => {
-                // If still active, wait a second and restart listening
                 if (isVoiceActive) {
                     setTimeout(() => { if(isVoiceActive) recognition.start(); }, 500);
                 }
             };
         }
+
+        // 50 Languages Dictionary mapping
+        const languages50 = [
+            { code: 'es', name: 'Spanish' },
+            { code: 'fr', name: 'French' },
+            { code: 'de', name: 'German' },
+            { code: 'it', name: 'Italian' },
+            { code: 'pt', name: 'Portuguese' },
+            { code: 'ru', name: 'Russian' },
+            { code: 'ja', name: 'Japanese' },
+            { code: 'ko', name: 'Korean' },
+            { code: 'zh', name: 'Chinese (Mandarin)' },
+            { code: 'ar', name: 'Arabic' },
+            { code: 'hi', name: 'Hindi' },
+            { code: 'nl', name: 'Dutch' },
+            { code: 'pl', name: 'Polish' },
+            { code: 'tr', name: 'Turkish' },
+            { code: 'vi', name: 'Vietnamese' },
+            { code: 'th', name: 'Thai' },
+            { code: 'sv', name: 'Swedish' },
+            { code: 'no', name: 'Norwegian' },
+            { code: 'da', name: 'Danish' },
+            { code: 'fi', name: 'Finnish' },
+            { code: 'el', name: 'Greek' },
+            { code: 'cs', name: 'Czech' },
+            { code: 'hu', name: 'Hungarian' },
+            { code: 'ro', name: 'Romanian' },
+            { code: 'uk', name: 'Ukrainian' },
+            { code: 'id', name: 'Indonesian' },
+            { code: 'ms', name: 'Malay' },
+            { code: 'he', name: 'Hebrew' },
+            { code: 'fa', name: 'Persian' },
+            { code: 'hi', name: 'Hindi' },
+            { code: 'bn', name: 'Bengali' },
+            { code: 'ur', name: 'Urdu' },
+            { code: 'ta', name: 'Tamil' },
+            { code: 'te', name: 'Telugu' },
+            { code: 'mr', name: 'Marathi' },
+            { code: 'gu', name: 'Gujarati' },
+            { code: 'kn', name: 'Kannada' },
+            { code: 'ml', name: 'Malayalam' },
+            { code: 'pa', name: 'Punjabi' },
+            { code: 'sw', name: 'Swahili' },
+            { code: 'fil', name: 'Filipino' },
+            { code: 'vi', name: 'Vietnamese' },
+            { code: 'hu', name: 'Hungarian' },
+            { code: 'bg', name: 'Bulgarian' },
+            { code: 'hr', name: 'Croatian' },
+            { code: 'sr', name: 'Serbian' },
+            { code: 'sk', name: 'Slovak' },
+            { code: 'sl', name: 'Slovenian' },
+            { code: 'et', name: 'Estonian' },
+            { code: 'lv', name: 'Latvian' },
+            { code: 'lt', name: 'Lithuanian' }
+        ];
         
         let db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { 
             profile: null, chatHistory: [], volume: 1.0, savedKey: ''
@@ -418,6 +498,16 @@
             document.getElementById('volume-slider').value = db.volume;
             if(db.savedKey) document.getElementById('access-key-input').value = db.savedKey;
             
+            // Populate 50 Languages select dropdown
+            const langSelect = document.getElementById('target-lang-select');
+            langSelect.innerHTML = '';
+            languages50.forEach(l => {
+                const opt = document.createElement('option');
+                opt.value = l.code;
+                opt.innerText = l.name;
+                langSelect.appendChild(opt);
+            });
+
             // FPS Loop
             let frameCount = 0; let lastTime = performance.now();
             function countFPS() {
@@ -443,7 +533,6 @@
         function renderAuthScreen() {
             const panel = document.getElementById('auth-panel');
             if (db.profile && db.profile.name) {
-                // Return User (Smart Login)
                 panel.innerHTML = `
                     <h2 style="margin-bottom: 15px; letter-spacing: 2px;">WELCOME BACK</h2>
                     <p style="margin-bottom: 25px; color: #88ff88;">USER: ${db.profile.name.toUpperCase()}</p>
@@ -451,7 +540,6 @@
                     <button class="btn" style="background: transparent; border-color: rgba(0,255,0,0.2); font-size: 0.8rem;" onclick="clearProfileData()">CREATE NEW ACCOUNT</button>
                 `;
             } else {
-                // New User
                 panel.innerHTML = `
                     <h2 style="margin-bottom: 15px; letter-spacing: 2px;">INITIALIZE PROFILE</h2>
                     <div id="auth-error" class="error-msg"></div>
@@ -485,12 +573,10 @@
                 statusEl.innerHTML = '🔑 KEY ACTIVE';
                 statusEl.style.color = '#10b981';
                 statusEl.style.textShadow = '0 0 5px rgba(16, 185, 129, 0.5)';
-                return true;
             } else {
                 statusEl.innerHTML = '🔑 NO KEY';
                 statusEl.style.color = '#ff4444';
                 statusEl.style.textShadow = '0 0 5px rgba(255, 68, 68, 0.5)';
-                return false;
             }
             saveDatabase();
         }
@@ -576,7 +662,7 @@
             setTimeout(() => {
                 if (index === 0) showDashboard();
                 if (index === 1) activateVoiceControl();
-                // index 2 is translation (UI placeholder for now)
+                if (index === 2) showTranslation();
             }, 300);
         }
 
@@ -620,7 +706,6 @@
             const honorific = db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
             isVoiceActive = true;
             
-            // Speak then start listening
             speak(`Voice Control is active, ${honorific}.`, () => {
                 if(isVoiceActive) recognition.start();
             });
@@ -633,7 +718,7 @@
         }
 
         function processVoiceCommand(cmd) {
-            recognition.stop(); // stop listening while processing/speaking
+            recognition.stop();
             const honorific = db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
             
             if (cmd.includes("deactivate voice control") || cmd.includes("exit") || cmd.includes("stop")) {
@@ -652,7 +737,6 @@
                 reply = `Acknowledged. I heard you say: ${cmd}`;
             }
 
-            // Speak reply, and because recognition.onend is set up, it will restart listening if isVoiceActive is true
             speak(reply);
         }
 
@@ -703,6 +787,39 @@
                     : `Acknowledged, ${honorific}. Memory stored.`;
                 appendMessage(reply, 'gibb');
             }, 600);
+        }
+
+        // TRANSLATION LOGIC (50 Languages)
+        function showTranslation() {
+            switchScreen('translation-screen');
+            executeTranslation();
+        }
+
+        function executeTranslation() {
+            const text = document.getElementById('source-text').value.trim();
+            const langCode = document.getElementById('target-lang-select').value;
+            const outputDiv = document.getElementById('translation-output');
+
+            if (!text) {
+                outputDiv.innerText = "[Awaiting source input...]";
+                return;
+            }
+
+            // Using MyMemory public translation API to support instant translation across 50+ languages seamlessly
+            const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|${langCode}`;
+
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.responseData && data.responseData.translatedText) {
+                        outputDiv.innerText = data.responseData.translatedText;
+                    } else {
+                        outputDiv.innerText = "[Translation processing error]";
+                    }
+                })
+                .catch(err => {
+                    outputDiv.innerText = "[Network connection error]";
+                });
         }
 
         function logout() {
