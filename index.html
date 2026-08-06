@@ -3,23 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G.I.B.B. System</title>
+    <title>G.I.B.B. System - Secure Core</title>
     <style>
         :root {
-            --bg-color: #0b0f19;
-            --panel-bg: rgba(17, 24, 39, 0.85);
-            --border-color: rgba(59, 130, 246, 0.3);
-            --text-color: #f3f4f6;
-            --accent-color: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.5);
-            --danger-color: #ef4444;
+            /* Full Green/Black Overhaul */
+            --bg-color: #000000;
+            --panel-bg: rgba(0, 30, 0, 0.9);
+            --border-color: rgba(0, 255, 0, 0.4);
+            --text-color: #00ff00;
+            --accent-color: #00ff00;
+            --accent-glow: rgba(0, 255, 0, 0.6);
+            --danger-color: #ff4444;
+
+            /* Chat Specific Styling */
+            --chat-bg: #e6ffec; /* Light Green */
+            --chat-text: #000000; /* Black */
+            --chat-bubble-gibb: rgba(0, 0, 0, 0.05); /* Very faint chat bubble */
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Courier New', Courier, monospace; /* Terminal Font */
         }
 
         body {
@@ -30,8 +36,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
 
+        /* SCREEN MANAGEMENT */
         .screen {
             display: none;
             width: 100%;
@@ -49,65 +57,64 @@
             display: flex;
         }
 
-        /* Logo with Orbiting Rings */
+        /* 2. CUSTOM CODE-GENERATED LOGO */
         .logo-container {
             position: relative;
-            width: 220px;
-            height: 220px;
+            width: 250px;
+            height: 250px;
             display: flex;
             justify-content: center;
             align-items: center;
             margin-bottom: 30px;
         }
 
-        .main-logo {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            object-fit: cover;
+        .gibb-text-logo {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: var(--accent-color);
             z-index: 10;
-            box-shadow: 0 0 25px var(--accent-glow);
+            text-shadow: 0 0 20px var(--accent-glow);
+            letter-spacing: 4px;
         }
 
-        /* Outer Orbiting Ring (Clockwise) */
+        /* Orbiting Rings remain */
         .orbit-ring-outer {
             position: absolute;
-            width: 200px;
-            height: 200px;
+            width: 230px;
+            height: 230px;
             border-radius: 50%;
-            border: 1px dashed rgba(59, 130, 246, 0.4);
+            border: 2px solid rgba(0, 255, 0, 0.6);
             animation: spinClockwise 12s linear infinite;
         }
 
         .dot-outer {
             position: absolute;
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             background-color: var(--accent-color);
             border-radius: 50%;
-            box-shadow: 0 0 8px var(--accent-color);
-            top: -4px;
-            left: calc(50% - 4px);
+            box-shadow: 0 0 10px var(--accent-color);
+            top: -5px;
+            left: calc(50% - 5px);
         }
 
-        /* Inner Orbiting Ring (Anti-Clockwise) */
         .orbit-ring-inner {
             position: absolute;
-            width: 170px;
-            height: 170px;
+            width: 190px;
+            height: 190px;
             border-radius: 50%;
-            border: 1px dashed rgba(59, 130, 246, 0.2);
+            border: 1px dashed rgba(0, 255, 0, 0.3);
             animation: spinCounterClockwise 8s linear infinite;
         }
 
         .dot-inner {
             position: absolute;
-            width: 5px;
-            height: 5px;
-            background-color: rgba(59, 130, 246, 0.6);
+            width: 6px;
+            height: 6px;
+            background-color: rgba(0, 255, 0, 0.7);
             border-radius: 50%;
-            bottom: -2.5px;
-            left: calc(50% - 2.5px);
+            bottom: -3px;
+            left: calc(50% - 3px);
         }
 
         @keyframes spinClockwise {
@@ -120,77 +127,58 @@
             100% { transform: rotate(-360deg); }
         }
 
-        /* Form & Panels */
+        /* 3. AUTH SCREEN (Green Overhaul) */
         .panel {
             background: var(--panel-bg);
-            border: 1px solid var(--border-color);
+            border: 2px solid var(--border-color);
             padding: 30px;
-            border-radius: 16px;
-            backdrop-filter: blur(10px);
+            border-radius: 12px;
             width: 100%;
             max-width: 420px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.2);
             text-align: center;
         }
 
-        h2 {
-            margin-bottom: 20px;
-            font-size: 1.8rem;
-            letter-spacing: 1px;
-        }
-
-        input, select {
+        input {
             width: 100%;
             padding: 12px 16px;
             margin-bottom: 15px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(0, 255, 0, 0.1);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 4px;
             color: var(--text-color);
             font-size: 1rem;
             outline: none;
-            transition: all 0.3s;
         }
 
-        input:focus, select:focus {
+        input:focus {
             border-color: var(--accent-color);
             box-shadow: 0 0 10px var(--accent-glow);
-        }
-
-        select option {
-            background: var(--bg-color);
-            color: var(--text-color);
         }
 
         .btn {
             width: 100%;
             padding: 12px;
-            background: var(--accent-color);
-            color: white;
-            border: none;
-            border-radius: 8px;
+            background: rgba(0, 255, 0, 0.2);
+            color: var(--accent-color);
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
             font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px var(--accent-glow);
         }
 
         .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
+            background: rgba(0, 255, 0, 0.4);
+            box-shadow: 0 0 15px var(--accent-glow);
         }
 
         .link-text {
             margin-top: 15px;
             font-size: 0.9rem;
-            color: #9ca3af;
+            color: #88ff88;
             cursor: pointer;
-        }
-
-        .link-text span {
-            color: var(--accent-color);
-            text-decoration: underline;
         }
 
         .error-msg {
@@ -200,7 +188,54 @@
             display: none;
         }
 
-        /* Carousel Menu */
+        /* 4. MAIN MENU LAYOUT (Settings Left, Location Right) */
+        .main-menu-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr 320px;
+            width: 100vw;
+            height: 100vh;
+            padding: 30px;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .sidebar-panel {
+            background: var(--panel-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .widget-box {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .widget-title {
+            font-size: 0.85rem;
+            color: #88ff88;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        /* Carousel (Center Panel) */
+        .center-menu-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
         .carousel-container {
             display: flex;
             align-items: center;
@@ -212,10 +247,10 @@
 
         .carousel-btn {
             background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            color: var(--accent-color);
             padding: 15px 25px;
-            border-radius: 12px;
+            border-radius: 4px;
             cursor: pointer;
             transition: all 0.4s ease;
             font-weight: bold;
@@ -235,97 +270,84 @@
             box-shadow: 0 0 20px var(--accent-glow);
         }
 
-        /* Dashboard Interface */
-        .dashboard-layout {
-            display: grid;
-            grid-template-columns: 260px 1fr 260px;
+        /* 5. FULLSCREEN CHAT INTERFACE (Black Text, Light Green BG) */
+        .chat-container {
             width: 100vw;
             height: 100vh;
-            padding: 20px;
-            gap: 20px;
-        }
-
-        .sidebar {
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            background: var(--panel-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
+            background: var(--chat-bg);
+            color: var(--chat-text);
             overflow: hidden;
+            border: none;
+        }
+
+        .chat-header {
+            padding: 15px 30px;
+            background: #cdffda; /* Slightly darker header */
+            border-bottom: 1px solid #a3e0b2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #004d00;
         }
 
         .chat-messages {
             flex: 1;
-            padding: 20px;
+            padding: 30px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
         }
 
         .message {
             max-width: 75%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 0.95rem;
-            line-height: 1.4;
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-size: 1rem;
+            line-height: 1.5;
+            font-family: inherit;
         }
 
+        /* User Message (Dark Green/White) */
         .message.user {
-            background: var(--accent-color);
-            color: white;
+            background: #006400; 
+            color: #ffffff;
             align-self: flex-end;
             border-bottom-right-radius: 2px;
         }
 
+        /* G.I.B.B. Message (Black Text, Default BG) */
         .message.gibb {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid var(--border-color);
+            background: #f0fff4; /* Faint bubble */
+            color: var(--chat-text);
             align-self: flex-start;
             border-bottom-left-radius: 2px;
+            border: 1px solid #d4edda;
         }
 
         .chat-input-area {
             display: flex;
-            padding: 15px;
-            border-top: 1px solid var(--border-color);
-            background: rgba(0,0,0,0.2);
-            gap: 10px;
+            padding: 20px 30px;
+            border-top: 1px solid #a3e0b2;
+            background: #f0fff4;
+            gap: 15px;
         }
 
         .chat-input-area input {
             margin-bottom: 0;
+            background: #ffffff;
+            color: #000000;
+            border: 1px solid #a3e0b2;
         }
 
         .chat-input-area button {
-            width: 100px;
+            width: 120px;
             margin-bottom: 0;
-        }
-
-        .widget-box {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .widget-title {
-            font-size: 0.85rem;
-            color: #9ca3af;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            letter-spacing: 0.5px;
+            background: #006400;
+            color: white;
+            border: none;
         }
     </style>
 </head>
@@ -335,111 +357,96 @@
         <div class="logo-container">
             <div class="orbit-ring-outer"><div class="dot-outer"></div></div>
             <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
-            <img src="gibblogo.png" alt="G.I.B.B. Logo" class="main-logo" onerror="this.src='https://via.placeholder.com/140?text=GIBB'">
+            <div class="gibb-text-logo">G.I.B.B.</div>
         </div>
         
         <div class="panel">
-            <h2 id="auth-title">CREATE ACCOUNT</h2>
+            <h2 id="auth-title" style="margin-bottom: 20px; letter-spacing: 2px;">SECURE LOG IN</h2>
             <div id="auth-error" class="error-msg"></div>
-            
-            <input type="text" id="username-input" placeholder="Username">
-            <input type="password" id="password-input" placeholder="Password">
-            
-            <div id="gender-group">
-                <select id="gender-input">
-                    <option value="" disabled selected>Select Title / Pronoun Style</option>
-                    <option value="male">Male (Sir)</option>
-                    <option value="female">Female (Miss)</option>
-                </select>
-            </div>
-
-            <button class="btn" id="auth-action-btn" onclick="handleAuth()">Register Account</button>
-            <div class="link-text" id="auth-toggle-text" onclick="toggleAuthMode()">
-                Already have an account? <span>Log In</span>
-            </div>
+            <input type="password" id="password-input" placeholder="ACCESS KEY">
+            <button class="btn" id="auth-action-btn" onclick="handleAuth()">UNLOC CORE</button>
         </div>
     </div>
 
     <div id="menu-screen" class="screen">
-        <div class="logo-container">
-            <div class="orbit-ring-outer"><div class="dot-outer"></div></div>
-            <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
-            <img src="gibblogo.png" alt="G.I.B.B. Logo" class="main-logo" onerror="this.src='https://via.placeholder.com/140?text=GIBB'">
-        </div>
+        <div class="main-menu-layout">
+            
+            <div class="sidebar-panel">
+                <div>
+                    <h3 style="margin-bottom: 20px; text-shadow: 0 0 10px var(--accent-glow);">CORE SETTINGS</h3>
+                    <div class="widget-box">
+                        <div class="widget-title">Access Key Status</div>
+                        <p style="font-size: 0.9rem; color: #10b981;">✓ Key Verified & Permanent</p>
+                    </div>
+                    <div class="widget-box">
+                        <div class="widget-title">System Remembrance</div>
+                        <p style="font-size: 0.85rem;">Neural history is being permanently logged to local core storage.</p>
+                    </div>
+                </div>
+                <div>
+                    <button class="btn" style="border-color: var(--danger-color); color: #ff8888;" onclick="logout()">LOG OUT</button>
+                </div>
+            </div>
 
-        <div style="font-size: 1.4rem; font-weight: bold; margin-bottom: 10px;" id="welcome-user-banner">SYSTEM READY</div>
-        <p style="color: #9ca3af; margin-bottom: 20px;">Use the carousel selector below to navigate</p>
+            <div class="center-menu-panel">
+                <div class="logo-container">
+                    <div class="orbit-ring-outer"><div class="dot-outer"></div></div>
+                    <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
+                    <div class="gibb-text-logo">G.I.B.B.</div>
+                </div>
 
-        <div class="carousel-container" id="carousel">
-            <button class="carousel-btn big" id="c-btn-0" onclick="selectCarouselOption(0)">Launch Chat Interface</button>
-            <button class="carousel-btn small" id="c-btn-1" onclick="selectCarouselOption(1)">System Settings</button>
+                <div class="carousel-container" id="carousel">
+                    <button class="carousel-btn big" id="c-btn-0" onclick="selectCarouselOption(0)">Launch Chat</button>
+                    <button class="carousel-btn small" id="c-btn-1" onclick="selectCarouselOption(1)">Data Core</button>
+                </div>
+            </div>
+
+            <div class="sidebar-panel">
+                <div>
+                    <h3 style="margin-bottom: 20px; text-shadow: 0 0 10px var(--accent-glow);">HUD MODULE</h3>
+                    <div class="widget-box">
+                        <div class="widget-title">Location</div>
+                        <p style="font-size: 1rem; font-weight: bold;">Sector: Secure Node 01</p>
+                    </div>
+                    <div class="widget-box">
+                        <div class="widget-title">Display Metrics</div>
+                        <p style="font-size: 0.9rem;">FPS: <span id="fps-counter">60</span></p>
+                        <p style="font-size: 0.9rem; margin-top: 5px;">RES: <span id="res-display">1920x1080</span></p>
+                    </div>
+                </div>
+                <div class="widget-box" style="margin-bottom: 0;">
+                    <div class="widget-title">System Status</div>
+                    <p style="font-size: 0.85rem; color: #10b981;">OPTIMAL</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <div id="dashboard-screen" class="screen">
-        <div class="dashboard-layout">
-            <div class="sidebar">
-                <div>
-                    <h3 style="margin-bottom: 15px; color: var(--accent-color);">PETS MODULE</h3>
-                    <div class="widget-box">
-                        <div class="widget-title">Active Companion</div>
-                        <p style="font-size: 0.9rem;">Virtual Core Pet: <span style="color: var(--accent-color); font-weight: bold;">G.I.B.B. Watcher</span></p>
-                    </div>
-                </div>
-                <div>
-                    <button class="btn" style="background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger-color); color: #fca5a5;" onclick="logout()">Log Out</button>
-                </div>
+        <div class="chat-container">
+            <div class="chat-header">
+                <span style="font-weight: bold; letter-spacing: 2px;">G.I.B.B. NEURAL CONNECT</span>
+                <button style="background: #006400; border: none; color: white; cursor: pointer; padding: 6px 12px; border-radius: 4px;" onclick="openMenu()">SYSTEM MENU</button>
             </div>
-
-            <div class="chat-container">
-                <div style="padding: 15px 20px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: bold; letter-spacing: 1px;">G.I.B.B. NEURAL CORE</span>
-                    <button style="background: none; border: none; color: var(--accent-color); cursor: pointer; font-size: 0.9rem;" onclick="openMenu()">Menu</button>
+            <div class="chat-messages" id="chat-messages">
                 </div>
-                <div class="chat-messages" id="chat-messages"></div>
-                <div class="chat-input-area">
-                    <input type="text" id="chat-input" placeholder="Type a message to G.I.B.B...." onkeypress="checkEnter(event)">
-                    <button class="btn" onclick="sendMessage()">Send</button>
-                </div>
-            </div>
-
-            <div class="sidebar">
-                <div>
-                    <h3 style="margin-bottom: 15px; color: var(--accent-color);">LOCATION & HUD</h3>
-                    <div class="widget-box">
-                        <div class="widget-title">Location Status</div>
-                        <p id="location-display" style="font-size: 0.9rem; font-weight: bold;">Global Sector - Secure Node</p>
-                    </div>
-                    <div class="widget-box">
-                        <div class="widget-title">Display Performance</div>
-                        <p style="font-size: 0.9rem;">FPS: <span id="fps-counter" style="color: var(--accent-color); font-weight: bold;">60</span></p>
-                        <p style="font-size: 0.9rem; margin-top: 5px;">Resolution: <span style="color: var(--accent-color); font-weight: bold;" id="res-display">1920x1080</span></p>
-                    </div>
-                </div>
-                <div>
-                    <div class="widget-box" style="margin-bottom: 0;">
-                        <div class="widget-title">Access Key</div>
-                        <p style="font-size: 0.85rem; color: #10b981;">✓ Key Verified & Permanent</p>
-                    </div>
-                </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Type a message to G.I.B.B...." onkeypress="checkEnter(event)">
+                <button class="btn" onclick="sendMessage()">SEND</button>
             </div>
         </div>
     </div>
 
     <script>
-        // State management with persistent permanent storage
-        let isLoginMode = false;
+        // State and Permanent Storage (Remembrance)
         let carouselIndex = 0;
-        
-        // Load persistent user database and session safely
-        let db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { users: {} };
-        let activeUserSession = localStorage.getItem('gibb_active_session') || null;
+        let db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { chatHistory: [] };
 
         window.addEventListener('DOMContentLoaded', () => {
             updateResolution();
             window.addEventListener('resize', updateResolution);
             
-            // Start FPS monitor
+            // FPS counter
             let frameCount = 0;
             let lastTime = performance.now();
             function countFPS() {
@@ -455,7 +462,7 @@
             requestAnimationFrame(countFPS);
 
             // Check if user session already exists permanently
-            if (activeUserSession && db.users[activeUserSession]) {
+            if (localStorage.getItem('gibb_unlocked') === 'true') {
                 showMenuScreen();
             } else {
                 showAuthScreen();
@@ -463,66 +470,24 @@
         });
 
         function updateResolution() {
-            document.getElementById('res-display').innerText = `${window.innerWidth}x${window.innerHeight}`;
+            const display = document.getElementById('res-display');
+            if(display) display.innerText = `${window.innerWidth}x${window.innerHeight}`;
         }
 
-        function toggleAuthMode() {
-            isLoginMode = !isLoginMode;
-            document.getElementById('auth-title').innerText = isLoginMode ? "LOG IN" : "CREATE ACCOUNT";
-            document.getElementById('auth-action-btn').innerText = isLoginMode ? "Log In" : "Register Account";
-            document.getElementById('gender-group').style.display = isLoginMode ? "none" : "block";
-            document.getElementById('auth-toggle-text').innerHTML = isLoginMode ? 
-                "Don't have an account? <span>Register</span>" : 
-                "Already have an account? <span>Log In</span>";
-            document.getElementById('auth-error').style.display = 'none';
-        }
-
+        // 1. Password Screen replaced with Access Key UNLOCK
         function handleAuth() {
-            const user = document.getElementById('username-input').value.trim();
             const pass = document.getElementById('password-input').value.trim();
-            const gender = document.getElementById('gender-input').value;
             const errorBox = document.getElementById('auth-error');
 
-            if (!user || !pass) {
-                errorBox.innerText = "Please fill in all required fields.";
+            // Set simple key 'gibb' for unlock testing
+            if (pass !== 'gibb') {
+                errorBox.innerText = "ACCESS DENIED: Invalid Key.";
                 errorBox.style.display = 'block';
                 return;
             }
 
-            if (!isLoginMode) {
-                if (!gender) {
-                    errorBox.innerText = "Please select your title preference.";
-                    errorBox.style.display = 'block';
-                    return;
-                }
-                // Register account (Permanent storage - never deletes automatically)
-                if (db.users[user]) {
-                    errorBox.innerText = "Username already exists. Log in instead.";
-                    errorBox.style.display = 'block';
-                    return;
-                }
-                db.users[user] = {
-                    password: pass,
-                    gender: gender,
-                    chatHistory: []
-                };
-                saveDatabase();
-            } else {
-                // Log in
-                if (!db.users[user] || db.users[user].password !== pass) {
-                    errorBox.innerText = "Invalid username or password.";
-                    errorBox.style.display = 'block';
-                    return;
-                }
-            }
-
-            activeUserSession = user;
-            localStorage.setItem('gibb_active_session', user);
+            localStorage.setItem('gibb_unlocked', 'true');
             showMenuScreen();
-        }
-
-        function saveDatabase() {
-            localStorage.setItem('gibb_permanent_db', JSON.stringify(db));
         }
 
         function showAuthScreen() {
@@ -535,17 +500,13 @@
             document.getElementById('auth-screen').classList.remove('active');
             document.getElementById('menu-screen').classList.add('active');
             document.getElementById('dashboard-screen').classList.remove('active');
-            
-            const userData = db.users[activeUserSession];
-            const title = userData.gender === 'male' ? 'Sir' : 'Miss';
-            document.getElementById('welcome-user-banner').innerText = `WELCOME BACK, ${title.toUpperCase()} ${activeUserSession.toUpperCase()}`;
         }
 
         function openMenu() {
             showMenuScreen();
         }
 
-        // Carousel Logic
+        // Carousel Logic (Center Panel navigation)
         function selectCarouselOption(index) {
             carouselIndex = index;
             updateCarouselUI();
@@ -566,18 +527,14 @@
             }
         }
 
-        // Allow carousel navigation via scrolling
         window.addEventListener('wheel', (e) => {
             if (document.getElementById('menu-screen').classList.contains('active')) {
-                if (e.deltaY > 0) {
-                    carouselIndex = 1;
-                } else {
-                    carouselIndex = 0;
-                }
+                if (e.deltaY > 0) carouselIndex = 1; else carouselIndex = 0;
                 updateCarouselUI();
             }
         });
 
+        // Dashboard Screen (Chat)
         function showDashboard() {
             document.getElementById('auth-screen').classList.remove('active');
             document.getElementById('menu-screen').classList.remove('active');
@@ -585,15 +542,14 @@
             loadChatHistory();
         }
 
+        // LOAD history from db for remembrance
         function loadChatHistory() {
             const container = document.getElementById('chat-messages');
-            container.innerHTML = '';
-            const history = db.users[activeUserSession].chatHistory || [];
+            container.innerHTML = ''; // Clear temporary welcome
+            const history = db.chatHistory || [];
             
             if (history.length === 0) {
-                const userData = db.users[activeUserSession];
-                const honorific = userData.gender === 'male' ? 'Sir' : 'Miss';
-                appendMessage(`Greetings, ${honorific}. G.I.B.B. core initialized and ready.`, 'gibb', false);
+                appendMessage(`System Core initialized, Sire. Secure channel established.`, 'gibb', false);
             } else {
                 history.forEach(msg => {
                     appendMessage(msg.text, msg.sender, false);
@@ -609,16 +565,14 @@
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
 
-            if (save && activeUserSession) {
-                db.users[activeUserSession].chatHistory.push({ text, sender });
-                saveDatabase();
+            if (save) {
+                db.chatHistory.push({ text, sender });
+                localStorage.setItem('gibb_permanent_db', JSON.stringify(db));
             }
         }
 
         function checkEnter(e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
+            if (e.key === 'Enter') sendMessage();
         }
 
         function sendMessage() {
@@ -629,26 +583,14 @@
             appendMessage(text, 'user');
             input.value = '';
 
-            // G.I.B.B. Response Simulation & Rule Enforcement
             setTimeout(() => {
-                const lowerText = text.toLowerCase();
-                const userData = db.users[activeUserSession];
-                const honorific = userData.gender === 'male' ? 'Sir' : 'Miss';
-
-                let reply = "";
-                if (lowerText.includes('who made you') || lowerText.includes('creator') || lowerText.includes('created you')) {
-                    reply = `gibbkayyy made me, ${honorific}.`;
-                } else {
-                    reply = `Acknowledged, ${honorific}. All chat sessions and account parameters remain securely remembered in permanent storage.`;
-                }
-
+                let reply = `Acknowledged, Sire. Permanent history remembrance is active. Your channel is secure.`;
                 appendMessage(reply, 'gibb');
-            }, 500);
+            }, 600);
         }
 
         function logout() {
-            activeUserSession = null;
-            localStorage.removeItem('gibb_active_session');
+            localStorage.removeItem('gibb_unlocked');
             showAuthScreen();
         }
     </script>
