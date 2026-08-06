@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G.I.B.B. Multi-Modal Matrix</title>
+    <style>
+        body {
+            background-color: #031409;
+            color: #00ff66;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            box-sizing: border-box;
+            background-image: linear-gradient(rgba(0, 255, 100, 0.08) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 255, 100, 0.08) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        .container {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            border: 1px solid #00ff66;
+            background-color: #020d06;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 255, 100, 0.4);
+            overflow: hidden;
+        }
+        header {
+            background-color: #041f0e;
+            padding: 15px;
+            border-bottom: 1px solid #00ff66;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-shadow: 0 0 10px rgba(0, 255, 100, 0.6);
+        }
+        #chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            padding: 10px;
+            border-radius: 6px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .user-msg {
+            background-color: #041f0e;
+            border: 1px solid rgba(0, 255, 100, 0.5);
+            align-self: flex-end;
+            color: #ffffff;
+        }
+        .bot-msg {
+            background-color: #031409;
+            border: 1px solid #00ff66;
+            align-self: flex-start;
+            color: #00ff66;
+        }
+        .input-area {
+            display: flex;
+            padding: 10px;
+            background-color: #041f0e;
+            border-top: 1px solid #00ff66;
+            gap: 8px;
+        }
+        input, button {
+            background-color: #031409;
+            color: #00ff66;
+            border: 1px solid #00ff66;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: inherit;
+        }
+        input {
+            flex: 1;
+        }
+        button {
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #00ff66;
+            color: #031409;
+            box-shadow: 0 0 15px rgba(0, 255, 100, 0.8);
+        }
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <h2>🔒 G.I.B.B. Security Clearance</h2>
+        <input type="password" id="password-input" placeholder="Enter password (prki3210)...">
+        <button onclick="checkPassword()">Unlock System</button>
+        <p id="error-msg" style="color: #ff3333; display: none;">Incorrect Password.</p>
+    </div>
+
+    <div class="container" id="app-container" style="display: none;">
+        <header>🤖 G.I.B.B. Multi-Modal Matrix (Text & Speech)</header>
+        <div id="chat-box">
+            <div class="message bot-msg">Systems online. Text-to-Text and Speech-to-Speech active.</div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="user-input" placeholder="Type text or click mic to speak..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Send</button>
+            <button onclick="startListening()" title="Speech to Text (Microphone)">🎙️</button>
+            <button onclick="speakLast()" title="Text to Speech (Read Aloud)">🔊</button>
+        </div>
+    </div>
+
+    <script>
+        const PASSWORD = "prki3210";
+        let lastResponseText = "Systems online.";
+
+        function checkPassword() {
+            let val = document.getElementById("password-input").value;
+            if (val === PASSWORD) {
+                document.getElementById("login-screen").style.display = "none";
+                document.getElementById("app-container").style.display = "flex";
+            } else {
+                document.getElementById("error-msg").style.display = "block";
+            }
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        function sendMessage() {
+            let inputField = document.getElementById("user-input");
+            let text = inputField.value.trim();
+            if (!text) return;
+
+            appendMessage(text, 'user-msg');
+            inputField.value = "";
+            processCommand(text);
+        }
+
+        function appendMessage(text, className) {
+            let chatBox = document.getElementById("chat-box");
+            let msgDiv = document.createElement("div");
+            msgDiv.className = `message ${className}`;
+            msgDiv.innerText = text;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // --- Speech-to-Text (Microphone Input) ---
+        function startListening() {
+            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Speech recognition is not supported in this browser. Try Chrome or Edge.");
+                return;
+            }
+            let recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            
+            recognition.onstart = function() {
+                document.getElementById("user-input").placeholder = "Listening...";
+            };
+
+            recognition.onresult = function(event) {
+                let speechToText = event.results[0][0].transcript;
+                document.getElementById("user-input").value = speechToText;
+                document.getElementById("user-input").placeholder = "Type text or click mic to speak...";
+                sendMessage(); // Automatically send the spoken text
+            };
+
+            recognition.onerror = function() {
+                document.getElementById("user-input").placeholder = "Microphone error. Try typing.";
+            };
+
+            recognition.start();
+        }
+
+        // --- Text-to-Speech (Audio Output) ---
+        function speakLast() {
+            let speech = new SpeechSynthesisUtterance(lastResponseText);
+            speech.rate = 1.0;
+            window.speechSynthesis.speak(speech);
+        }
+
+        // --- Processing Logic (Text-to-Text & Memory) ---
+        function processCommand(input) {
+            let lower = input.toLowerCase();
+            let response = "";
+
+            if (lower.includes("remember that") && lower.includes("is")) {
+                try {
+                    let parts = input.split(/remember that/i)[1].split(/is/i);
+                    let k = parts[0].trim();
+                    let v = parts[1].trim();
+                    localStorage.setItem(k, v);
+                    response = `🧠 Permanent Memory Saved: ${k} is ${v}`;
+                } catch(e) {
+                    response = "⚠️ Format error. Use: Remember that [key] is [value]";
+                }
+            } 
+            else if (lower.startsWith("calculate")) {
+                try {
+                    let expr = input.replace(/calculate/i, "").trim();
+                    let res = eval(expr);
+                    response = `🔢 Result: ${res}`;
+                } catch(e) {
+                    response = "⚠️ Calculation error.";
+                }
+            } 
+            else {
+                let foundKey = Object.keys(localStorage).find(k => lower.includes(k));
+                if (foundKey) {
+                    response = `🔍 Memory Match: ${foundKey} is ${localStorage.getItem(foundKey)}`;
+                } else {
+                    response = `🤖 Text-to-text response matrix processed: "${input}". All systems nominal.`;
+                }
+            }
+
+            setTimeout(() => {
+                appendMessage(response, 'bot-msg');
+                lastResponseText = response;
+                // Optional: Automatically speak the response back out loud for true Speech-to-Speech feel
+                speakLast();
+            }, 300);
+        }
+    </script>
+</body>
+</html>
