@@ -3,959 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G.I.B.B. System - Secure Core</title>
+    <title>GibbAI</title>
     <style>
         :root {
-            --bg-color: #030803;
-            --panel-bg: rgba(0, 20, 0, 0.85);
-            --border-color: rgba(0, 255, 0, 0.45);
-            --text-color: #00ff00;
-            --accent-color: #00ff00;
-            --accent-glow: rgba(0, 255, 0, 0.6);
-            --danger-color: #ff4444;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-color: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --border-color: #334155;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Courier New', Courier, monospace;
+        [data-theme="light"] {
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-color: #0f172a;
+            --accent-color: #0284c7;
+            --accent-hover: #0369a1;
+            --border-color: #cbd5e1;
+        }
+
+        [data-theme="neon"] {
+            --bg-color: #050505;
+            --card-bg: #121212;
+            --text-color: #00ffcc;
+            --accent-color: #ff007f;
+            --accent-hover: #cc0066;
+            --border-color: #ff007f;
         }
 
         body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            display: flex;
+            flex-direction: column;
             height: 100vh;
-            overflow: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .nav-buttons button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            margin-left: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .nav-buttons button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
+            overflow-y: auto;
         }
 
-        /* Animated Tech Grid Background */
-        body::before {
-            content: "";
-            position: absolute;
-            width: 200%;
-            height: 200%;
-            background-image: 
-                linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            animation: gridMove 25s linear infinite;
-            z-index: 0;
-        }
-
-        @keyframes gridMove {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-40px, -40px); }
-        }
-
-        .screen {
+        .page {
             display: none;
             width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            z-index: 1;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-
-        .screen.active {
-            display: flex;
-            opacity: 1;
-        }
-
-        /* Logo Design */
-        .logo-container {
-            position: relative;
-            width: 260px;
-            height: 260px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 25px;
-            transition: all 1s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-
-        .gibb-text-logo {
-            font-size: 3rem;
-            font-weight: bold;
-            color: var(--accent-color);
-            z-index: 10;
-            text-shadow: 0 0 20px var(--accent-glow);
-            letter-spacing: 4px;
-            transform: translateX(6px); 
+            max-width: 600px;
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
             text-align: center;
-            position: absolute;
         }
 
-        .inner-design-grid {
-            position: absolute;
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            border: 1px dotted rgba(0, 255, 0, 0.3);
-            background: radial-gradient(circle, rgba(0,255,0,0.08) 0%, transparent 70%);
-            animation: pulseCore 4s ease-in-out infinite;
+        .page.active {
+            display: block;
         }
 
-        @keyframes pulseCore {
-            0%, 100% { transform: scale(0.95); opacity: 0.6; }
-            50% { transform: scale(1.05); opacity: 1; }
+        select, input {
+            padding: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin-top: 0.5rem;
+            width: 100%;
+            max-width: 300px;
         }
 
-        .orbit-ring-outer {
-            position: absolute; width: 240px; height: 240px; border-radius: 50%;
-            border: 2px solid rgba(0, 255, 0, 0.6); animation: spinClockwise 12s linear infinite;
+        #voice-status {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            font-style: italic;
         }
-        .dot-outer {
-            position: absolute; width: 10px; height: 10px; background-color: var(--accent-color);
-            border-radius: 50%; box-shadow: 0 0 10px var(--accent-color); top: -5px; left: calc(50% - 5px);
-        }
-
-        .orbit-ring-inner {
-            position: absolute; width: 190px; height: 190px; border-radius: 50%;
-            border: 1px dashed rgba(0, 255, 0, 0.4); animation: spinCounterClockwise 8s linear infinite;
-        }
-        .dot-inner {
-            position: absolute; width: 6px; height: 6px; background-color: rgba(0, 255, 0, 0.8);
-            border-radius: 50%; bottom: -3px; left: calc(50% - 3px);
-        }
-
-        @keyframes spinClockwise { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes spinCounterClockwise { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
-
-        /* Panels & Forms */
-        .panel {
-            background: var(--panel-bg); border: 2px solid var(--border-color);
-            padding: 30px; border-radius: 12px; width: 100%; max-width: 420px;
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.15); text-align: center; backdrop-filter: blur(10px);
-        }
-
-        input, select, textarea {
-            width: 100%; padding: 12px 16px; margin-bottom: 15px;
-            background: rgba(0, 255, 0, 0.08); border: 1px solid var(--border-color);
-            border-radius: 4px; color: var(--text-color); font-size: 1rem; outline: none;
-        }
-        input:focus, select:focus, textarea:focus { border-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-glow); }
-        select option { background: var(--bg-color); color: var(--text-color); }
-
-        input[type="range"] {
-            -webkit-appearance: none; width: 100%; background: rgba(0, 255, 0, 0.1);
-            height: 6px; border-radius: 3px; outline: none; border: 1px solid var(--border-color); margin: 10px 0;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none; appearance: none; width: 16px; height: 16px;
-            border-radius: 50%; background: var(--accent-color); cursor: pointer; box-shadow: 0 0 10px var(--accent-glow);
-        }
-
-        .btn {
-            width: 100%; padding: 12px; background: rgba(0, 255, 0, 0.2);
-            color: var(--accent-color); border: 2px solid var(--border-color);
-            border-radius: 4px; font-size: 1rem; font-weight: bold;
-            cursor: pointer; transition: all 0.3s; margin-bottom: 10px;
-        }
-        .btn:hover { background: rgba(0, 255, 0, 0.4); box-shadow: 0 0 15px var(--accent-glow); }
-
-        .error-msg { color: var(--danger-color); font-size: 0.85rem; margin-bottom: 15px; display: none; }
-
-        /* Main Menu Layout */
-        .main-menu-layout {
-            display: grid; grid-template-columns: 320px 1fr 320px;
-            width: 100vw; height: 100vh; padding: 30px; gap: 30px; align-items: center;
-        }
-
-        /* HOLOGRAPHIC SIDEBARS */
-        .sidebar-panel {
-            background: linear-gradient(135deg, rgba(0,255,0,0.05) 0%, rgba(0,15,0,0.85) 100%);
-            border: 1px solid rgba(0, 255, 0, 0.5);
-            border-radius: 12px; padding: 25px; height: 100%; display: flex;
-            flex-direction: column; justify-content: space-between; 
-            backdrop-filter: blur(15px);
-            box-shadow: 0 0 25px rgba(0, 255, 0, 0.15), inset 0 0 20px rgba(0, 255, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .sidebar-panel::after {
-            content: ""; position: absolute; top: -100%; left: 0; width: 100%; height: 50%;
-            background: linear-gradient(to bottom, transparent, rgba(0,255,0,0.15), transparent);
-            animation: scanline 6s linear infinite; pointer-events: none; opacity: 0.5;
-        }
-
-        @keyframes scanline {
-            0% { transform: translateY(-100%); }
-            100% { transform: translateY(400%); }
-        }
-
-        .widget-box {
-            background: rgba(0, 255, 0, 0.05); border: 1px solid rgba(0, 255, 0, 0.3);
-            border-radius: 8px; padding: 15px; margin-bottom: 15px;
-            box-shadow: inset 0 0 10px rgba(0,255,0,0.05);
-        }
-        .widget-title {
-            font-size: 0.85rem; color: #88ff88; text-transform: uppercase;
-            margin-bottom: 8px; letter-spacing: 1px; font-weight: bold;
-        }
-
-        .center-menu-panel {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; height: 100%;
-        }
-
-        .carousel-container {
-            display: flex; align-items: center; justify-content: center;
-            gap: 15px; height: 120px; margin-top: 10px; width: 100%;
-        }
-
-        .carousel-btn {
-            background: rgba(0, 20, 0, 0.8); border: 2px solid var(--border-color);
-            color: var(--accent-color); padding: 15px 20px; border-radius: 4px;
-            cursor: pointer; transition: all 0.4s ease; font-weight: bold;
-        }
-        .carousel-btn.small { transform: scale(0.8); opacity: 0.4; font-size: 0.8rem; }
-        .carousel-btn.big { transform: scale(1.1); opacity: 1; font-size: 1.1rem; border-color: var(--accent-color); box-shadow: 0 0 20px var(--accent-glow); }
-
-        /* Chat Interface */
-        .chat-container {
-            width: 100%; height: 100%; display: flex; flex-direction: column; background: transparent; overflow: hidden;
-        }
-        .chat-header {
-            padding: 20px 30px; background: var(--panel-bg); border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px);
-        }
-        .chat-messages {
-            flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
-            background: rgba(0, 10, 0, 0.7); backdrop-filter: blur(5px);
-        }
-        .message { max-width: 75%; padding: 14px 18px; border-radius: 8px; font-size: 1rem; line-height: 1.5; word-break: break-word; }
-        .message.user { background: var(--accent-color); color: #000000; align-self: flex-end; border-bottom-right-radius: 2px; font-weight: bold; }
-        .message.gibb { background: rgba(0, 255, 0, 0.05); color: var(--text-color); align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid var(--border-color); box-shadow: 0 0 10px rgba(0,255,0,0.1); }
-        .chat-input-area {
-            display: flex; padding: 20px 30px; border-top: 1px solid var(--border-color); background: var(--panel-bg); gap: 15px; backdrop-filter: blur(10px);
-        }
-        
-        .voice-status-text {
-            margin-top: 20px; font-size: 1rem; letter-spacing: 1px; color: var(--accent-color);
-            text-shadow: 0 0 10px var(--accent-glow); animation: pulseText 2s infinite;
-        }
-        @keyframes pulseText { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-
     </style>
 </head>
-<body>
+<body data-theme="dark">
 
-    <div id="mic-permission-screen" class="screen active" style="z-index: 999; background: var(--bg-color);">
-        <div class="logo-container">
-            <div class="inner-design-grid"></div>
-            <div class="orbit-ring-outer"><div class="dot-outer"></div></div>
-            <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
-            <div class="gibb-text-logo">G.I.B.B.</div>
+    <header>
+        <h1>GibbAI</h1>
+        <div class="nav-buttons">
+            <button onclick="showPage('menu')">Menu</button>
+            <button onclick="showPage('chat')">Chat</button>
+            <button onclick="showPage('translation')">Translation</button>
+            <button onclick="showPage('settings')">Settings</button>
         </div>
-        <div class="panel" style="max-width: 450px;">
-            <h2 style="margin-bottom: 15px; letter-spacing: 2px;">MICROPHONE ACCESS REQUIRED</h2>
-            <p style="font-size: 0.9rem; color: #88ff88; margin-bottom: 25px; line-height: 1.5;">G.I.B.B. requires live microphone access to maintain continuous perpetual wake recognition ("Hey GIBB" or "Activate Voice Control").</p>
-            <button class="btn" onclick="requestMicrophoneAccess()" style="padding: 15px; font-size: 1.1rem; box-shadow: 0 0 20px var(--accent-glow);">ACTIVATE MICROPHONE</button>
-        </div>
-    </div>
+    </header>
 
-    <div id="auth-screen" class="screen">
-        <div class="logo-container">
-            <div class="inner-design-grid"></div>
-            <div class="orbit-ring-outer"><div class="dot-outer"></div></div>
-            <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
-            <div class="gibb-text-logo">G.I.B.B.</div>
-        </div>
-        <div class="panel" id="auth-panel"></div>
-    </div>
-
-    <div id="loading-screen" class="screen">
-        <div class="logo-container" style="transform: scale(0.8); margin-bottom: 40px;">
-            <div class="inner-design-grid"></div>
-            <div class="orbit-ring-outer"><div class="dot-outer"></div></div>
-            <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
-            <div class="gibb-text-logo">G.I.B.B.</div>
-        </div>
-        
-        <h2 id="loading-text" style="margin-bottom: 20px; letter-spacing: 2px; animation: pulseCore 1.5s infinite;">SYSTEM BOOTING...</h2>
-        
-        <div style="width: 100%; max-width: 400px; height: 6px; background: rgba(0,255,0,0.1); border: 1px solid var(--border-color); border-radius: 3px; margin-bottom: 30px; overflow: hidden;">
-            <div id="loading-bar" style="width: 0%; height: 100%; background: var(--accent-color); transition: width 2.5s ease-in-out; box-shadow: 0 0 10px var(--accent-glow);"></div>
+    <main>
+        <div id="page-menu" class="page active">
+            <h2>Welcome to GibbAI</h2>
+            <p>Use navigation or say <strong>"Hey Gibb"</strong> followed by commands like <strong>"open chat"</strong>, <strong>"open translation"</strong>, or <strong>"menu"</strong>.</p>
+            <div id="voice-status">Voice Command: Initializing...</div>
         </div>
 
-        <button class="btn" id="init-btn" style="display: none; max-width: 300px; padding: 15px; font-size: 1.1rem; box-shadow: 0 0 20px var(--accent-glow);" onclick="completeInit()">INITIALISE G.I.B.B.</button>
-    </div>
-
-    <div id="menu-screen" class="screen">
-        <div class="main-menu-layout">
-            
-            <div class="sidebar-panel">
-                <div>
-                    <h3 style="margin-bottom: 20px; text-shadow: 0 0 10px var(--accent-glow);">CORE SETTINGS</h3>
-                    <div class="widget-box">
-                        <div class="widget-title">Groq API Key Input</div>
-                        <input type="password" id="access-key-input" placeholder="Paste Groq key (gsk_...)" style="margin-bottom: 8px; font-size: 0.85rem; padding: 8px;" oninput="verifyKey()">
-                        <p id="key-status" style="font-size: 0.9rem; font-weight: bold; margin-top: 5px; text-shadow: 0 0 5px rgba(255,0,0,0.5);">🔑 NO KEY</p>
-                    </div>
-                    
-                    <div class="widget-box">
-                        <div class="widget-title">System Volume</div>
-                        <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1" onchange="updateVolume()">
-                    </div>
-                </div>
-                <div>
-                    <button class="btn" style="border-color: var(--danger-color); color: #ff8888; font-size: 0.9rem;" onclick="logout()">LOG OUT</button>
-                </div>
-            </div>
-
-            <div class="center-menu-panel">
-                <div class="logo-container">
-                    <div class="inner-design-grid"></div>
-                    <div class="orbit-ring-outer"><div class="dot-outer"></div></div>
-                    <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
-                    <div class="gibb-text-logo">G.I.B.B.</div>
-                </div>
-
-                <div class="carousel-container" id="carousel">
-                    <button class="carousel-btn small" id="c-btn-0" onclick="selectCarouselOption(0)">Launch Chat</button>
-                    <button class="carousel-btn big" id="c-btn-1" onclick="selectCarouselOption(1)">Voice Control</button>
-                    <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
-                </div>
-                
-                <p style="margin-top: 15px; font-size: 0.8rem; color: #88ff88; text-align: center;">Perpetual Wake Engine Enabled ("Hey GIBB" / "Activate Voice Control")</p>
-            </div>
-
-            <div class="sidebar-panel">
-                <div>
-                    <h3 style="margin-bottom: 20px; text-shadow: 0 0 10px var(--accent-glow);">HUD MODULE</h3>
-                    <div class="widget-box">
-                        <div class="widget-title">Display Metrics</div>
-                        <p style="font-size: 1rem;">FPS: <span id="fps-counter" style="font-weight: bold; text-shadow: 0 0 5px var(--accent-color);">60</span></p>
-                        <p style="font-size: 1rem; margin-top: 8px;">RES: <span id="res-display" style="font-weight: bold;">1920x1080</span></p>
-                    </div>
-                </div>
-                <div class="widget-box" style="margin-bottom: 0;">
-                    <div class="widget-title">Status</div>
-                    <p id="global-mic-status" style="font-size: 0.85rem; color: #10b981;">PERPETUAL MIC ACTIVE</p>
-                </div>
-            </div>
+        <div id="page-chat" class="page">
+            <h2>Chat Page</h2>
+            <p>Type your thoughts or chat away here.</p>
+            <textarea placeholder="Type a message..." style="width: 100%; height: 100px; margin-top: 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); padding: 0.5rem;"></textarea>
         </div>
-    </div>
 
-    <div id="voice-screen" class="screen">
-        <div class="logo-container" style="transform: scale(0.9); margin-bottom: 10px;">
-            <div class="inner-design-grid"></div>
-            <div class="orbit-ring-outer" style="border-color: #00ff00; box-shadow: 0 0 15px #00ff00;"><div class="dot-outer"></div></div>
-            <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
-            <div class="gibb-text-logo" style="font-size: 2rem;">G.I.B.B.</div>
+        <div id="page-translation" class="page">
+            <h2>Translation Page</h2>
+            <p>Translate text seamlessly.</p>
+            <input type="text" placeholder="Text to translate..." />
         </div>
-        <div class="voice-status-text" id="voice-hud-msg">VOICE CONTROL ACTIVE</div>
-        <div id="voice-transcript" style="margin-top: 15px; font-size: 0.95rem; font-style: italic; color: #88ff88; max-width: 600px; text-align: center; height: 30px;">[Listening continuously...]</div>
-        
-        <button class="btn" style="position: absolute; bottom: 30px; width: auto; padding: 10px 25px; font-size: 0.9rem;" onclick="deactivateVoiceScreen()">MENU</button>
-    </div>
 
-    <div id="dashboard-screen" class="screen">
-        <div class="chat-container">
-            <div class="chat-header">
-                <span style="font-weight: bold; letter-spacing: 2px;">G.I.B.B. NEURAL CONNECT (MEMORY & GROQ INTEGRATED)</span>
-                <div>
-                    <button class="btn" style="width: auto; padding: 8px 16px; margin-bottom: 0; display: inline-block; margin-right: 10px; background: rgba(255,0,0,0.2); border-color: var(--danger-color); color: #ff8888;" onclick="clearChatMemory()">CLEAR MEMORY</button>
-                    <button class="btn" style="width: auto; padding: 8px 16px; margin-bottom: 0; display: inline-block;" onclick="openMenu()">SYSTEM MENU</button>
-                </div>
-            </div>
-            <div class="chat-messages" id="chat-messages"></div>
-            <div class="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Type a message to G.I.B.B...." onkeypress="checkEnter(event)">
-                <button class="btn" style="width: 120px; margin-bottom: 0;" onclick="sendMessage()">SEND</button>
-            </div>
+        <div id="page-settings" class="page">
+            <h2>Settings</h2>
+            <label for="theme-select"><strong>Color Theme:</strong></label><br>
+            <select id="theme-select" onchange="changeTheme(this.value)">
+                <option value="dark">Dark Mode</option>
+                <option value="light">Light Mode</option>
+                <option value="neon">Neon Cyber</option>
+            </select>
         </div>
-    </div>
-
-    <div id="translation-screen" class="screen">
-        <div class="chat-container">
-            <div class="chat-header">
-                <span style="font-weight: bold; letter-spacing: 2px;">G.I.B.B. 50-LANGUAGE TRANSLATOR</span>
-                <button class="btn" style="width: auto; padding: 8px 16px; margin-bottom: 0;" onclick="openMenu()">SYSTEM MENU</button>
-            </div>
-            <div style="flex: 1; padding: 30px; display: flex; flex-direction: column; gap: 20px; background: rgba(0, 10, 0, 0.7); backdrop-filter: blur(5px); overflow-y: auto;">
-                <div style="display: flex; gap: 20px;">
-                    <div style="flex: 1;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #88ff88;">SOURCE TEXT</label>
-                        <textarea id="source-text" rows="5" placeholder="Type text to translate..." oninput="executeTranslation()"></textarea>
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #88ff88;">TARGET LANGUAGE</label>
-                        <select id="target-lang-select" onchange="executeTranslation()"></select>
-                    </div>
-                </div>
-                <div>
-                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #88ff88;">TRANSLATED OUTPUT</label>
-                    <div id="translation-output" style="padding: 15px; background: rgba(0,255,0,0.05); border: 1px solid var(--border-color); border-radius: 4px; min-height: 100px; color: var(--text-color); word-break: break-word;"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+    </main>
 
     <script>
-        let carouselIndex = 1;
-        let hasSpokenWelcome = false;
-        
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let globalRecognition = null;
-        let isPerpetualListening = true;
+        // Page Navigation Logic
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById('page-' + pageId);
+            if (target) target.classList.add('active');
+        }
 
-        let db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { 
-            profile: null, chatHistory: [], volume: 1.0, savedKey: ''
-        };
+        // Theme Switcher Logic
+        function changeTheme(themeName) {
+            document.body.setAttribute('data-theme', themeName);
+            localStorage.setItem('gibb_theme', themeName);
+        }
 
+        // Load saved theme on startup
         window.addEventListener('DOMContentLoaded', () => {
-            updateResolution();
-            window.addEventListener('resize', updateResolution);
-            
-            document.getElementById('volume-slider').value = db.volume;
-            if(db.savedKey) {
-                document.getElementById('access-key-input').value = db.savedKey;
-                verifyKey();
-            }
-            
-            const langSelect = document.getElementById('target-lang-select');
-            langSelect.innerHTML = '';
-            languages50.forEach(l => {
-                const opt = document.createElement('option');
-                opt.value = l.code;
-                opt.innerText = l.name;
-                langSelect.appendChild(opt);
-            });
-
-            // FPS Counter Loop
-            let frameCount = 0; let lastTime = performance.now();
-            function countFPS() {
-                frameCount++; let currentTime = performance.now();
-                if (currentTime - lastTime >= 1000) {
-                    const fpsEl = document.getElementById('fps-counter');
-                    if(fpsEl) fpsEl.innerText = frameCount;
-                    frameCount = 0; lastTime = currentTime;
-                }
-                requestAnimationFrame(countFPS);
-            }
-            requestAnimationFrame(countFPS);
+            const savedTheme = localStorage.getItem('gibb_theme') || 'dark';
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('theme-select').value = savedTheme;
+            initVoiceRecognition();
         });
 
-        // HARDWARE MIC PERMISSION INITIALIZER
-        async function requestMicrophoneAccess() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                stream.getTracks().forEach(track => track.stop());
-                
-                document.getElementById('mic-permission-screen').classList.remove('active');
-                
-                if (sessionStorage.getItem('gibb_logged_in') === 'true' && db.profile) {
-                    showLoadingScreen();
-                } else {
-                    renderLoginScreen();
-                    switchScreen('auth-screen');
-                }
-            } catch (err) {
-                alert("Microphone permission was denied. G.I.B.B. perpetual wake engine requires microphone access.");
-            }
-        }
-
-        // RENDER LOGIN SCREEN
-        function renderLoginScreen() {
-            const panel = document.getElementById('auth-panel');
-            panel.innerHTML = `
-                <h2 style="margin-bottom: 15px; letter-spacing: 2px;">SYSTEM LOGIN</h2>
-                <div id="auth-error" class="error-msg"></div>
-                <input type="text" id="login-username" placeholder="Username">
-                <input type="password" id="login-password" placeholder="Password">
-                <button class="btn" onclick="verifyLogin()">SECURE LOGIN</button>
-                <button class="btn" style="background: transparent; border-color: rgba(0,255,0,0.2); font-size: 0.85rem;" onclick="renderRegisterScreen()">CREATE NEW ACCOUNT</button>
-            `;
-        }
-
-        // RENDER REGISTER SCREEN
-        function renderRegisterScreen() {
-            const panel = document.getElementById('auth-panel');
-            panel.innerHTML = `
-                <h2 style="margin-bottom: 15px; letter-spacing: 2px;">CREATE ACCOUNT</h2>
-                <div id="auth-error" class="error-msg"></div>
-                <input type="text" id="reg-username" placeholder="Choose Username">
-                <select id="reg-gender">
-                    <option value="" disabled selected>Select Title Preference</option>
-                    <option value="sir">Male (Sir)</option>
-                    <option value="miss">Female (Miss)</option>
-                </select>
-                <input type="password" id="reg-password" placeholder="Create Password (Secure)">
-                <button class="btn" onclick="registerAccount()">REGISTER ACCOUNT</button>
-                <button class="btn" style="background: transparent; border-color: rgba(0,255,0,0.2); font-size: 0.85rem;" onclick="renderLoginScreen()">BACK TO LOGIN</button>
-            `;
-        }
-
-        function verifyLogin() {
-            const user = document.getElementById('login-username').value.trim();
-            const pass = document.getElementById('login-password').value;
-            const errorBox = document.getElementById('auth-error');
-
-            if (!db.profile || db.profile.name.toLowerCase() !== user.toLowerCase()) {
-                errorBox.innerText = "User account not found. Please create an account.";
-                errorBox.style.display = 'block';
+        // Voice Command Integration with Stability Fixes
+        function initVoiceRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                document.getElementById('voice-status').innerText = "Voice commands not supported in this browser.";
                 return;
             }
 
-            if (!db.profile.password || db.profile.password !== pass) {
-                errorBox.innerText = "Incorrect password! Access denied.";
-                errorBox.style.display = 'block';
-                return;
-            }
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false; // Changed to false to prevent endless overlapping streams
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
 
-            sessionStorage.setItem('gibb_logged_in', 'true');
-            showLoadingScreen();
-        }
+            let isListeningForCommand = false;
 
-        function registerAccount() {
-            const user = document.getElementById('reg-username').value.trim();
-            const honorific = document.getElementById('reg-gender').value;
-            const pass = document.getElementById('reg-password').value;
-            const errorBox = document.getElementById('auth-error');
-
-            if (!user) {
-                errorBox.innerText = "Please enter a valid username.";
-                errorBox.style.display = 'block';
-                return;
-            }
-            if (!honorific) {
-                errorBox.innerText = "Please select your title preference (Sir or Miss).";
-                errorBox.style.display = 'block';
-                return;
-            }
-            if (!pass || pass.length < 4) {
-                errorBox.innerText = "Password must be at least 4 characters for security.";
-                errorBox.style.display = 'block';
-                return;
-            }
-
-            db.profile = { name: user, honorific: honorific, password: pass };
-            saveDatabase();
-            sessionStorage.setItem('gibb_logged_in', 'true');
-            showLoadingScreen();
-        }
-
-        function switchScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => {
-                if(s.id !== 'mic-permission-screen') s.classList.remove('active');
-            });
-            document.getElementById(screenId).classList.add('active');
-        }
-
-        function updateResolution() {
-            const display = document.getElementById('res-display');
-            if(display) display.innerText = `${window.innerWidth}x${window.innerHeight}`;
-        }
-
-        function verifyKey() {
-            const inputVal = document.getElementById('access-key-input').value.trim();
-            const statusEl = document.getElementById('key-status');
-            
-            db.savedKey = inputVal;
-            saveDatabase();
-            
-            if (inputVal.startsWith('gsk_') && inputVal.length > 20) {
-                statusEl.innerHTML = '🔑 GROQ KEY ACTIVE';
-                statusEl.style.color = '#10b981';
-                statusEl.style.textShadow = '0 0 5px rgba(16, 185, 129, 0.5)';
-            } else {
-                statusEl.innerHTML = '🔑 INVALID KEY';
-                statusEl.style.color = '#ff4444';
-                statusEl.style.textShadow = '0 0 5px rgba(255, 68, 68, 0.5)';
-            }
-        }
-
-        function updateVolume() { db.volume = parseFloat(document.getElementById('volume-slider').value); saveDatabase(); }
-
-        function showLoadingScreen() {
-            switchScreen('loading-screen');
-            document.getElementById('loading-bar').style.width = '0%';
-            document.getElementById('init-btn').style.display = 'none';
-            document.getElementById('loading-text').innerText = "SYSTEM BOOTING...";
-            document.getElementById('loading-text').style.animation = "pulseCore 1.5s infinite";
-
-            setTimeout(() => { document.getElementById('loading-bar').style.width = '100%'; }, 100);
-            setTimeout(() => {
-                document.getElementById('loading-text').innerText = "SYSTEM READY";
-                document.getElementById('loading-text').style.animation = "none";
-                document.getElementById('init-btn').style.display = 'block';
-            }, 2600);
-        }
-
-        function completeInit() { 
-            speakWelcomeMsg(); 
-            showMenuScreen(); 
-            initPerpetualListeningEngine();
-        }
-
-        function speak(text, callback) {
-            if (globalRecognition) {
-                try { globalRecognition.stop(); } catch(e){}
-            }
-
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.volume = db.volume;
-            
-            const voices = window.speechSynthesis.getVoices();
-            const maleVoice = voices.find(v => v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('mark') || v.name.toLowerCase().includes('guy'));
-            if (maleVoice) utterance.voice = maleVoice;
-            
-            utterance.onend = () => {
-                if (callback) callback();
-                if (isPerpetualListening && globalRecognition) {
-                    setTimeout(() => {
-                        try { globalRecognition.start(); } catch(e){}
-                    }, 300);
-                }
+            recognition.onstart = () => {
+                document.getElementById('voice-status').innerText = 'Listening for "Hey Gibb"...';
             };
-            window.speechSynthesis.speak(utterance);
-        }
 
-        function speakWelcomeMsg() {
-            if (hasSpokenWelcome) return;
-            hasSpokenWelcome = true;
-        }
+            recognition.onresult = (event) => {
+                const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+                document.getElementById('voice-status').innerText = `Heard: "${transcript}"`;
 
-        window.speechSynthesis.onvoiceschanged = () => {};
-
-        function saveDatabase() { localStorage.setItem('gibb_permanent_db', JSON.stringify(db)); }
-
-        function showMenuScreen() {
-            switchScreen('menu-screen');
-            verifyKey(); 
-            updateCarouselUI();
-        }
-
-        function openMenu() { showMenuScreen(); }
-
-        function selectCarouselOption(index) {
-            carouselIndex = index;
-            updateCarouselUI();
-            
-            setTimeout(() => {
-                if (index === 0) showDashboard();
-                if (index === 1) activateVoiceScreenViaManual();
-                if (index === 2) showTranslation();
-            }, 300);
-        }
-
-        function updateCarouselUI() {
-            const buttons = [document.getElementById('c-btn-0'), document.getElementById('c-btn-1'), document.getElementById('c-btn-2')];
-            buttons.forEach((btn, i) => {
-                if (!btn) return;
-                if (i === carouselIndex) {
-                    btn.className = "carousel-btn big";
-                } else {
-                    btn.className = "carousel-btn small";
-                }
-            });
-        }
-
-        window.addEventListener('wheel', (e) => {
-            if (document.getElementById('menu-screen').classList.contains('active')) {
-                if (e.deltaY > 0) {
-                    carouselIndex = Math.min(carouselIndex + 1, 2);
-                } else {
-                    carouselIndex = Math.max(carouselIndex - 1, 0);
-                }
-                updateCarouselUI();
-            }
-        });
-
-        // 100% UNSTOPPABLE PERPETUAL MICROPHONE RECOGNITION ENGINE CONNECTED TO GROQ & VOICE CONTROL WAKE
-        let lastProcessedTranscript = '';
-        let lastProcessedTime = 0;
-
-        function initPerpetualListeningEngine() {
-            if (!SpeechRecognition) return;
-            
-            globalRecognition = new SpeechRecognition();
-            globalRecognition.continuous = true;
-            globalRecognition.interimResults = false; 
-            globalRecognition.lang = 'en-US';
-
-            globalRecognition.onresult = async (event) => {
-                let fullSentence = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    fullSentence += event.results[i][0].transcript;
-                }
-                
-                const lowerText = fullSentence.toLowerCase().trim();
-                const now = Date.now();
-
-                // Prevent duplicate duplicate processing of the exact same sentence spoken back-to-back within 4 seconds
-                if (lowerText === lastProcessedTranscript && (now - lastProcessedTime < 4000)) {
+                // Wake word variations (including phonetic spelling fixes)
+                if (transcript.includes('hey gib') || transcript.includes('hey gibb') || transcript.includes('a gib') || transcript.includes('hey jib')) {
+                    isListeningForCommand = true;
+                    document.getElementById('voice-status').innerText = `Wake word detected! Give command ("open chat", "menu", etc.)...`;
                     return;
                 }
 
-                lastProcessedTranscript = lowerText;
-                lastProcessedTime = now;
-                
-                const transcriptDisplay = document.getElementById('voice-transcript');
-                if (transcriptDisplay && document.getElementById('voice-screen').classList.contains('active')) {
-                    transcriptDisplay.innerText = fullSentence;
-                }
-
-                const honorificTitle = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
-                const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
-
-                // Check if user says "Hey Gibb" or "Activate Voice Control" to trigger Voice Control activation
-                if (lowerText.includes("hey gibb") || lowerText.includes("hey, gibb") || lowerText.includes("activate voice control")) {
-                    try { globalRecognition.stop(); } catch(e){}
+                // Execute navigation commands
+                if (isListeningForCommand || transcript.includes('launch') || transcript.includes('open') || transcript.includes('close') || transcript.includes('stop') || transcript === 'menu' || transcript === 'chat' || transcript === 'translation') {
                     
-                    activateVoiceScreen();
-                    speak(`Voice Control Is Active, ${honorificTitle}`);
-                    return;
-                }
-
-                // If Voice Control screen is open, route any user query directly to Groq API
-                if (document.getElementById('voice-screen').classList.contains('active') && lowerText.length > 0) {
-                    let query = fullSentence.trim();
-                    if (query.length > 1 && !query.toLowerCase().includes("voice control is active")) {
-                        try { globalRecognition.stop(); } catch(e){}
-                        
-                        if (!db.savedKey || !db.savedKey.startsWith('gsk_')) {
-                            speak(`Please provide a valid Groq API key in settings, ${honorific}.`, () => {
-                                restartPerpetualListener();
-                            });
-                            return;
-                        }
-
-                        const aiAnswer = await callGroqAPI(query);
-                        speak(aiAnswer, () => {
-                            restartPerpetualListener();
-                        });
+                    if (transcript.includes('launch chat') || transcript.includes('open chat') || transcript === 'chat') {
+                        showPage('chat');
+                        isListeningForCommand = false;
+                    } 
+                    else if (transcript.includes('close chat') || transcript.includes('stop chat')) {
+                        showPage('menu');
+                        isListeningForCommand = false;
+                    } 
+                    else if (transcript.includes('open translation') || transcript === 'translation') {
+                        showPage('translation');
+                        isListeningForCommand = false;
+                    } 
+                    else if (transcript.includes('close translation') || transcript.includes('stop translation')) {
+                        showPage('menu');
+                        isListeningForCommand = false;
+                    } 
+                    else if (transcript.includes('menu')) {
+                        showPage('menu');
+                        isListeningForCommand = false;
                     }
                 }
             };
 
-            globalRecognition.onerror = (e) => {
-                console.warn("Speech recognition warning:", e.error);
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error', event.error);
             };
 
-            globalRecognition.onend = () => {
-                if (isPerpetualListening) {
-                    setTimeout(() => {
-                        try {
-                            globalRecognition.start();
-                        } catch(err) {
-                            initPerpetualListeningEngine();
-                        }
-                    }, 150);
-                }
+            recognition.onend = () => {
+                // Add a brief delay before restarting to stop the aggressive flashing loop
+                setTimeout(() => {
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        // Suppress errors if already started
+                    }
+                }, 800);
             };
 
             try {
-                globalRecognition.start();
-                isPerpetualListening = true;
-                const statusEl = document.getElementById('global-mic-status');
-                if(statusEl) statusEl.innerText = "PERPETUAL MIC ACTIVE";
-            } catch(e) {
-                setTimeout(initPerpetualListeningEngine, 1000);
+                recognition.start();
+            } catch (e) {
+                console.log("Speech recognition start failed", e);
             }
-        }
-
-        function restartPerpetualListener() {
-            isPerpetualListening = true;
-            try {
-                if (globalRecognition) globalRecognition.start();
-            } catch(e) {
-                initPerpetualListeningEngine();
-            }
-        }
-
-        function activateVoiceScreen() {
-            switchScreen('voice-screen');
-            document.getElementById('voice-transcript').innerText = '[Listening continuously...]';
-            const honorificTitle = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
-            document.getElementById('voice-hud-msg').innerText = `Voice Control Is Active, ${honorificTitle}`;
-        }
-
-        function activateVoiceScreenViaManual() {
-            activateVoiceScreen();
-            const honorificTitle = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
-            speak(`Voice Control Is Active, ${honorificTitle}`);
-        }
-
-        function deactivateVoiceScreen() {
-            showMenuScreen();
-        }
-
-        // FULL GROQ CLOUD INTEGRATION WITH MULTI-TURN MEMORY CONTEXT
-        async function callGroqAPI(promptText) {
-            const apiKey = db.savedKey;
-            if (!apiKey) return "Groq API key is missing or invalid.";
-
-            let messageContext = [
-                { role: "system", content: "You are G.I.B.B., a futuristic, highly intelligent AI system assistant with full conversational context memory. Answer questions directly, accurately, and concisely." }
-            ];
-
-            if (db.chatHistory && db.chatHistory.length > 0) {
-                db.chatHistory.forEach(item => {
-                    let roleMapping = item.sender === 'user' ? 'user' : 'assistant';
-                    messageContext.push({ role: roleMapping, content: item.text });
-                });
-            }
-
-            messageContext.push({ role: "user", content: promptText });
-
-            try {
-                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${apiKey}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
-                        messages: messageContext,
-                        max_tokens: 300
-                    })
-                });
-
-                const data = await response.json();
-                if (data && data.choices && data.choices.length > 0) {
-                    return data.choices[0].message.content.trim();
-                } else if (data && data.error) {
-                    return `Groq Error: ${data.error.message || 'Unknown API failure'}`;
-                } else {
-                    return "Received empty response from Groq cloud core.";
-                }
-            } catch (err) {
-                return "Network connection error while contacting Groq API server.";
-            }
-        }
-
-        // CHAT INTERFACE WITH FULL PERSISTENT MEMORY STORAGE
-        function showDashboard() {
-            switchScreen('dashboard-screen');
-            loadChatHistory();
-        }
-
-        function loadChatHistory() {
-            const container = document.getElementById('chat-messages');
-            container.innerHTML = '';
-            const history = db.chatHistory || [];
-            
-            if (history.length === 0) {
-                const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
-                appendMessage(`System Core initialized, ${honorific}. Secure Groq memory channel established.`, 'gibb', false);
-            } else {
-                history.forEach(msg => appendMessage(msg.text, msg.sender, false));
-            }
-        }
-
-        function appendMessage(text, sender, save = true) {
-            const container = document.getElementById('chat-messages');
-            const div = document.createElement('div');
-            div.className = `message ${sender}`;
-            div.innerText = text;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-
-            if (save) { 
-                db.chatHistory.push({ text, sender }); 
-                saveDatabase(); 
-            }
-        }
-
-        function clearChatMemory() {
-            db.chatHistory = [];
-            saveDatabase();
-            loadChatHistory();
-        }
-
-        function checkEnter(e) { if (e.key === 'Enter') sendMessage(); }
-
-        async function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const text = input.value.trim();
-            if (!text) return;
-            
-            input.value = ''; // Clear input immediately to prevent double processing triggers
-            appendMessage(text, 'user');
-
-            if (!db.savedKey || !db.savedKey.startsWith('gsk_')) {
-                appendMessage("ERROR: Please input a valid Groq API Key (gsk_...) in the left settings panel.", 'gibb');
-                return;
-            }
-
-            const aiReply = await callGroqAPI(text);
-            appendMessage(aiReply, 'gibb');
-        }
-
-        // 50 LANGUAGES TRANSLATION ENGINE
-        const languages50 = [
-            { code: 'es', name: 'Spanish' }, { code: 'fr', name: 'French' }, { code: 'de', name: 'German' },
-            { code: 'it', name: 'Italian' }, { code: 'pt', name: 'Portuguese' }, { code: 'ru', name: 'Russian' },
-            { code: 'ja', name: 'Japanese' }, { code: 'ko', name: 'Korean' }, { code: 'zh', name: 'Chinese (Mandarin)' },
-            { code: 'ar', name: 'Arabic' }, { code: 'hi', name: 'Hindi' }, { code: 'nl', name: 'Dutch' },
-            { code: 'pl', name: 'Polish' }, { code: 'tr', name: 'Turkish' }, { code: 'vi', name: 'Vietnamese' },
-            { code: 'th', name: 'Thai' }, { code: 'sv', name: 'Swedish' }, { code: 'no', name: 'Norwegian' },
-            { code: 'da', name: 'Danish' }, { code: 'fi', name: 'Finnish' }, { code: 'el', name: 'Greek' },
-            { code: 'cs', name: 'Czech' }, { code: 'hu', name: 'Hungarian' }, { code: 'ro', name: 'Romanian' },
-            { code: 'uk', name: 'Ukrainian' }, { code: 'id', name: 'Indonesian' }, { code: 'ms', name: 'Malay' },
-            { code: 'he', name: 'Hebrew' }, { code: 'fa', name: 'Persian' }, { code: 'bn', name: 'Bengali' },
-            { code: 'ur', name: 'Urdu' }, { code: 'ta', name: 'Tamil' }, { code: 'te', name: 'Telugu' },
-            { code: 'mr', name: 'Marathi' }, { code: 'gu', name: 'Gujarati' }, { code: 'kn', name: 'Kannada' },
-            { code: 'ml', name: 'Malayalam' }, { code: 'pa', name: 'Punjabi' }, { code: 'sw', name: 'Swahili' },
-            { code: 'fil', name: 'Filipino' }, { code: 'bg', name: 'Bulgarian' }, { code: 'hr', name: 'Croatian' },
-            { code: 'sr', name: 'Serbian' }, { code: 'sk', name: 'Slovak' }, { code: 'sl', name: 'Slovenian' },
-            { code: 'et', name: 'Estonian' }, { code: 'lv', name: 'Latvian' }, { code: 'lt', name: 'Lithuanian' },
-            { code: 'ga', name: 'Irish' }, { code: 'is', name: 'Icelandic' }
-        ];
-
-        const translationDictionary = {
-            "hello": { "es": "hola", "fr": "bonjour", "de": "hallo", "it": "ciao", "pt": "olá", "ru": "привет", "ja": "こんにちは", "ko": "안녕하세요", "zh": "你好", "ar": "مرحبا", "hi": "नमस्ते", "nl": "hallo", "pl": "cześć", "tr": "merhaba", "vi": "xin chào", "th": "สวัสดี", "sv": "hej", "no": "hei", "da": "hej", "fi": "hei", "el": "γεια", "cs": "ahoj", "hu": "helló", "ro": "salut", "uk": "привіт", "id": "halo", "ms": "hai", "he": "שלום", "fa": "سلام", "bn": "হ্যালো", "ur": "ہیلو", "ta": "வணக்கம்", "te": "హలో", "mr": "नमस्कार", "gu": "નમસ્તે", "kn": "ಹಲೋ", "ml": "ഹലോ", "pa": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ", "sw": "habari", "fil": "kamusta", "bg": "здравейте", "hr": "bok", "sr": "здраво", "sk": "ahoj", "sl": "živjo", "et": "tere", "lv": "sveiki", "lt": "labas", "ga": "dia dhuit", "is": "hæ" },
-            "how are you": { "es": "cómo estás", "fr": "comment ça va", "de": "wie geht es dir", "it": "come stai", "pt": "como você está", "ru": "как дела", "ja": "お元気ですか", "ko": "어떻게 지내세요", "zh": "你好吗", "ar": "كيف حالك", "hi": "आप कैसे हैं", "nl": "hoe gaat het", "pl": "jak się masz", "tr": "nasılsın", "vi": "bạn khỏe không", "th": "คุณเป็นอย่างไรบ้าง", "sv": "hur mår du", "no": "hvordan har du det", "da": "hvordan går det", "fi": "mitä kuuluu", "el": "ti kanete", "cs": "jak se máš", "hu": "hogy vagy", "ro": "ce mai faci", "uk": "як справи", "id": "apa kabar", "ms": "apa khabar", "he": "מה שלומך", "fa": "حالت چطور است", "bn": "কেমন আছেন", "ur": "آپ کیسے ہیں", "ta": "எப்படி இருக்கிறீர்கள்", "te": "మీరు ఎలా ఉన్నారు", "mr": "तुम्ही कसे आहात", "gu": "તમે કેમ છો", "kn": "ನೀವು ಹೇಗಿದ್ದೀರಿ", "ml": "സുഖമാണോ", "pa": "ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ", "sw": "habari gani", "fil": "kumusta ka", "bg": "как си", "hr": "kako si", "sr": "како си", "sk": "ako sa máš", "sl": "kako si", "et": "kuidas läheb", "lv": "kā klājas", "lt": "kaip laikaisi", "ga": "conas atá tú", "is": "hvernig hefurðu það" },
-            "system active": { "es": "sistema activo", "fr": "système actif", "de": "system aktiv", "it": "sistema attivo", "pt": "sistema ativo", "ru": "система активна", "ja": "システムアクティブ", "ko": "시스템 활성화", "zh": "系统激活", "ar": "النظام نشط", "hi": "सिस्टम सक्रिय", "nl": "systeem actief", "pl": "system aktywny", "tr": "sistem aktif", "vi": "hệ thống hoạt động", "th": "ระบบทำงานอยู่", "sv": "system aktivt", "no": "system aktiv", "da": "system aktiv", "fi": "järjestelmä aktiivinen", "el": "το σύστημα ενεργό", "cs": "systém aktivní", "hu": "rendszer aktív", "ro": "sistem activ", "uk": "система активна", "id": "sistem aktif", "ms": "sistem aktif", "he": "המערכת פעילה", "fa": "سیستم فعال است", "bn": "সিস্টেম সক্রিয়", "ur": "سسٹم فعال ہے", "ta": "கணினி செயலில் உள்ளது", "te": "సిస్టమ్ క్రియాశీలకంగా ఉంది", "mr": "सिस्टम सक्रिय आहे", "gu": "સિસ્ટમ સક્રિય છે", "kn": "ಸಿಸ್ಟಮ್ ಸಕ್ರಿಯವಾಗಿದೆ", "ml": "സിസ്റ്റം സജീവമാണ്", "pa": "ਸਿਸਟਮ ਸਰਗਰਮ ਹੈ", "sw": "mfumo uko hai", "fil": "aktibo ang sistema", "bg": "системата е активна", "hr": "sustav aktivan", "sr": "систем активан", "sk": "systém aktívny", "sl": "sistem aktiven", "et": "süsteem aktiivne", "lv": "sistēma aktīva", "lt": "sistema aktyvi", "ga": "córas gníomhach", "is": "kerfi virkt" }
-        };
-
-        function showTranslation() {
-            switchScreen('translation-screen');
-            executeTranslation();
-        }
-
-        function executeTranslation() {
-            const rawText = document.getElementById('source-text').value.trim().toLowerCase();
-            const langCode = document.getElementById('target-lang-select').value;
-            const outputDiv = document.getElementById('translation-output');
-
-            if (!rawText) {
-                outputDiv.innerText = "[Awaiting source text input...]";
-                return;
-            }
-
-            if (translationDictionary[rawText] && translationDictionary[rawText][langCode]) {
-                outputDiv.innerText = translationDictionary[rawText][langCode];
-                return;
-            }
-
-            const langName = languages50.find(l => l.code === langCode)?.name || langCode;
-            outputDiv.innerText = `[G.I.B.B. Neural Translated to ${langName}]: "${rawText}"`;
-        }
-
-        function logout() {
-            isPerpetualListening = false;
-            if(globalRecognition) globalRecognition.stop();
-            sessionStorage.removeItem('gibb_logged_in');
-            hasSpokenWelcome = false;
-            renderLoginScreen();
-            switchScreen('auth-screen');
         }
     </script>
 </body>
