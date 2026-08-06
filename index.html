@@ -80,7 +80,7 @@
             background: radial-gradient(circle, rgba(0,255,100,0.05) 0%, rgba(1,10,4,1) 80%);
         }
         #login-screen img {
-            width: 280px; /* Much bigger logo */
+            width: 280px;
             filter: drop-shadow(0 0 30px rgba(0, 255, 100, 0.9));
             animation: float 3s ease-in-out infinite;
         }
@@ -138,7 +138,7 @@
             font-size: 0.85rem;
         }
 
-        /* --- HUD / Stark-Inspired Next-Gen Menu Screen --- */
+        /* --- Stark HUD Next-Gen Menu Screen --- */
         #home-screen {
             display: none;
             flex-direction: column;
@@ -173,7 +173,7 @@
             gap: 20px;
         }
         .hud-center img {
-            width: 240px; /* Much bigger logo on menu */
+            width: 240px;
             filter: drop-shadow(0 0 35px rgba(0, 255, 100, 0.9));
             animation: pulse 3s infinite alternate;
         }
@@ -243,7 +243,7 @@
             box-shadow: 0 0 20px rgba(0, 255, 100, 0.2);
         }
         header img {
-            height: 50px; /* Bigger logo in headers */
+            height: 50px;
             filter: drop-shadow(0 0 10px rgba(0,255,100,0.6));
         }
         .back-home {
@@ -401,7 +401,7 @@
         </div>
         <div class="hud-center">
             <img src="gibblogo.png" alt="G.I.B.B. Logo">
-            <div class="menu-title">MENU</div>
+            <div class="menu-title">Menu</div>
             <div class="menu-grid">
                 <button class="menu-btn" onclick="openApp('chat')">💬 Terminal Chat</button>
                 <button class="menu-btn" onclick="openApp('translate')">🌐 Translation Matrix</button>
@@ -482,51 +482,41 @@
                     document.getElementById("login-screen").style.display = "flex";
                 }, 800);
             }, 1200);
-            initVoices();
+            loadOptimalMaleVoice();
             updateHUDClock();
             setInterval(updateHUDClock, 1000);
             fetchLiveWeather();
         });
 
-        function updateHUDClock() {
-            let now = new Date();
-            let timeStr = now.toLocaleTimeString();
-            let dateStr = now.toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-            let clockElem = document.getElementById("hud-date-time");
-            if (clockElem) {
-                clockElem.innerText = `DATE: ${dateStr} // TIME: ${timeStr}`;
-            }
-        }
-
-        async function fetchLiveWeather() {
-            try {
-                // Free public geolocation/weather routing simulation or basic telemetry
-                let res = await fetch('https://ipapi.co/json/');
-                let loc = await res.json();
-                let weatherElem = document.getElementById("hud-weather");
-                if (weatherElem) {
-                    weatherElem.innerText = `LOCATION: ${loc.city}, ${loc.country_name} // STATUS: OPTIMAL`;
-                }
-            } catch(e) {
-                let weatherElem = document.getElementById("hud-weather");
-                if (weatherElem) weatherElem.innerText = `LOCATION: GLOBAL MATRIX // STATUS: NOMINAL`;
-            }
-        }
-
-        function initVoices() {
+        function loadOptimalMaleVoice() {
             let voices = window.speechSynthesis.getVoices();
-            // Strictly target forced male AI voices without lag delays
-            jarvisVoice = voices.find(v => (v.name.includes("Male") || v.name.includes("David") || v.name.includes("UK English Male") || v.name.includes("George") || v.name.includes("Oliver") || v.name.includes("Daniel") || v.name.includes("Mark")) && v.lang.startsWith("en")) || voices.find(v => v.lang.startsWith("en")) || voices[0];
+            // Strict selection prioritizing explicit male voice identifiers and strict English tags
+            jarvisVoice = voices.find(v => 
+                (v.name.includes("Male") || v.name.includes("David") || v.name.includes("George") || v.name.includes("Oliver") || v.name.includes("Daniel") || v.name.includes("Mark") || v.name.includes("James")) && 
+                v.lang.startsWith("en")
+            ) || voices.find(v => v.lang.startsWith("en")) || voices[0];
         }
-        window.speechSynthesis.onvoiceschanged = initVoices;
+        
+        // Handles browser voice async loading updates instantly
+        if ('onvoiceschanged' in window.speechSynthesis) {
+            window.speechSynthesis.onvoiceschanged = loadOptimalMaleVoice;
+        }
 
         function speakJarvis(text) {
             if (!text) return;
-            window.speechSynthesis.cancel(); // Instantly clears queue to avoid zero-delay stuttering
+            window.speechSynthesis.cancel(); // Instantly clears pending speech queue to eliminate delay/lag
+            
             let speech = new SpeechSynthesisUtterance(text);
-            speech.rate = 1.1; // Snappy speed to prevent audio lags
-            speech.pitch = 0.75; // Deep masculine timbre
-            if (jarvisVoice) speech.voice = jarvisVoice;
+            speech.rate = 1.15; // Snappy speed for instant delivery
+            speech.pitch = 0.7; // Deep resonant male timbre
+            
+            if (!jarvisVoice) {
+                loadOptimalMaleVoice();
+            }
+            if (jarvisVoice) {
+                speech.voice = jarvisVoice;
+            }
+            
             window.speechSynthesis.speak(speech);
         }
 
@@ -538,7 +528,7 @@
                 home.style.display = "flex";
                 setTimeout(() => { home.style.opacity = "1"; }, 50);
                 
-                // Instantaneous MALE Voice Announcement
+                // Zero-delay MALE Voice System Online Announcement
                 speakJarvis("SYSTEM ONLINE");
             } else {
                 document.getElementById("error-msg").style.display = "block";
@@ -555,7 +545,7 @@
         }
 
         function goHome() {
-            // Instantly terminates speech synthesis when exiting application views (Stops AI immediately)
+            // Instantly terminates speech synthesis when exiting application views
             window.speechSynthesis.cancel();
             
             document.getElementById("chat-view").style.display = "none";
@@ -588,12 +578,35 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // --- Smart Adaptive AI Engine (Short & Precise Responses) ---
+        function updateHUDClock() {
+            let now = new Date();
+            let timeStr = now.toLocaleTimeString();
+            let dateStr = now.toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+            let clockElem = document.getElementById("hud-date-time");
+            if (clockElem) {
+                clockElem.innerText = `DATE: ${dateStr} // TIME: ${timeStr}`;
+            }
+        }
+
+        async function fetchLiveWeather() {
+            try {
+                let res = await fetch('https://ipapi.co/json/');
+                let loc = await res.json();
+                let weatherElem = document.getElementById("hud-weather");
+                if (weatherElem) {
+                    weatherElem.innerText = `LOCATION: ${loc.city}, ${loc.country_name} // STATUS: OPTIMAL`;
+                }
+            } catch(e) {
+                let weatherElem = document.getElementById("hud-weather");
+                if (weatherElem) weatherElem.innerText = `LOCATION: GLOBAL MATRIX // STATUS: NOMINAL`;
+            }
+        }
+
+        // --- Smart Adaptive AI Engine (Concise & Zero Yapping) ---
         async function processJarvisAI(input) {
             let lower = input.toLowerCase().trim();
             let response = "";
 
-            // Intercept casual greetings instantly
             if (lower === "hi" || lower === "hello" || lower === "hey" || lower === "greetings") {
                 let savedUser = localStorage.getItem("user_profile_name");
                 response = savedUser ? `Systems online. Welcome back, ${savedUser}, sir.` : `Systems online. Awaiting your command, sir.`;
@@ -614,7 +627,7 @@
                     response = "Formatting error.";
                 }
             } 
-            // Precise Math Calculation Engine (Stops unnecessary yapping)
+            // Precise Math Calculation Engine (Instant short answer)
             else if (lower.startsWith("calculate") || lower.startsWith("solve") || /[0-9]+\s*[\+\-\*\/\^]\s*[0-9]+/.test(lower)) {
                 try {
                     let expr = lower.replace(/calculate/i, "").replace(/solve/i, "").trim();
@@ -645,7 +658,6 @@
                 let data = await res.json();
                 
                 if (data.AbstractText) {
-                    // Keep response concise and direct
                     return data.AbstractText.split('.')[0] + '.';
                 } else if (data.RelatedTopics && data.RelatedTopics.length > 0 && data.RelatedTopics[0].Text) {
                     return data.RelatedTopics[0].Text.split('.')[0] + '.';
@@ -684,7 +696,7 @@
             }
         }
 
-        // --- Voice-to-Text Microphone Integration (Supports both Chat and Translation) ---
+        // --- Voice-to-Text Microphone Integration (Chat and Translation) ---
         function startListening(targetApp) {
             window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
