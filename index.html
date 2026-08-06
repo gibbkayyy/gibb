@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G.I.B.B. System Interface</title>
+    <title>G.I.B.B. AI Interface</title>
     <style>
         :root {
             --bg-color: #03080c;
-            --panel-bg: rgba(5, 12, 20, 0.95);
-            --accent-green: #00ff66;
+            --panel-bg: rgba(5, 12, 20, 0.9);
+            --accent-green: #00ff88;
+            --accent-cyan: #00e1ff;
             --text-color: #d1f7ff;
-            --border-color: rgba(0, 255, 102, 0.25);
+            --border-color: rgba(0, 225, 255, 0.25);
             --danger-color: #ff3366;
-            --glow-green: 0 0 12px rgba(0, 255, 102, 0.4);
+            --glow-green: 0 0 10px rgba(0, 255, 136, 0.4);
+            --glow-cyan: 0 0 10px rgba(0, 225, 255, 0.4);
         }
 
         * {
@@ -31,26 +33,71 @@
             min-height: 100vh;
             overflow: hidden;
             background-image: 
-                radial-gradient(circle at 50% 50%, rgba(0, 255, 102, 0.04) 0%, transparent 80%),
-                repeating-linear-gradient(transparent 0px, transparent 2px, rgba(0, 255, 102, 0.015) 2px, rgba(0, 255, 102, 0.015) 4px);
+                radial-gradient(circle at 50% 50%, rgba(0, 225, 255, 0.05) 0%, transparent 80%),
+                repeating-linear-gradient(transparent 0px, transparent 2px, rgba(0, 225, 255, 0.02) 2px, rgba(0, 225, 255, 0.02) 4px);
             background-size: 100% 100%, 100% 4px;
         }
 
-        .main-wrapper {
-            width: 98%;
-            max-width: 1100px;
-            height: 94vh;
+        .container {
+            width: 95%;
+            max-width: 1000px;
+            height: 90vh;
             background: var(--panel-bg);
             border: 1px solid var(--border-color);
-            box-shadow: 0 0 30px rgba(0, 255, 102, 0.12);
-            border-radius: 4px;
+            box-shadow: 0 0 30px rgba(0, 225, 255, 0.15);
+            border-radius: 6px;
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
         }
 
-        /* PASSWORD LOCK SCREEN */
+        /* JARVIS REACTOR ANIMATED LOGO */
+        .jarvis-logo {
+            position: relative;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .jarvis-logo .ring-outer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid transparent;
+            border-top-color: var(--accent-green);
+            border-bottom-color: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: var(--glow-green);
+            animation: rotateClockwise 3s linear infinite;
+        }
+
+        .jarvis-logo .ring-inner {
+            position: absolute;
+            width: 60%;
+            height: 60%;
+            border: 2px solid transparent;
+            border-left-color: rgba(0, 225, 255, 0.4);
+            border-right-color: rgba(0, 225, 255, 0.4);
+            border-radius: 50%;
+            animation: rotateAntiClockwise 1.5s linear infinite;
+        }
+
+        .jarvis-logo .dot-center {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        @keyframes rotateClockwise { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes rotateAntiClockwise { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
+
+        /* AUTHENTICATION SCREEN */
         #auth-screen {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -65,289 +112,181 @@
 
         .auth-card {
             background: var(--panel-bg);
-            border: 1px solid var(--accent-green);
-            box-shadow: 0 0 25px rgba(0, 255, 102, 0.15);
+            border: 1px solid var(--accent-cyan);
+            box-shadow: 0 0 25px rgba(0, 225, 255, 0.2);
             padding: 35px;
             border-radius: 4px;
             width: 100%;
-            max-width: 420px;
+            max-width: 400px;
             text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
 
-        .logo-ring {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            border: 2px dashed var(--accent-green);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: var(--glow-green);
-            margin-bottom: 20px;
-            position: relative;
-            animation: pulseGlow 3s infinite alternate;
+        .auth-card h1 {
+            color: var(--accent-cyan);
+            letter-spacing: 3px;
+            margin-bottom: 5px;
+            font-size: 24px;
         }
 
-        .logo-ring img {
-            width: 75px;
-            height: 75px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 8px var(--accent-green));
+        .auth-card p {
+            font-size: 12px;
+            color: #88a0b0;
+            margin-bottom: 25px;
         }
 
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 8px rgba(0, 255, 102, 0.2); }
-            100% { box-shadow: 0 0 20px rgba(0, 255, 102, 0.6); }
-        }
-
-        .auth-card h3 {
-            color: var(--accent-green);
-            letter-spacing: 2px;
+        .input-group {
             margin-bottom: 15px;
-            font-size: 15px;
-            text-transform: uppercase;
+            text-align: left;
         }
 
-        .auth-card input {
+        .input-group label {
+            display: block;
+            font-size: 11px;
+            color: var(--accent-cyan);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-group input {
             width: 100%;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid var(--accent-green);
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border-color);
             color: var(--accent-green);
-            text-align: center;
             border-radius: 4px;
             outline: none;
-            font-size: 16px;
-            letter-spacing: 3px;
-            margin-bottom: 15px;
+            font-size: 13px;
         }
 
-        .auth-card input:focus {
-            box-shadow: var(--glow-green);
+        .input-group input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: var(--glow-cyan);
         }
 
-        .auth-btn {
+        .btn {
             width: 100%;
             padding: 12px;
-            background: rgba(0, 255, 102, 0.1);
-            border: 1px solid var(--accent-green);
-            color: var(--accent-green);
+            background: rgba(0, 225, 255, 0.1);
+            border: 1px solid var(--accent-cyan);
+            color: var(--accent-cyan);
             font-weight: bold;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             cursor: pointer;
             border-radius: 4px;
             transition: all 0.2s;
+            margin-top: 10px;
         }
 
-        .auth-btn:hover {
-            background: var(--accent-green);
+        .btn:hover {
+            background: var(--accent-cyan);
             color: #000;
-            box-shadow: var(--glow-green);
+            box-shadow: var(--glow-cyan);
         }
 
-        /* HUD TOP BAR */
-        .hud-top-bar {
-            padding: 12px 20px;
+        .auth-toggle {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #88a0b0;
+            cursor: pointer;
+        }
+
+        .auth-toggle span {
+            color: var(--accent-cyan);
+            text-decoration: underline;
+        }
+
+        /* MAIN HUD INTERFACE */
+        .header {
+            padding: 15px 20px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: rgba(0, 0, 0, 0.4);
-            font-size: 12px;
-            letter-spacing: 1px;
-            color: var(--accent-green);
         }
 
-        /* CAROUSEL NAVIGATION */
-        .system-carousel {
-            padding: 10px 20px;
-            border-bottom: 1px solid var(--border-color);
-            background: rgba(0, 0, 0, 0.2);
+        .logo-container {
             display: flex;
+            align-items: center;
             gap: 15px;
-            overflow-x: auto;
         }
 
-        .carousel-item {
-            padding: 8px 16px;
-            background: rgba(0, 255, 102, 0.05);
-            border: 1px solid rgba(0, 255, 102, 0.2);
-            color: var(--accent-green);
-            border-radius: 20px;
-            font-size: 11px;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: 0.2s;
-        }
-
-        .carousel-item:hover { border-color: var(--accent-green); box-shadow: var(--glow-green); }
-        .carousel-item.active-item { color: #000; background: var(--accent-green); border-color: var(--accent-green); font-weight: bold; }
-
-        /* VIEW SECTIONS */
-        .view-section {
-            flex: 1;
-            display: none;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-        .view-section.active-view {
-            display: flex;
-        }
-
-        /* DASHBOARD GRID (HUD Layout) */
-        .dashboard-grid {
-            flex: 1;
-            display: grid;
-            grid-template-columns: 280px 1fr 280px;
-            gap: 20px;
-            padding: 25px;
-            align-items: center;
-            overflow-y: auto;
-        }
-
-        .hud-box {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 6px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .hud-box h4 {
-            font-size: 12px;
-            color: var(--accent-green);
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 6px;
-            letter-spacing: 1px;
-        }
-
-        .setting-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .setting-group label {
-            font-size: 11px;
-            color: var(--accent-green);
-        }
-
-        .theme-swatches {
-            display: flex;
-            gap: 8px;
-        }
-
-        .swatch {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid #fff;
-        }
-
-        .settings-btn {
-            padding: 8px;
-            background: rgba(0, 255, 102, 0.1);
-            border: 1px solid var(--accent-green);
-            color: var(--accent-green);
-            cursor: pointer;
-            border-radius: 4px;
+        .logo-text {
+            font-size: 16px;
             font-weight: bold;
-            font-size: 11px;
-        }
-
-        .settings-btn:hover { background: var(--accent-green); color: #000; }
-        
-        input[type="range"] { width: 100%; accent-color: var(--accent-green); cursor: pointer; }
-
-        /* CENTRAL REACTOR DISPLAY */
-        .center-reactor {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            text-align: center;
-        }
-
-        .reactor-core {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            border: 2px solid var(--accent-green);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: var(--glow-green);
-            background: rgba(0, 255, 102, 0.05);
-            animation: pulseGlow 3s infinite alternate;
-        }
-
-        .reactor-core img {
-            width: 95px;
-            height: 95px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 10px var(--accent-green));
-        }
-
-        .terminal-launch-btn {
-            padding: 14px 28px;
-            background: rgba(0, 255, 102, 0.12);
-            border: 1px solid var(--accent-green);
-            color: var(--accent-green);
-            font-weight: bold;
+            color: var(--accent-cyan);
             letter-spacing: 2px;
+        }
+
+        .user-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+        }
+
+        .nav-btn {
+            padding: 6px 12px;
+            background: transparent;
+            border: 1px solid rgba(0, 225, 255, 0.3);
+            color: rgba(0, 225, 255, 0.8);
+            font-size: 11px;
             cursor: pointer;
             border-radius: 4px;
-            transition: 0.2s;
         }
 
-        .terminal-launch-btn:hover {
-            background: var(--accent-green);
-            color: #000;
-            box-shadow: var(--glow-green);
+        .nav-btn:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 225, 255, 0.1);
+            color: var(--accent-cyan);
         }
 
-        /* TELEMETRY DATA */
-        .telemetry-data {
-            font-size: 11px;
-            line-height: 1.6;
-            color: rgba(209, 247, 255, 0.8);
-        }
-
-        /* CHAT VIEW */
         .chat-box {
             flex: 1;
-            padding: 25px;
+            padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
 
-        .message { max-width: 80%; padding: 12px 18px; border-radius: 4px; line-height: 1.6; font-size: 14px; border: 1px solid transparent; }
-        .user-msg { align-self: flex-end; background: rgba(0, 255, 102, 0.08); border-color: rgba(0, 255, 102, 0.2); color: #fff; }
-        .bot-msg { align-self: flex-start; background: rgba(0, 0, 0, 0.4); border-color: var(--border-color); color: var(--accent-green); }
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 4px;
+            line-height: 1.5;
+            font-size: 14px;
+            border: 1px solid transparent;
+        }
+
+        .user-msg {
+            align-self: flex-end;
+            background: rgba(0, 225, 255, 0.05);
+            border-color: rgba(0, 225, 255, 0.2);
+            color: #fff;
+        }
+
+        .bot-msg {
+            align-self: flex-start;
+            background: rgba(0, 255, 136, 0.04);
+            border-color: rgba(0, 255, 136, 0.2);
+            color: var(--accent-green);
+        }
 
         .input-area {
-            padding: 18px;
+            padding: 15px;
             border-top: 1px solid var(--border-color);
             display: flex;
-            gap: 12px;
+            gap: 10px;
             background: rgba(0, 0, 0, 0.4);
         }
 
         .input-area input {
             flex: 1;
-            padding: 14px;
+            padding: 12px;
             background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(0, 255, 102, 0.2);
+            border: 1px solid var(--border-color);
             color: var(--accent-green);
             border-radius: 4px;
             outline: none;
@@ -355,311 +294,264 @@
         }
 
         .icon-btn {
-            padding: 14px 18px;
-            background: rgba(0, 255, 102, 0.08);
-            border: 1px solid rgba(0, 255, 102, 0.25);
+            padding: 12px 16px;
+            background: rgba(0, 255, 136, 0.08);
+            border: 1px solid rgba(0, 255, 136, 0.2);
             color: var(--accent-green);
             cursor: pointer;
             border-radius: 4px;
             transition: 0.2s;
         }
 
-        .icon-btn:hover { background: rgba(0, 255, 102, 0.15); border-color: var(--accent-green); box-shadow: var(--glow-green); }
-
-        /* TRANSLATION SECTION */
-        .translation-panel {
-            flex: 1;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            overflow-y: auto;
+        .icon-btn:hover {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: var(--accent-green);
+            box-shadow: var(--glow-green);
         }
 
-        .translation-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            flex: 1;
+        /* SETTINGS MODAL */
+        .modal {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(3, 8, 12, 0.95);
+            z-index: 50;
+            justify-content: center;
+            align-items: center;
         }
 
-        .trans-box {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .trans-box textarea {
-            flex: 1;
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid var(--border-color);
-            color: var(--accent-green);
-            padding: 15px;
+        .modal-content {
+            background: var(--panel-bg);
+            border: 1px solid var(--accent-cyan);
+            padding: 25px;
             border-radius: 4px;
-            resize: none;
-            outline: none;
-            font-size: 14px;
+            width: 90%;
+            max-width: 480px;
+            box-shadow: var(--glow-cyan);
         }
 
-        .api-input-box {
-            background: #000c03;
-            border: 1px solid var(--accent-green);
-            padding: 10px;
-            border-radius: 4px;
+        .modal-header {
             display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 10px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: var(--accent-cyan);
+            letter-spacing: 1px;
         }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--danger-color);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .thinking-dots span {
+            animation: blink 1.4s infinite;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .thinking-dots span:nth-child(2) { animation-delay: .2s; }
+        .thinking-dots span:nth-child(3) { animation-delay: .4s; }
+        @keyframes blink { 0% { opacity: .2; } 20% { opacity: 1; } 100% { opacity: .2; } }
     </style>
 </head>
 <body>
 
-    <div class="main-wrapper">
+    <div id="auth-screen">
+        <div class="auth-card">
+            <h1 id="auth-title">G.I.B.B. LOGIN</h1>
+            <p id="auth-sub">SIGN IN TO YOUR ACCOUNT</p>
+            
+            <div id="auth-error" style="color: var(--danger-color); font-size: 12px; margin-bottom: 10px; display: none;"></div>
 
-        <div id="auth-screen">
-            <div class="auth-card">
-                <div class="logo-ring">
-                    <img src="gibblogo.png" alt="G.I.B.B. Logo" onerror="this.style.display='none'">
+            <div class="input-group" id="name-group" style="display: none;">
+                <label>YOUR NAME</label>
+                <input type="text" id="auth-name" placeholder="User">
+            </div>
+
+            <div class="input-group">
+                <label>EMAIL ADDRESS</label>
+                <input type="email" id="auth-email" placeholder="user@domain.com">
+            </div>
+
+            <div class="input-group">
+                <label>PASSWORD</label>
+                <input type="password" id="auth-password" placeholder="••••••••">
+            </div>
+
+            <button class="btn" id="auth-btn" onclick="handleAuth()">LOGIN</button>
+
+            <div class="auth-toggle" onclick="toggleAuthMode()">
+                <span id="toggle-text">Need an account? Sign Up</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <div class="jarvis-logo">
+                    <div class="ring-outer"></div>
+                    <div class="ring-inner"></div>
+                    <div class="dot-center"></div>
                 </div>
-                <h3>🔐 Enter Authorised Password:</h3>
-                <div id="auth-error" style="color: var(--danger-color); font-size: 11px; margin-bottom: 8px; display: none;"></div>
-                <input type="password" id="auth-password" placeholder="••••••••" onkeydown="if(event.key==='Enter') verifyPassword()">
-                <button class="auth-btn" onclick="verifyPassword()">Initialise G.I.B.B.</button>
+                <div class="logo-text">G.I.B.B. OS</div>
+            </div>
+            <div class="user-status">
+                <span id="display-user">USER: OFFLINE</span>
+                <button class="nav-btn" onclick="openSettings()">⚙️ SETTINGS</button>
+                <button class="nav-btn" style="border-color: var(--danger-color); color: var(--danger-color);" onclick="logout()">LOGOUT</button>
             </div>
         </div>
 
-        <div class="hud-top-bar">
-            <div id="live-datetime">DATE: Thu, 6 Aug 2026 // TIME: --:--:--</div>
-            <div id="fps-res">FPS: 60 // RES: 1396x765</div>
-        </div>
-
-        <div class="system-carousel">
-            <div class="carousel-item active-item" onclick="switchView('dashboard', this)">System HUD</div>
-            <div class="carousel-item" onclick="switchView('chat', this)">Terminal Chat</div>
-            <div class="carousel-item" onclick="switchView('translation', this)">Translation Module</div>
-            <div class="carousel-item" onclick="clearCurrentChat()">Clear History</div>
-            <div class="carousel-item" onclick="lockSystem()">Lock Terminal</div>
-        </div>
-
-        <div class="view-section active-view" id="view-dashboard">
-            <div class="dashboard-grid">
-                <div class="hud-box">
-                    <h4>⚙️ SYSTEM SETTINGS</h4>
-                    
-                    <div class="api-input-box">
-                        <label style="font-size: 11px; color: var(--accent-green); font-weight: bold;">⚡ API Key (Groq)</label>
-                        <input type="password" id="groq-key-input" placeholder="gsk_..." oninput="saveGroqKey(this.value)" style="width: 100%; background: #010a04; color: var(--accent-green); border: 1px solid var(--accent-green); padding: 8px; border-radius: 4px; font-family: inherit; font-size: 0.85rem; outline: none;">
-                    </div>
-
-                    <div class="setting-group">
-                        <label>🎨 HUD Theme / Color</label>
-                        <div class="theme-swatches">
-                            <div class="swatch" style="background: #00ff66;" onclick="setTheme('#00ff66', 'rgba(0,255,100,0.8)')"></div>
-                            <div class="swatch" style="background: #00bfff;" onclick="setTheme('#00bfff', 'rgba(0,191,255,0.8)')"></div>
-                            <div class="swatch" style="background: #ffaa00;" onclick="setTheme('#ffaa00', 'rgba(255,170,0,0.8)')"></div>
-                            <div class="swatch" style="background: #ff3366;" onclick="setTheme('#ff3366', 'rgba(255,51,102,0.8)')"></div>
-                        </div>
-                    </div>
-
-                    <div class="setting-group">
-                        <label>🔊 Audio Mute Toggle</label>
-                        <button class="settings-btn" id="mute-btn" onclick="toggleMute()">MUTE: OFF</button>
-                    </div>
-
-                    <div class="setting-group">
-                        <label>🎚️ Master Volume: <span id="vol-val">100%</span></label>
-                        <input type="range" id="volume-slider" min="0" max="100" value="100" oninput="updateVolume(this.value)">
-                    </div>
-
-                    <div class="setting-group">
-                        <label>💾 Data Core</label>
-                        <button class="settings-btn" style="border-color: var(--danger-color); color: var(--danger-color);" onclick="clearCurrentChat()">Wipe Saved Memory</button>
-                    </div>
-                </div>
-
-                <div class="center-reactor">
-                    <div class="reactor-core">
-                        <img src="gibblogo.png" alt="G.I.B.B." onerror="this.style.display='none'">
-                    </div>
-                    <button class="terminal-launch-btn" onclick="switchView('chat', document.querySelectorAll('.carousel-item')[1])">💬 Terminal Chat</button>
-                    <span style="font-size: 11px; letter-spacing: 2px; color: var(--accent-green); opacity: 0.8;">SYSTEM ONLINE</span>
-                </div>
-
-                <div class="hud-box">
-                    <h4>🌐 TELEMETRY & WEATHER</h4>
-                    <div class="telemetry-data">
-                        <div><strong>LOCATION:</strong> Amsterdam, North Holland, The Netherlands</div>
-                        <div style="margin-top: 8px;"><strong>IP NODE:</strong> 86.54.29.49</div>
-                        <div style="margin-top: 8px;"><strong>ISP:</strong> Black HOST Ltd</div>
-                        <div style="margin-top: 8px;"><strong>ATMOSPHERE:</strong> Optimal / Nominal</div>
-                    </div>
-                </div>
+        <div class="chat-box" id="chat-box">
+            <div class="message bot-msg">
+                System online. Welcome back.
             </div>
         </div>
 
-        <div class="view-section" id="view-chat">
-            <div class="chat-box" id="chat-box">
-                <div class="message bot-msg">
-                    G.I.B.B. neural core initialized. Systems fully operational.
-                </div>
-            </div>
-
-            <div class="input-area">
-                <button class="icon-btn" onclick="toggleTextVoiceInput()" id="mic-btn">🎙️</button>
-                <input type="text" id="user-input" placeholder="Enter message or query..." onkeydown="if(event.key==='Enter') sendMessage()">
-                <button class="icon-btn" onclick="sendMessage()">SEND ➣</button>
-            </div>
+        <div class="input-area">
+            <button class="icon-btn" onclick="toggleVoice()" id="mic-btn">🎙️</button>
+            <input type="text" id="user-input" placeholder="Enter message or ask something..." onkeydown="if(event.key==='Enter') sendMessage()">
+            <button class="icon-btn" onclick="sendMessage()">SEND ➢</button>
         </div>
+    </div>
 
-        <div class="view-section" id="view-translation">
-            <div class="translation-panel">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="color: var(--accent-green); letter-spacing: 1px;">🌐 LINGUISTIC TRANSLATION PROTOCOL</h3>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <label style="font-size: 12px; color: var(--accent-green);">TARGET LANGUAGE:</label>
-                        <select id="target-lang" style="background: rgba(0,0,0,0.6); border: 1px solid var(--accent-green); color: var(--accent-green); padding: 8px; border-radius: 4px; outline: none;">
-                            <option value="Spanish">Spanish</option>
-                            <option value="French">French</option>
-                            <option value="German">German</option>
-                            <option value="Japanese">Japanese</option>
-                            <option value="Mandarin">Mandarin</option>
-                            <option value="Russian">Russian</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="translation-grid">
-                    <div class="trans-box">
-                        <label style="font-size: 11px; color: var(--accent-green);">SOURCE TEXT</label>
-                        <textarea id="source-text" placeholder="Type or paste text to translate here..."></textarea>
-                    </div>
-                    <div class="trans-box">
-                        <label style="font-size: 11px; color: var(--accent-green);">TRANSLATED OUTPUT</label>
-                        <textarea id="output-text" readonly placeholder="Translation will display here..." style="opacity: 0.8;"></textarea>
-                    </div>
-                </div>
-                <button class="terminal-launch-btn" onclick="executeTranslation()">EXECUTE TRANSLATION</button>
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>SYSTEM SETTINGS</h3>
+                <button class="close-btn" onclick="closeSettings()">&times;</button>
             </div>
-        </div>
+            
+            <div class="input-group">
+                <label>GROQ API KEY</label>
+                <input type="password" id="groq-key-input" placeholder="gsk_...">
+            </div>
 
+            <div class="input-group">
+                <label>USER EMAIL</label>
+                <input type="text" id="profile-email-input" readonly style="opacity: 0.6; color: var(--text-color);">
+            </div>
+
+            <button class="btn" onclick="saveSettings()">SAVE SETTINGS</button>
+        </div>
     </div>
 
     <script>
-        const CORRECT_PASSWORD = "gibb"; 
-
+        let isSignUp = false;
+        let currentUser = null;
         let conversationHistory = [];
-        let isMuted = false;
-        let masterVolume = 1.0;
 
+        // Load active session on start
         window.addEventListener('load', () => {
-            setInterval(() => {
-                const now = new Date();
-                const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                const dStr = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-                const tStr = now.toTimeString().split(' ')[0];
-                document.getElementById('live-datetime').innerText = `DATE: ${dStr} // TIME: ${tStr}`;
-            }, 1000);
-
-            window.addEventListener('resize', () => {
-                document.getElementById('fps-res').innerText = `FPS: 60 // RES: ${window.innerWidth}x${window.innerHeight}`;
-            });
-            document.getElementById('fps-res').innerText = `FPS: 60 // RES: ${window.innerWidth}x${window.innerHeight}`;
-
-            const savedKey = localStorage.getItem('gibb_apikey') || "";
-            document.getElementById('groq-key-input').value = savedKey;
-
-            const savedHistory = localStorage.getItem('gibb_chat_history');
-            if (savedHistory) {
-                conversationHistory = JSON.parse(savedHistory);
-                conversationHistory.forEach(msg => {
-                    if (msg.role !== 'system') {
-                        appendMessage(msg.content, msg.role === 'user' ? 'user-msg' : 'bot-msg', false);
-                    }
-                });
-            } else {
-                conversationHistory = [{ role: "system", content: "You are G.I.B.B., an advanced AI terminal assistant. Keep responses clear, concise, and professional." }];
-            }
-
-            if (sessionStorage.getItem('gibb_authenticated') === 'true') {
-                document.getElementById('auth-screen').style.display = 'none';
+            const savedSession = localStorage.getItem('gibb_current_user');
+            if (savedSession) {
+                currentUser = JSON.parse(savedSession);
+                initInterface();
             }
         });
 
-        function verifyPassword() {
-            const pwd = document.getElementById('auth-password').value;
+        function toggleAuthMode() {
+            isSignUp = !isSignUp;
+            document.getElementById('auth-title').innerText = isSignUp ? "CREATE ACCOUNT" : "G.I.B.B. LOGIN";
+            document.getElementById('auth-sub').innerText = isSignUp ? "REGISTER A NEW PROFILE" : "SIGN IN TO YOUR ACCOUNT";
+            document.getElementById('auth-btn').innerText = isSignUp ? "CREATE ACCOUNT" : "LOGIN";
+            document.getElementById('name-group').style.display = isSignUp ? "block" : "none";
+            document.getElementById('toggle-text').innerText = isSignUp ? "Already have an account? Login" : "Need an account? Sign Up";
+            document.getElementById('auth-error').style.display = "none";
+        }
+
+        function handleAuth() {
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
+            const name = document.getElementById('auth-name').value.trim() || "User";
             const errDiv = document.getElementById('auth-error');
 
-            if (pwd === CORRECT_PASSWORD) {
-                sessionStorage.setItem('gibb_authenticated', 'true');
-                document.getElementById('auth-screen').style.display = 'none';
-                speakResponse("System unlocked. Welcome back.");
-            } else {
-                errDiv.innerText = "ACCESS DENIED: INVALID PASSCODE";
+            if (!email || !password) {
+                errDiv.innerText = "Please enter both Email and Password.";
                 errDiv.style.display = "block";
-                document.getElementById('auth-password').value = "";
+                return;
             }
-        }
 
-        function lockSystem() {
-            sessionStorage.removeItem('gibb_authenticated');
-            document.getElementById('auth-password').value = "";
-            document.getElementById('auth-error').style.display = "none";
-            document.getElementById('auth-screen').style.display = 'flex';
-        }
+            let accounts = JSON.parse(localStorage.getItem('gibb_accounts')) || {};
 
-        function switchView(viewName, element) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
-            document.querySelectorAll('.carousel-item').forEach(el => el.classList.remove('active-item'));
-
-            if (viewName === 'dashboard') {
-                document.getElementById('view-dashboard').classList.add('active-view');
-            } else if (viewName === 'chat') {
-                document.getElementById('view-chat').classList.add('active-view');
-            } else if (viewName === 'translation') {
-                document.getElementById('view-translation').classList.add('active-view');
+            if (isSignUp) {
+                if (accounts[email]) {
+                    errDiv.innerText = "An account with this email already exists.";
+                    errDiv.style.display = "block";
+                    return;
+                }
+                accounts[email] = { name, email, password, groqApiKey: "" };
+                localStorage.setItem('gibb_accounts', JSON.stringify(accounts));
+                currentUser = accounts[email];
+            } else {
+                if (!accounts[email] || accounts[email].password !== password) {
+                    errDiv.innerText = "Invalid credentials. Check your email and password.";
+                    errDiv.style.display = "block";
+                    return;
+                }
+                currentUser = accounts[email];
             }
-            if (element) element.classList.add('active-item');
+
+            localStorage.setItem('gibb_current_user', JSON.stringify(currentUser));
+            initInterface();
         }
 
-        function saveGroqKey(val) {
-            localStorage.setItem('gibb_apikey', val.trim());
+        function initInterface() {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('display-user').innerText = `USER: ${currentUser.name.toUpperCase()} (${currentUser.email})`;
+            document.getElementById('groq-key-input').value = currentUser.groqApiKey || "";
+            document.getElementById('profile-email-input').value = currentUser.email;
+
+            // System prompt
+            conversationHistory = [
+                {
+                    role: "system",
+                    content: `You are G.I.B.B., a smart, helpful AI assistant. Address the user as ${currentUser.name}. Keep your responses direct, clear, intelligent, and concise.`
+                }
+            ];
+
+            appendMessage(`Welcome back, ${currentUser.name}. How can I help you today?`, 'bot-msg');
         }
 
-        function clearCurrentChat() {
-            conversationHistory = [conversationHistory[0]];
-            localStorage.removeItem('gibb_chat_history');
-            document.getElementById('chat-box').innerHTML = '<div class="message bot-msg">Memory cleared. Ready for new input.</div>';
+        function logout() {
+            localStorage.removeItem('gibb_current_user');
+            location.reload();
         }
 
-        function setTheme(color, glow) {
-            document.documentElement.style.setProperty('--accent-green', color);
-            document.documentElement.style.setProperty('--glow-green', `0 0 12px ${glow}`);
+        function openSettings() {
+            document.getElementById('settings-modal').style.display = 'flex';
         }
 
-        function toggleMute() {
-            isMuted = !isMuted;
-            document.getElementById('mute-btn').innerText = `MUTE: ${isMuted ? 'ON' : 'OFF'}`;
+        function closeSettings() {
+            document.getElementById('settings-modal').style.display = 'none';
         }
 
-        function updateVolume(val) {
-            masterVolume = val / 100;
-            document.getElementById('vol-val').innerText = `${val}%`;
+        function saveSettings() {
+            const key = document.getElementById('groq-key-input').value.trim();
+            currentUser.groqApiKey = key;
+
+            let accounts = JSON.parse(localStorage.getItem('gibb_accounts')) || {};
+            if (accounts[currentUser.email]) {
+                accounts[currentUser.email].groqApiKey = key;
+                localStorage.setItem('gibb_accounts', JSON.stringify(accounts));
+            }
+            localStorage.setItem('gibb_current_user', JSON.stringify(currentUser));
+
+            closeSettings();
+            appendMessage("Settings saved successfully. Groq API Key updated.", 'bot-msg');
         }
 
-        function appendMessage(text, className, save = true) {
+        function appendMessage(text, className) {
             const chatBox = document.getElementById('chat-box');
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${className}`;
             msgDiv.innerHTML = text;
             chatBox.appendChild(msgDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
-
-            if (save) {
-                const role = className.includes('user-msg') ? 'user' : 'assistant';
-                conversationHistory.push({ role, content: text });
-                localStorage.setItem('gibb_chat_history', JSON.stringify(conversationHistory));
-            }
             return msgDiv;
         }
 
@@ -671,20 +563,20 @@
             appendMessage(text, 'user-msg');
             inputField.value = '';
 
-            const apiKey = localStorage.getItem('gibb_apikey');
-            if (!apiKey) {
-                appendMessage("API key missing. Please enter your Groq key in the System HUD settings.", 'bot-msg');
-                speakResponse("API key missing.");
+            if (!currentUser.groqApiKey) {
+                appendMessage("Please open ⚙️ SETTINGS and save your Groq API key to start chatting.", 'bot-msg');
+                speak("API key missing. Please enter your Groq API key in system settings.");
                 return;
             }
 
-            let loadingDots = appendMessage('...', 'bot-msg', false);
+            conversationHistory.push({ role: "user", content: text });
+            let loadingDots = appendMessage('<div class="thinking-dots"><span>.</span><span>.</span><span>.</span></div>', 'bot-msg');
 
             try {
                 let res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
                     headers: {
-                        "Authorization": `Bearer ${apiKey}`,
+                        "Authorization": `Bearer ${currentUser.groqApiKey}`,
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
@@ -700,77 +592,34 @@
 
                 if (data.choices && data.choices.length > 0) {
                     let reply = data.choices[0].message.content;
+                    conversationHistory.push({ role: "assistant", content: reply });
                     appendMessage(reply, 'bot-msg');
-                    speakResponse(reply);
+                    speak(reply);
                 } else {
-                    appendMessage("System Error: Invalid AI response.", 'bot-msg');
+                    appendMessage("Error: AI returned invalid response format.", 'bot-msg');
                 }
             } catch (err) {
                 document.getElementById('chat-box').removeChild(loadingDots);
-                appendMessage("Connection Error: Unable to reach server cluster.", 'bot-msg');
+                appendMessage("Connection error: Unable to reach Groq server.", 'bot-msg');
             }
         }
 
-        async function executeTranslation() {
-            const sourceText = document.getElementById('source-text').value.trim();
-            const targetLang = document.getElementById('target-lang').value;
-            const outputField = document.getElementById('output-text');
-            const apiKey = localStorage.getItem('gibb_apikey');
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                let cleanText = text.replace(/[*#_`]/g, '');
+                let utter = new SpeechSynthesisUtterance(cleanText);
+                utter.rate = 1.0;
+                utter.pitch = 0.9;
+                window.speechSynthesis.speak(utter);
+            }
+        }
 
-            if (!sourceText) {
-                outputField.value = "Please enter text to translate.";
+        function toggleVoice() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert("Speech recognition is not supported on this browser.");
                 return;
             }
-
-            if (!apiKey) {
-                outputField.value = "Error: Groq API key missing in System HUD settings.";
-                return;
-            }
-
-            outputField.value = "Translating...";
-
-            try {
-                let res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${apiKey}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
-                        messages: [
-                            { role: "system", content: `Translate the following text accurately into ${targetLang}. Return ONLY the translated text without extra explanation.` },
-                            { role: "user", content: sourceText }
-                        ],
-                        temperature: 0.3,
-                        max_tokens: 500
-                    })
-                });
-
-                let data = await res.json();
-                if (data.choices && data.choices.length > 0) {
-                    outputField.value = data.choices[0].message.content;
-                } else {
-                    outputField.value = "Translation failed.";
-                }
-            } catch (err) {
-                outputField.value = "Connection error during translation.";
-            }
-        }
-
-        function speakResponse(text) {
-            if (isMuted || !('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            let cleanText = text.replace(/[*#_`]/g, '');
-            let utter = new SpeechSynthesisUtterance(cleanText);
-            utter.rate = 1.0; 
-            utter.pitch = 0.95;
-            utter.volume = masterVolume;
-            window.speechSynthesis.speak(utter);
-        }
-
-        function toggleTextVoiceInput() {
-            if (!('webkitSpeechRecognition' in window)) { alert("Speech recognition not supported."); return; }
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const recognition = new SpeechRecognition();
             recognition.lang = 'en-US';
@@ -794,4 +643,3 @@
     </script>
 </body>
 </html>
-
