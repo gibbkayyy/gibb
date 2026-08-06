@@ -677,12 +677,15 @@
         });
 
         // 100% UNSTOPPABLE PERPETUAL MICROPHONE RECOGNITION ENGINE CONNECTED TO GROQ & VOICE CONTROL WAKE
+        let lastProcessedTranscript = '';
+        let lastProcessedTime = 0;
+
         function initPerpetualListeningEngine() {
             if (!SpeechRecognition) return;
             
             globalRecognition = new SpeechRecognition();
             globalRecognition.continuous = true;
-            globalRecognition.interimResults = false; // Set to false so it only processes final distinct utterances, eliminating double typing
+            globalRecognition.interimResults = false; 
             globalRecognition.lang = 'en-US';
 
             globalRecognition.onresult = async (event) => {
@@ -692,6 +695,15 @@
                 }
                 
                 const lowerText = fullSentence.toLowerCase().trim();
+                const now = Date.now();
+
+                // Prevent duplicate duplicate processing of the exact same sentence spoken back-to-back within 4 seconds
+                if (lowerText === lastProcessedTranscript && (now - lastProcessedTime < 4000)) {
+                    return;
+                }
+
+                lastProcessedTranscript = lowerText;
+                lastProcessedTime = now;
                 
                 const transcriptDisplay = document.getElementById('voice-transcript');
                 if (transcriptDisplay && document.getElementById('voice-screen').classList.contains('active')) {
@@ -701,7 +713,7 @@
                 const honorificTitle = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
                 const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
 
-                // Check if user says "Hey Gibb" or "Activate Voice Control" anywhere to trigger Voice Control screen activation
+                // Check if user says "Hey Gibb" or "Activate Voice Control" to trigger Voice Control activation
                 if (lowerText.includes("hey gibb") || lowerText.includes("hey, gibb") || lowerText.includes("activate voice control")) {
                     try { globalRecognition.stop(); } catch(e){}
                     
@@ -710,10 +722,10 @@
                     return;
                 }
 
-                // If Voice Control screen is open, route spoken questions directly to Groq API
+                // If Voice Control screen is open, route any user query directly to Groq API
                 if (document.getElementById('voice-screen').classList.contains('active') && lowerText.length > 0) {
                     let query = fullSentence.trim();
-                    if (query.length > 3 && !query.toLowerCase().includes("voice control is active")) {
+                    if (query.length > 1 && !query.toLowerCase().includes("voice control is active")) {
                         try { globalRecognition.stop(); } catch(e){}
                         
                         if (!db.savedKey || !db.savedKey.startsWith('gsk_')) {
@@ -789,7 +801,7 @@
             if (!apiKey) return "Groq API key is missing or invalid.";
 
             let messageContext = [
-                { role: "system", content: "You are G.I.B.B., a futuristic, highly intelligent AI system assistant with full conversational context memory." }
+                { role: "system", content: "You are G.I.B.B., a futuristic, highly intelligent AI system assistant with full conversational context memory. Answer questions directly, accurately, and concisely." }
             ];
 
             if (db.chatHistory && db.chatHistory.length > 0) {
