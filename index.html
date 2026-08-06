@@ -545,7 +545,6 @@
     </div>
 
     <script>
-        // Set your desired passcode here:
         const CORRECT_PASSWORD = "gibb"; 
 
         let conversationHistory = [];
@@ -553,7 +552,6 @@
         let masterVolume = 1.0;
 
         window.addEventListener('load', () => {
-            // Live clock updater
             setInterval(() => {
                 const now = new Date();
                 const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -563,13 +561,11 @@
                 document.getElementById('live-datetime').innerText = `DATE: ${dStr} // TIME: ${tStr}`;
             }, 1000);
 
-            // Dynamic resolution tracking
             window.addEventListener('resize', () => {
                 document.getElementById('fps-res').innerText = `FPS: 60 // RES: ${window.innerWidth}x${window.innerHeight}`;
             });
             document.getElementById('fps-res').innerText = `FPS: 60 // RES: ${window.innerWidth}x${window.innerHeight}`;
 
-            // Load saved API key & chat history
             const savedKey = localStorage.getItem('gibb_apikey') || "";
             document.getElementById('groq-key-input').value = savedKey;
 
@@ -585,7 +581,6 @@
                 conversationHistory = [{ role: "system", content: "You are G.I.B.B., an advanced AI terminal assistant. Keep responses clear, concise, and professional." }];
             }
 
-            // Check if already authenticated in this tab session
             if (sessionStorage.getItem('gibb_authenticated') === 'true') {
                 document.getElementById('auth-screen').style.display = 'none';
             }
