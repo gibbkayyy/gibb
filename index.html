@@ -24,7 +24,7 @@
             background-size: 100% 100%, 40px 40px, 40px 40px;
         }
 
-        /* --- Replaced Cinematic Loading Screen (Stark HUD Terminal Boot) --- */
+        /* --- Terminal Boot Sequence Loading Screen --- */
         #loading-screen {
             position: fixed;
             top: 0;
@@ -71,7 +71,7 @@
             background: radial-gradient(circle, rgba(0,255,100,0.05) 0%, rgba(1,10,4,1) 80%);
         }
         #login-screen img {
-            width: 320px; /* Enormously bigger logo */
+            width: 320px;
             filter: drop-shadow(0 0 35px rgba(0, 255, 100, 0.9));
             animation: float 3s ease-in-out infinite;
         }
@@ -129,7 +129,7 @@
             font-size: 0.85rem;
         }
 
-        /* --- Stark HUD Next-Gen Carousel Menu Screen --- */
+        /* --- Stark HUD Carousel Menu Screen --- */
         #home-screen {
             display: none;
             flex-direction: column;
@@ -157,7 +157,6 @@
             box-shadow: 0 0 10px rgba(0,255,100,0.1);
         }
         
-        /* Layout split: Logo Right, Carousel Left */
         .hud-main-layout {
             display: flex;
             flex: 1;
@@ -172,7 +171,7 @@
             justify-content: center;
         }
         .hud-logo-container img {
-            width: 380px; /* Extremely large, dominant logo on the right */
+            width: 380px;
             filter: drop-shadow(0 0 45px rgba(0, 255, 100, 0.95));
             animation: pulse 3s infinite alternate;
         }
@@ -181,7 +180,6 @@
             100% { transform: scale(1.04); filter: drop-shadow(0 0 55px rgba(0, 255, 100, 1)); }
         }
 
-        /* Carousel Menu Container on the Left */
         .carousel-container {
             height: 320px;
             width: 380px;
@@ -220,7 +218,6 @@
             white-space: nowrap;
         }
 
-        /* Dynamic Carousel State Styles */
         .carousel-item.active {
             transform: scale(1.18);
             background: rgba(0, 255, 100, 0.15);
@@ -261,7 +258,7 @@
             box-shadow: 0 0 20px rgba(0, 255, 100, 0.2);
         }
         header img {
-            height: 55px; /* Bigger logo in headers */
+            height: 55px;
             filter: drop-shadow(0 0 10px rgba(0,255,100,0.6));
         }
         .back-home {
@@ -450,9 +447,9 @@
             <div class="message bot-msg">G.I.B.B. core online. Awaiting queries, sir.</div>
         </div>
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="Query web databases, mathematics, science..." onkeypress="handleKeyPress(event)">
+            <input type="text" id="user-input" placeholder="Chat with G.I.B.B. or query web databases..." onkeypress="handleKeyPress(event)">
             <button onclick="sendMessage()">Enter</button>
-            <button onclick="startListening('chat')" title="Voice Input">🎙️ Voice</button>
+            <button class="voice-btn-designed" onclick="startListening('chat')">🎙️ Voice</button>
         </div>
     </div>
 
@@ -478,9 +475,7 @@
                     <option value="en">English (Reverse Translate)</option>
                 </select>
                 <button class="translate-exec-btn" onclick="performTranslation()">Execute Translation</button>
-                <button class="voice-btn-designed" onclick="startListening('translate')">
-                    🎙️ Voice Input
-                </button>
+                <button class="voice-btn-designed" onclick="startListening('translate')">🎙️ Voice Input</button>
             </div>
             <div style="display: flex; gap: 20px;">
                 <div class="translate-box">
@@ -498,10 +493,8 @@
     <script>
         const PASSWORD = "prki3210";
         let jarvisVoice = null;
-        let currentCarouselIndex = 1; // 0: Translate, 1: Chat, 2: Detect
-        let activeVoicesCache = [];
+        let currentCarouselIndex = 1;
 
-        // Terminal Boot Sequence Animation handler
         window.addEventListener("load", () => {
             runBootSequence();
             initVoices();
@@ -538,7 +531,6 @@
         }
 
         function measureTelemetry() {
-            // Live FPS & Screen Resolution Detection
             let resWidth = window.screen.width || window.innerWidth;
             let resHeight = window.screen.height || window.innerHeight;
             let telemetryElem = document.getElementById("hud-telemetry");
@@ -563,13 +555,12 @@
         // --- Forced Deep Male Voice & Zero Delay Speech Engine ---
         function initVoices() {
             if (!('speechSynthesis' in window)) return;
-            activeVoicesCache = window.speechSynthesis.getVoices();
+            let voices = window.speechSynthesis.getVoices();
             
-            // Aggressively search for authentic masculine speech engines
-            jarvisVoice = activeVoicesCache.find(v => 
-                (v.name.includes("Male") || v.name.includes("David") || v.name.includes("George") || v.name.includes("Oliver") || v.name.includes("Daniel") || v.name.includes("Mark") || v.name.includes("James") || v.name.includes("Microsoft Zira") === false && v.name.includes("Google") && v.name.includes("en-GB")) && 
+            jarvisVoice = voices.find(v => 
+                (v.name.includes("Male") || v.name.includes("David") || v.name.includes("George") || v.name.includes("Oliver") || v.name.includes("Daniel") || v.name.includes("Mark") || v.name.includes("James") || (v.name.includes("Google") && v.name.includes("en-GB"))) && 
                 v.lang.startsWith("en")
-            ) || activeVoicesCache.find(v => v.lang.startsWith("en") && !v.name.toLowerCase().includes("female") && !v.name.toLowerCase().includes("zira") && !v.name.toLowerCase().includes("hazel")) || activeVoicesCache[0];
+            ) || voices.find(v => v.lang.startsWith("en") && !v.name.toLowerCase().includes("female") && !v.name.toLowerCase().includes("zira") && !v.name.toLowerCase().includes("hazel")) || voices[0];
         }
 
         if ('speechSynthesis' in window) {
@@ -580,11 +571,11 @@
             if (!text) return;
             if (!('speechSynthesis' in window)) return;
             
-            window.speechSynthesis.cancel(); // Instantly cancels queue to eliminate all latency/stutter
+            window.speechSynthesis.cancel();
             
             let speech = new SpeechSynthesisUtterance(text);
-            speech.rate = 1.12; // Snappy instant response rate
-            speech.pitch = 0.65; // Deep resonant male timbre
+            speech.rate = 1.12;
+            speech.pitch = 0.65;
             
             if (!jarvisVoice) initVoices();
             if (jarvisVoice) speech.voice = jarvisVoice;
@@ -606,7 +597,6 @@
             }
         }
 
-        // --- Interactive Carousel Navigation System ---
         function setupCarouselInteraction() {
             let container = document.getElementById("carousel-box");
             let startY = 0;
@@ -614,8 +604,8 @@
             container.addEventListener("touchstart", (e) => { startY = e.touches[0].clientY; }, {passive: true});
             container.addEventListener("touchend", (e) => {
                 let diff = e.changedTouches[0].clientY - startY;
-                if (diff > 40) moveCarousel(-1); // Swiped down -> previous
-                else if (diff < -40) moveCarousel(1); // Swiped up -> next
+                if (diff > 40) moveCarousel(-1);
+                else if (diff < -40) moveCarousel(1);
             });
 
             container.addEventListener("wheel", (e) => {
@@ -630,15 +620,13 @@
         function moveCarousel(direction) {
             currentCarouselIndex += direction;
             if (currentCarouselIndex < 0) currentCarouselIndex = 2;
-            if (currentCarouselIndex > 2) currentCarouselIndex = 2; // Restrict bounds
+            if (currentCarouselIndex > 2) currentCarouselIndex = 2;
             updateCarouselView();
         }
 
         function selectMenuItem(index) {
             currentCarouselIndex = index;
             updateCarouselView();
-            
-            // Trigger app click action if middle item is clicked
             setTimeout(() => {
                 if (currentCarouselIndex === 0) openApp('translate');
                 else if (currentCarouselIndex === 1) openApp('chat');
@@ -649,8 +637,6 @@
         function updateCarouselView() {
             let track = document.getElementById("carousel-track");
             let items = track.children;
-            
-            // Calculate pixel shift to center the active item (each item slot is ~75px)
             let offset = (1 - currentCarouselIndex) * 75;
             track.style.transform = `translateY(${offset}px)`;
 
@@ -714,14 +700,21 @@
             }
         }
 
-        // --- Smart Keyless Web Search & AI Engine ---
+        // --- Upgraded Conversational Intelligence & Knowledge Core ---
         async function processJarvisAI(input) {
             let lower = input.toLowerCase().trim();
             let response = "";
 
+            // 1. Conversational greetings & identity rules
             if (lower === "hi" || lower === "hello" || lower === "hey" || lower === "greetings") {
                 let savedUser = localStorage.getItem("user_profile_name");
-                response = savedUser ? `Systems online. Welcome back, ${savedUser}, sir.` : `Systems online. Awaiting your command, sir.`;
+                response = savedUser ? `Hello! Welcome back, ${savedUser}, sir.` : `Hello! My name is G.I.B.B.! What can I do for you today, sir?`;
+            }
+            else if (lower.includes("what is your name") || lower.includes("who are you")) {
+                response = `My name is G.I.B.B.! I am your advanced artificial intelligence neural assistant.`;
+            }
+            else if (lower.includes("what can you do") || lower.includes("your capabilities") || lower.includes("help me")) {
+                response = `Here is everything G.I.B.B. can do: I can chat with you naturally, remember personal details, execute instant calculations, perform multilingual translations across global languages, fetch live web telemetry and database summaries, and monitor system diagnostics in real-time, sir.`;
             }
             else if (lower.includes("remember me")) {
                 let savedUser = localStorage.getItem("user_profile_name");
@@ -769,9 +762,9 @@
                 let data = await res.json();
                 
                 if (data.AbstractText) {
-                    return data.AbstractText.split('.')[0] + '.';
+                    return data.AbstractText;
                 } else if (data.RelatedTopics && data.RelatedTopics.length > 0 && data.RelatedTopics[0].Text) {
-                    return data.RelatedTopics[0].Text.split('.')[0] + '.';
+                    return data.RelatedTopics[0].Text;
                 } else {
                     return `Live search query analyzed for "${query}". Telemetry verified, sir.`;
                 }
@@ -807,7 +800,7 @@
             }
         }
 
-        // --- Voice-to-Text Microphone Integration (Supports Chat & Translation) ---
+        // --- Voice-to-Text Microphone Integration ---
         function startListening(targetApp) {
             window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
