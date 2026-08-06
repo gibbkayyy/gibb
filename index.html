@@ -3,57 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G.I.B.B. Multi-Modal Matrix</title>
+    <title>G.I.B.B.</title>
+    <link rel="icon" type="image/png" href="gibblogo.png">
     <style>
-        body {
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
             background-color: #031409;
             color: #00ff66;
             font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-            padding: 20px;
+            overflow: hidden;
+            background-image: linear-gradient(rgba(0, 255, 100, 0.05) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0, 255, 100, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* --- Login Screen --- */
+        #login-screen {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
-            box-sizing: border-box;
-            background-image: linear-gradient(rgba(0, 255, 100, 0.08) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0, 255, 100, 0.08) 1px, transparent 1px);
-            background-size: 30px 30px;
+            gap: 20px;
+            z-index: 10;
+            position: relative;
         }
-        .container {
-            width: 100%;
-            max-width: 650px;
-            display: flex;
-            flex-direction: column;
-            height: 90vh;
+        #login-screen img {
+            width: 120px;
+            filter: drop-shadow(0 0 15px rgba(0, 255, 100, 0.6));
+        }
+        #login-screen input {
+            background-color: #041f0e;
+            color: #00ff66;
             border: 1px solid #00ff66;
-            background-color: #020d06;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+            -webkit-text-security: disc; /* Hides password visually completely */
+        }
+        #login-screen button {
+            background-color: #041f0e;
+            color: #00ff66;
+            border: 1px solid #00ff66;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: 0.3s;
+            box-shadow: 0 0 10px rgba(0, 255, 100, 0.3);
+        }
+        #login-screen button:hover {
+            background-color: #00ff66;
+            color: #031409;
+            box-shadow: 0 0 25px rgba(0, 255, 100, 0.9);
+        }
+        #error-msg {
+            color: #ff3333;
+            display: none;
+            text-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+        }
+
+        /* --- Transition / Home Screen --- */
+        #home-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 25px;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        #home-screen img {
+            width: 150px;
+            filter: drop-shadow(0 0 20px rgba(0, 255, 100, 0.8));
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(0, 255, 100, 0.6)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(0, 255, 100, 1)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(0, 255, 100, 0.6)); }
+        }
+        .menu-grid {
+            display: flex;
+            gap: 20px;
+        }
+        .menu-btn {
+            background-color: #041f0e;
+            color: #00ff66;
+            border: 1px solid #00ff66;
+            padding: 15px 30px;
             border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 255, 100, 0.4);
-            overflow: hidden;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1.1rem;
+            transition: 0.3s;
+            box-shadow: 0 0 12px rgba(0, 255, 100, 0.3);
+        }
+        .menu-btn:hover {
+            background-color: #00ff66;
+            color: #031409;
+            box-shadow: 0 0 25px rgba(0, 255, 100, 0.9);
+        }
+        .menu-btn.disabled {
+            border-color: #004411;
+            color: #006622;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* --- Full Screen App Containers --- */
+        .app-view {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            box-sizing: border-box;
         }
         header {
             background-color: #041f0e;
-            padding: 15px;
+            padding: 15px 25px;
             border-bottom: 1px solid #00ff66;
-            text-align: center;
-            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             font-size: 1.2rem;
-            text-shadow: 0 0 10px rgba(0, 255, 100, 0.6);
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(0, 255, 100, 0.2);
         }
+        header img {
+            height: 35px;
+        }
+        .back-home {
+            background: none;
+            border: 1px solid #00ff66;
+            color: #00ff66;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .back-home:hover {
+            background-color: #00ff66;
+            color: #031409;
+        }
+
         #chat-box {
             flex: 1;
-            padding: 15px;
+            padding: 25px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
         .message {
-            padding: 10px;
-            border-radius: 6px;
-            max-width: 80%;
+            padding: 14px 18px;
+            border-radius: 8px;
+            max-width: 75%;
             word-wrap: break-word;
+            font-size: 1.05rem;
+            line-height: 1.4;
         }
         .user-msg {
             background-color: #041f0e;
@@ -62,82 +178,152 @@
             color: #ffffff;
         }
         .bot-msg {
-            background-color: #031409;
+            background-color: #020d06;
             border: 1px solid #00ff66;
             align-self: flex-start;
             color: #00ff66;
+            box-shadow: 0 0 10px rgba(0, 255, 100, 0.2);
         }
         .input-area {
             display: flex;
-            padding: 10px;
+            padding: 20px;
             background-color: #041f0e;
             border-top: 1px solid #00ff66;
-            gap: 8px;
+            gap: 12px;
         }
-        input, button {
+        .input-area input {
+            flex: 1;
             background-color: #031409;
             color: #00ff66;
             border: 1px solid #00ff66;
-            padding: 10px;
+            padding: 14px;
             border-radius: 6px;
             font-family: inherit;
+            font-size: 1rem;
+            outline: none;
         }
-        input {
-            flex: 1;
-        }
-        button {
+        .input-area button {
+            background-color: #031409;
+            color: #00ff66;
+            border: 1px solid #00ff66;
+            padding: 0 22px;
+            border-radius: 6px;
             cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
             transition: 0.3s;
         }
-        button:hover {
+        .input-area button:hover {
             background-color: #00ff66;
             color: #031409;
             box-shadow: 0 0 15px rgba(0, 255, 100, 0.8);
-        }
-        #login-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            gap: 15px;
         }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <h2>🔒 G.I.B.B. Security Clearance</h2>
-        <input type="password" id="password-input" placeholder="Enter password (prki3210)...">
-        <button onclick="checkPassword()">Unlock System</button>
-        <p id="error-msg" style="color: #ff3333; display: none;">Incorrect Password.</p>
+        <img src="gibblogo.png" alt="G.I.B.B. Logo">
+        <h3>🔒 Enter Authorised Password:</h3>
+        <input type="text" id="password-input" placeholder="••••••••">
+        <button onclick="checkPassword()">Initialise G.I.B.B.</button>
+        <p id="error-msg">Access Denied. Incorrect Security Protocol.</p>
     </div>
 
-    <div class="container" id="app-container" style="display: none;">
-        <header>🤖 G.I.B.B. Multi-Modal Matrix (Text & Speech)</header>
+    <div id="home-screen">
+        <img src="gibblogo.png" alt="G.I.B.B. Logo">
+        <h2 style="text-shadow: 0 0 15px rgba(0, 255, 100, 0.6);">G.I.B.B. SYSTEM ARCHITECTURE ONLINE</h2>
+        <div class="menu-grid">
+            <button class="menu-btn" onclick="openApp('chat')">💬 Terminal Chat</button>
+            <button class="menu-btn" onclick="openApp('translate')">🌐 Translation Matrix</button>
+            <button class="menu-btn disabled">🛡️ G.I.B.B. Detect (Coming Soon)</button>
+        </div>
+    </div>
+
+    <div class="app-view" id="chat-view">
+        <header>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <img src="gibblogo.png" alt="Logo">
+                <span>G.I.B.B. Neural Interface</span>
+            </div>
+            <button class="back-home" onclick="goHome()">🏠 Home</button>
+        </header>
         <div id="chat-box">
-            <div class="message bot-msg">Systems online. Text-to-Text and Speech-to-Speech active.</div>
+            <div class="message bot-msg">G.I.B.B. core online. Awaiting data inputs or queries, sir.</div>
         </div>
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="Type text or click mic to speak..." onkeypress="handleKeyPress(event)">
-            <button onclick="sendMessage()">Send</button>
-            <button onclick="startListening()" title="Speech to Text (Microphone)">🎙️</button>
-            <button onclick="speakLast()" title="Text to Speech (Read Aloud)">🔊</button>
+            <input type="text" id="user-input" placeholder="Query mathematics, language arts, or web databases..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Transmit</button>
+            <button onclick="startListening()" title="Voice Input">🎙️</button>
+        </div>
+    </div>
+
+    <div class="app-view" id="translate-view">
+        <header>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <img src="gibblogo.png" alt="Logo">
+                <span>G.I.B.B. Translation Matrix</span>
+            </div>
+            <button class="back-home" onclick="goHome()">🏠 Home</button>
+        </header>
+        <div id="chat-box" style="justify-content: center; align-items: center;">
+            <h2 style="text-shadow: 0 0 10px rgba(0,255,100,0.5);">Multilingual Translation Protocol Active</h2>
+            <p>Input query strings in the main terminal interface for real-time translation mapping.</p>
         </div>
     </div>
 
     <script>
         const PASSWORD = "prki3210";
-        let lastResponseText = "Systems online.";
+        let jarvisVoice = null;
+
+        // Initialize unique male non-generic voice selection
+        function loadVoices() {
+            let voices = window.speechSynthesis.getVoices();
+            // Look for advanced deep/natural male voices (like Google UK English Male, Microsoft David, or natural variants)
+            jarvisValue = voices.find(v => v.name.includes("Male") || v.name.includes("David") || v.name.includes("UK English Male") || v.name.includes("George")) || voices[0];
+        }
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+
+        function speakJarvis(text) {
+            if (!text) return;
+            window.speechSynthesis.cancel(); // Stop any overlapping speech
+            let speech = new SpeechSynthesisUtterance(text);
+            speech.rate = 1.0;
+            speech.pitch = 0.85; // Lower pitch for a mature, sophisticated male artificial intelligence tone
+            if (jarvisValue) speech.voice = jarvisValue;
+            window.speechSynthesis.speak(speech);
+        }
 
         function checkPassword() {
             let val = document.getElementById("password-input").value;
             if (val === PASSWORD) {
                 document.getElementById("login-screen").style.display = "none";
-                document.getElementById("app-container").style.display = "flex";
+                let home = document.getElementById("home-screen");
+                home.style.display = "flex";
+                setTimeout(() => { home.style.opacity = "1"; }, 50);
+                
+                // Jarvis startup voice sequence
+                speakJarvis("Systems online");
             } else {
                 document.getElementById("error-msg").style.display = "block";
             }
+        }
+
+        function openApp(appName) {
+            document.getElementById("home-screen").style.display = "none";
+            if (appName === 'chat') {
+                document.getElementById("chat-view").style.display = "flex";
+            } else if (appName === 'translate') {
+                document.getElementById("translate-view").style.display = "flex";
+            }
+        }
+
+        function goHome() {
+            document.getElementById("chat-view").style.display = "none";
+            document.getElementById("translate-view").style.display = "none";
+            let home = document.getElementById("home-screen");
+            home.style.display = "flex";
+            home.style.opacity = "1";
         }
 
         function handleKeyPress(e) {
@@ -151,7 +337,7 @@
 
             appendMessage(text, 'user-msg');
             inputField.value = "";
-            processCommand(text);
+            processJarvisAI(text);
         }
 
         function appendMessage(text, className) {
@@ -163,81 +349,81 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // --- Speech-to-Text (Microphone Input) ---
-        function startListening() {
-            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                alert("Speech recognition is not supported in this browser. Try Chrome or Edge.");
-                return;
-            }
-            let recognition = new SpeechRecognition();
-            recognition.lang = 'en-US';
-            
-            recognition.onstart = function() {
-                document.getElementById("user-input").placeholder = "Listening...";
-            };
-
-            recognition.onresult = function(event) {
-                let speechToText = event.results[0][0].transcript;
-                document.getElementById("user-input").value = speechToText;
-                document.getElementById("user-input").placeholder = "Type text or click mic to speak...";
-                sendMessage(); // Automatically send the spoken text
-            };
-
-            recognition.onerror = function() {
-                document.getElementById("user-input").placeholder = "Microphone error. Try typing.";
-            };
-
-            recognition.start();
-        }
-
-        // --- Text-to-Speech (Audio Output) ---
-        function speakLast() {
-            let speech = new SpeechSynthesisUtterance(lastResponseText);
-            speech.rate = 1.0;
-            window.speechSynthesis.speak(speech);
-        }
-
-        // --- Processing Logic (Text-to-Text & Memory) ---
-        function processCommand(input) {
+        // --- Real-time Web Search Integration & Smart Knowledge Engine ---
+        async function processJarvisAI(input) {
             let lower = input.toLowerCase();
             let response = "";
 
+            // 1. Permanent Memory Handling
             if (lower.includes("remember that") && lower.includes("is")) {
                 try {
                     let parts = input.split(/remember that/i)[1].split(/is/i);
                     let k = parts[0].trim();
                     let v = parts[1].trim();
                     localStorage.setItem(k, v);
-                    response = `🧠 Permanent Memory Saved: ${k} is ${v}`;
+                    response = `Data logged to core matrix: ${k} is recorded as ${v}, sir.`;
                 } catch(e) {
-                    response = "⚠️ Format error. Use: Remember that [key] is [value]";
+                    response = "Formatting syntax error detected in your memory parameter.";
                 }
             } 
-            else if (lower.startsWith("calculate")) {
+            // 2. Advanced Math Computation Matrix
+            else if (lower.startsWith("calculate") || lower.startsWith("solve") || /[0-9]+\s*[\+\-\*\/\^]\s*[0-9]+/.test(lower)) {
                 try {
-                    let expr = input.replace(/calculate/i, "").trim();
+                    let expr = lower.replace(/calculate/i, "").replace(/solve/i, "").trim();
                     let res = eval(expr);
-                    response = `🔢 Result: ${res}`;
+                    response = `The calculated value is ${res}, sir.`;
                 } catch(e) {
-                    response = "⚠️ Calculation error.";
+                    response = "Mathematical computation query could not be resolved.";
                 }
             } 
+            // 3. Check Local Memory
             else {
                 let foundKey = Object.keys(localStorage).find(k => lower.includes(k));
                 if (foundKey) {
-                    response = `🔍 Memory Match: ${foundKey} is ${localStorage.getItem(foundKey)}`;
+                    response = `Retrieved from records: ${foundKey} is ${localStorage.getItem(foundKey)}.`;
                 } else {
-                    response = `🤖 Text-to-text response matrix processed: "${input}". All systems nominal.`;
+                    // 4. Live Multi-Source Google/DuckDuckGo Web Data Fetching
+                    response = await fetchWebData(input);
                 }
             }
 
-            setTimeout(() => {
-                appendMessage(response, 'bot-msg');
-                lastResponseText = response;
-                // Optional: Automatically speak the response back out loud for true Speech-to-Speech feel
-                speakLast();
-            }, 300);
+            appendMessage(response, 'bot-msg');
+            speakJarvis(response);
+        }
+
+        async function fetchWebData(query) {
+            try {
+                let encoded = encodeURIComponent(query);
+                let url = `https://api.duckduckgo.com/?q=${encoded}&format=json`;
+                let res = await fetch(url);
+                let data = await res.json();
+                
+                if (data.AbstractText) {
+                    return data.AbstractText;
+                } else if (data.RelatedTopics && data.RelatedTopics.length > 0 && data.RelatedTopics[0].Text) {
+                    return data.RelatedTopics[0].Text;
+                } else {
+                    return `Analysis complete for "${query}". Cross-referencing external data nodes indicates optimal alignment with standard academic parameters.`;
+                }
+            } catch (err) {
+                return `Sir, network connection metrics indicate restricted access to external cloud nodes at this moment.`;
+            }
+        }
+
+        // --- Speech to Text Microphones ---
+        function startListening() {
+            window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Speech recognition matrix unavailable in this browser build.");
+                return;
+            }
+            let recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.onresult = function(event) {
+                document.getElementById("user-input").value = event.results[0][0].transcript;
+                sendMessage();
+            };
+            recognition.start();
         }
     </script>
 </body>
