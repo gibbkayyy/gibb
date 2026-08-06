@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G.I.B.B. AI OS v3.1</title>
+    <title>G.I.B.B. AI Interface</title>
     <style>
         :root {
             --bg-color: #03080c;
-            --panel-bg: rgba(5, 12, 20, 0.92);
+            --panel-bg: rgba(5, 12, 20, 0.95);
             --accent-green: #00ff66;
-            --accent-cyan: #00e1ff;
             --text-color: #d1f7ff;
             --border-color: rgba(0, 255, 102, 0.25);
             --danger-color: #ff3366;
             --glow-green: 0 0 12px rgba(0, 255, 102, 0.4);
-            --glow-cyan: 0 0 12px rgba(0, 225, 255, 0.4);
         }
 
         * {
@@ -52,52 +50,15 @@
             overflow: hidden;
         }
 
-        /* ------------------- JARVIS REACTOR LOGO ANIMATION ------------------- */
-        .jarvis-logo {
-            position: relative;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        /* LOGO IMAGE STYLING */
+        .gibb-logo-img {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 8px var(--accent-green));
         }
 
-        .jarvis-logo .ring-outer {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border: 2px solid transparent;
-            border-top-color: var(--accent-green);
-            border-bottom-color: var(--accent-green);
-            border-radius: 50%;
-            box-shadow: var(--glow-green);
-            animation: rotateClockwise 3s linear infinite;
-        }
-
-        .jarvis-logo .ring-inner {
-            position: absolute;
-            width: 60%;
-            height: 60%;
-            border: 2px solid transparent;
-            border-left-color: rgba(0, 225, 255, 0.4);
-            border-right-color: rgba(0, 225, 255, 0.4);
-            border-radius: 50%;
-            animation: rotateAntiClockwise 1.5s linear infinite;
-        }
-
-        .jarvis-logo .dot-center {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: var(--accent-cyan);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--accent-cyan);
-        }
-
-        @keyframes rotateClockwise { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes rotateAntiClockwise { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
-
-        /* ------------------- AUTHENTICATION SCREEN ------------------- */
+        /* AUTHENTICATION SCREEN */
         #auth-screen {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -187,7 +148,7 @@
         .auth-toggle { margin-top: 15px; font-size: 12px; color: #88a0b0; cursor: pointer; }
         .auth-toggle span { color: var(--accent-green); text-decoration: underline; }
 
-        /* ------------------- MAIN HUD INTERFACE ------------------- */
+        /* HEADER */
         .header {
             padding: 15px 25px;
             border-bottom: 1px solid var(--border-color);
@@ -244,13 +205,18 @@
         .carousel-item:hover { border-color: var(--accent-green); box-shadow: var(--glow-green); }
         .carousel-item.active-item { color: #000; background: var(--accent-green); border-color: var(--accent-green); font-weight: bold; }
 
-        .main-chat-screen {
+        /* VIEW SECTIONS */
+        .view-section {
             flex: 1;
-            display: flex;
+            display: none;
             flex-direction: column;
             overflow: hidden;
         }
+        .view-section.active-view {
+            display: flex;
+        }
 
+        /* CHAT BOX */
         .chat-box {
             flex: 1;
             padding: 25px;
@@ -261,8 +227,8 @@
         }
 
         .message { max-width: 80%; padding: 12px 18px; border-radius: 4px; line-height: 1.6; font-size: 14px; border: 1px solid transparent; }
-        .user-msg { align-self: flex-end; background: rgba(0, 225, 255, 0.05); border-color: rgba(0, 225, 255, 0.15); color: #fff; }
-        .bot-msg { align-self: flex-start; background: rgba(0, 255, 102, 0.03); border-color: rgba(0, 255, 102, 0.15); color: var(--accent-green); }
+        .user-msg { align-self: flex-end; background: rgba(0, 255, 102, 0.08); border-color: rgba(0, 255, 102, 0.2); color: #fff; }
+        .bot-msg { align-self: flex-start; background: rgba(0, 0, 0, 0.4); border-color: var(--border-color); color: var(--accent-green); }
 
         .input-area {
             padding: 18px;
@@ -272,7 +238,7 @@
             background: rgba(0, 0, 0, 0.4);
         }
 
-        .input-area input {
+        .input-area input, .input-area select {
             flex: 1;
             padding: 14px;
             background: rgba(0, 0, 0, 0.6);
@@ -295,47 +261,42 @@
 
         .icon-btn:hover { background: rgba(0, 255, 102, 0.15); border-color: var(--accent-green); box-shadow: var(--glow-green); }
 
-        /* VOICE ACTIVE SCREEN (HUGE REACTOR HUD) */
-        #voice-active-screen {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(3, 8, 12, 0.99);
-            z-index: 90;
-            display: none;
+        /* TRANSLATION SECTION */
+        .translation-panel {
+            flex: 1;
+            padding: 30px;
+            display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
+            gap: 20px;
+            overflow-y: auto;
         }
 
-        #voice-active-screen .jarvis-logo {
-            width: 220px;
-            height: 220px;
-            margin-bottom: 30px;
+        .translation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            flex: 1;
         }
 
-        #voice-active-screen .ring-outer { border-width: 5px; box-shadow: 0 0 45px rgba(0, 255, 102, 0.6); }
-        #voice-active-screen .ring-inner { border-width: 3px; }
-        #voice-active-screen .dot-center { width: 18px; height: 18px; box-shadow: 0 0 25px var(--accent-cyan); }
+        .trans-box {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-        .listening-status {
+        .trans-box textarea {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--border-color);
             color: var(--accent-green);
-            font-size: 18px;
-            letter-spacing: 3px;
-            font-weight: bold;
-            animation: pulseText 1s infinite;
+            padding: 15px;
+            border-radius: 4px;
+            resize: none;
+            outline: none;
+            font-size: 14px;
         }
 
-        .listening-back-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-        }
-
-        @keyframes pulseText { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
-
-        /* SETTINGS MODAL (RESTORED USER LAYOUT) */
+        /* SETTINGS MODAL */
         .modal { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(3, 8, 12, 0.95); z-index: 50; justify-content: center; align-items: center; }
         .modal-content { background: var(--panel-bg); border: 1px solid var(--accent-green); padding: 30px; border-radius: 4px; width: 90%; max-width: 500px; box-shadow: var(--glow-green); max-height: 90vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: var(--accent-green); letter-spacing: 2px; }
@@ -361,19 +322,20 @@
 
         <div id="auth-screen">
             <div class="auth-card">
-                <h1 id="auth-title">G.I.B.B. OS</h1>
-                <p id="auth-sub">INITIALIZE SYSTEM LOGIN</p>
+                <img src="gibblogo.png" alt="G.I.B.B. Logo" class="gibb-logo-img" style="width: 70px; height: 70px; margin: 0 auto 15px auto; display: block;" onerror="this.style.display='none'">
+                <h1 id="auth-title">G.I.B.B. SYSTEM</h1>
+                <p id="auth-sub">INITIALIZE LOGIN CREDENTIALS</p>
                 
                 <div id="auth-error" style="color: var(--danger-color); font-size: 12px; margin-bottom: 10px; display: none;"></div>
 
                 <div class="input-group" id="name-group" style="display: none;">
-                    <label>USER DESIGNATION / NAME</label>
-                    <input type="text" id="auth-name" placeholder="User / Operator">
+                    <label>OPERATOR NAME</label>
+                    <input type="text" id="auth-name" placeholder="User">
                 </div>
 
                 <div class="input-group">
                     <label>EMAIL ADDRESS</label>
-                    <input type="email" id="auth-email" placeholder="operator@domain.com">
+                    <input type="email" id="auth-email" placeholder="user@domain.com">
                 </div>
 
                 <div class="input-group">
@@ -381,58 +343,36 @@
                     <input type="password" id="auth-password" placeholder="••••••••">
                 </div>
 
-                <div class="input-group" id="gender-group" style="display: none;">
-                    <label>GENDER (ADDRESS PROTOCOL)</label>
-                    <select id="auth-gender">
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                    </select>
-                </div>
-
-                <button class="btn" id="auth-btn" onclick="handleAuth()">AUTHENTICATE</button>
+                <button class="btn" id="auth-btn" onclick="handleAuth()">LOGIN</button>
 
                 <div class="auth-toggle" onclick="toggleAuthMode()">
-                    <span id="toggle-text">Need an account? Register System Profile</span>
+                    <span id="toggle-text">Need an account? Register Profile</span>
                 </div>
             </div>
-        </div>
-
-        <div id="voice-active-screen">
-            <button class="nav-btn listening-back-btn" onclick="deactivateVoiceActiveScreen()">❌ CANCEL</button>
-            <div class="jarvis-logo">
-                <div class="ring-outer"></div>
-                <div class="ring-inner"></div>
-                <div class="dot-center"></div>
-            </div>
-            <p class="listening-status" style="margin-top: 30px;">AWAITING COMMAND...</p>
         </div>
 
         <div class="header">
             <div class="user-status">
-                <div class="jarvis-logo">
-                    <div class="ring-outer"></div>
-                    <div class="ring-inner"></div>
-                    <div class="dot-center"></div>
-                </div>
+                <img src="gibblogo.png" alt="G.I.B.B." class="gibb-logo-img" onerror="this.style.display='none'">
                 <div style="display: flex; flex-direction: column;">
-                    <span style="font-weight: bold; letter-spacing: 2px; color: var(--accent-green);">G.I.B.B. HUD</span>
+                    <span style="font-weight: bold; letter-spacing: 2px; color: var(--accent-green);">G.I.B.B. INTERFACE</span>
                     <span id="display-user" style="color: rgba(0, 255, 102, 0.7); font-size: 11px;">System Offline</span>
                 </div>
             </div>
             <div class="user-status">
                 <button class="nav-btn" onclick="openSettings()">⚙️ SETTINGS</button>
-                <button class="nav-btn" style="border-color: var(--danger-color); color: var(--danger-color);" onclick="logout()">SHUTDOWN</button>
+                <button class="nav-btn" style="border-color: var(--danger-color); color: var(--danger-color);" onclick="logout()">LOGOUT</button>
             </div>
         </div>
 
         <div class="system-carousel">
-            <div class="carousel-item active-item">Main Chat</div>
-            <div class="carousel-item" onclick="activateVoiceActiveScreen()">Voice Control</div>
+            <div class="carousel-item active-item" onclick="switchView('chat', this)">Main Chat</div>
+            <div class="carousel-item" onclick="switchView('translation', this)">Translation Module</div>
             <div class="carousel-item" onclick="openSettings()">System Config</div>
             <div class="carousel-item" onclick="clearCurrentChat()">Clear History</div>
         </div>
 
-        <div class="main-chat-screen" id="main-chat-screen">
+        <div class="view-section active-view" id="view-chat">
             <div class="chat-box" id="chat-box">
                 <div class="message bot-msg">
                     System initialized. Welcome back.
@@ -441,8 +381,38 @@
 
             <div class="input-area">
                 <button class="icon-btn" onclick="toggleTextVoiceInput()" id="mic-btn">🎙️</button>
-                <input type="text" id="user-input" placeholder="Enter command or speak to G.I.B.B..." onkeydown="if(event.key==='Enter') sendMessage()">
+                <input type="text" id="user-input" placeholder="Enter message or query..." onkeydown="if(event.key==='Enter') sendMessage()">
                 <button class="icon-btn" onclick="sendMessage()">SEND ➣</button>
+            </div>
+        </div>
+
+        <div class="view-section" id="view-translation">
+            <div class="translation-panel">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="color: var(--accent-green); letter-spacing: 1px;">🌐 LINGUISTIC TRANSLATION PROTOCOL</h3>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <label style="font-size: 12px; color: var(--accent-green);">TARGET LANGUAGE:</label>
+                        <select id="target-lang" style="background: rgba(0,0,0,0.6); border: 1px solid var(--accent-green); color: var(--accent-green); padding: 8px; border-radius: 4px; outline: none;">
+                            <option value="Spanish">Spanish</option>
+                            <option value="French">French</option>
+                            <option value="German">German</option>
+                            <option value="Japanese">Japanese</option>
+                            <option value="Mandarin">Mandarin</option>
+                            <option value="Russian">Russian</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="translation-grid">
+                    <div class="trans-box">
+                        <label style="font-size: 11px; color: var(--accent-green);">SOURCE TEXT</label>
+                        <textarea id="source-text" placeholder="Type or paste text to translate here..."></textarea>
+                    </div>
+                    <div class="trans-box">
+                        <label style="font-size: 11px; color: var(--accent-green);">TRANSLATED OUTPUT</label>
+                        <textarea id="output-text" readonly placeholder="Translation will display here..." style="opacity: 0.8;"></textarea>
+                    </div>
+                </div>
+                <button class="btn" onclick="executeTranslation()">EXECUTE TRANSLATION</button>
             </div>
         </div>
 
@@ -493,26 +463,23 @@
         let isSignUp = false;
         let currentUser = null;
         let conversationHistory = [];
-        let permanentVoiceHandler = null;
         let isMuted = false;
         let masterVolume = 1.0;
 
         window.addEventListener('load', () => {
-            const savedSession = localStorage.getItem('gibb_v31_session');
+            const savedSession = localStorage.getItem('gibb_original_session');
             if (savedSession) {
                 currentUser = JSON.parse(savedSession);
                 initInterface();
-                startPermanentWakeWordListener();
             }
         });
 
         function toggleAuthMode() {
             isSignUp = !isSignUp;
-            document.getElementById('auth-title').innerText = isSignUp ? "REGISTER PROFILE" : "G.I.B.B. OS";
-            document.getElementById('auth-sub').innerText = isSignUp ? "NEW OPERATOR REGISTRATION" : "SIGN IN TO YOUR ACCOUNT";
-            document.getElementById('auth-btn').innerText = isSignUp ? "CREATE ACCOUNT" : "AUTHENTICATE";
+            document.getElementById('auth-title').innerText = isSignUp ? "REGISTER PROFILE" : "G.I.B.B. SYSTEM";
+            document.getElementById('auth-sub').innerText = isSignUp ? "NEW OPERATOR REGISTRATION" : "INITIALIZE LOGIN CREDENTIALS";
+            document.getElementById('auth-btn').innerText = isSignUp ? "CREATE ACCOUNT" : "LOGIN";
             document.getElementById('name-group').style.display = isSignUp ? "block" : "none";
-            document.getElementById('gender-group').style.display = isSignUp ? "block" : "none";
             document.getElementById('toggle-text').innerText = isSignUp ? "Already have a profile? Login" : "Need an account? Register Profile";
             document.getElementById('auth-error').style.display = "none";
         }
@@ -520,8 +487,7 @@
         function handleAuth() {
             const email = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value.trim();
-            const name = document.getElementById('auth-name').value.trim() || "Operator";
-            const gender = document.getElementById('auth-gender').value;
+            const name = document.getElementById('auth-name').value.trim() || "User";
             const errDiv = document.getElementById('auth-error');
 
             if (!email || !password) {
@@ -530,7 +496,7 @@
                 return;
             }
 
-            let accounts = JSON.parse(localStorage.getItem('gibb_v31_accounts')) || {};
+            let accounts = JSON.parse(localStorage.getItem('gibb_original_accounts')) || {};
 
             if (isSignUp) {
                 if (accounts[email]) {
@@ -538,8 +504,8 @@
                     errDiv.style.display = "block";
                     return;
                 }
-                accounts[email] = { name, email, password, gender, groqApiKey: "", history: [] };
-                localStorage.setItem('gibb_v31_accounts', JSON.stringify(accounts));
+                accounts[email] = { name, email, password, groqApiKey: "", history: [] };
+                localStorage.setItem('gibb_original_accounts', JSON.stringify(accounts));
                 currentUser = accounts[email];
             } else {
                 if (!accounts[email] || accounts[email].password !== password) {
@@ -550,9 +516,8 @@
                 currentUser = accounts[email];
             }
 
-            localStorage.setItem('gibb_v31_session', JSON.stringify(currentUser));
+            localStorage.setItem('gibb_original_session', JSON.stringify(currentUser));
             initInterface();
-            startPermanentWakeWordListener();
         }
 
         function initInterface() {
@@ -561,12 +526,10 @@
             document.getElementById('groq-key-input').value = currentUser.groqApiKey || "";
             document.getElementById('profile-email-input').value = currentUser.email;
 
-            const salutation = currentUser.gender === 'female' ? 'miss' : 'sir';
-
             conversationHistory = [
                 {
                     role: "system",
-                    content: `You are G.I.B.B., a highly intelligent, direct, and helpful AI assistant. Address the user as ${currentUser.name} and use the polite salutation ${salutation}. Keep your responses direct, concise, smart, and professional.`
+                    content: `You are G.I.B.B., an intelligent, direct, and helpful assistant. Address the user as ${currentUser.name}. Keep responses clear, professional, and concise.`
                 }
             ];
 
@@ -578,16 +541,28 @@
                     }
                 });
             } else {
-                appendMessage(`Ready when you are, ${salutation}.`, 'bot-msg');
+                appendMessage(`Welcome back, ${currentUser.name}. How can I assist you today?`, 'bot-msg');
             }
 
-            speakJarvis(`Ready when you are, ${salutation}.`);
+            speakResponse(`Welcome back, ${currentUser.name}.`);
         }
 
         function logout() {
             saveAccountHistory();
-            localStorage.removeItem('gibb_v31_session');
+            localStorage.removeItem('gibb_original_session');
             location.reload();
+        }
+
+        function switchView(viewName, element) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active-view'));
+            document.querySelectorAll('.carousel-item').forEach(el => el.classList.remove('active-item'));
+
+            if (viewName === 'chat') {
+                document.getElementById('view-chat').classList.add('active-view');
+            } else if (viewName === 'translation') {
+                document.getElementById('view-translation').classList.add('active-view');
+            }
+            if (element) element.classList.add('active-item');
         }
 
         function openSettings() {
@@ -604,13 +579,13 @@
         }
 
         function updateAccountStorage() {
-            let accounts = JSON.parse(localStorage.getItem('gibb_v31_accounts')) || {};
+            let accounts = JSON.parse(localStorage.getItem('gibb_original_accounts')) || {};
             if (accounts[currentUser.email]) {
                 accounts[currentUser.email].groqApiKey = currentUser.groqApiKey;
                 accounts[currentUser.email].history = currentUser.history;
-                localStorage.setItem('gibb_v31_accounts', JSON.stringify(accounts));
+                localStorage.setItem('gibb_original_accounts', JSON.stringify(accounts));
             }
-            localStorage.setItem('gibb_v31_session', JSON.stringify(currentUser));
+            localStorage.setItem('gibb_original_session', JSON.stringify(currentUser));
         }
 
         function saveAccountHistory() {
@@ -666,7 +641,7 @@
 
             if (!currentUser.groqApiKey) {
                 appendMessage("API key missing. Please check system settings.", 'bot-msg');
-                speakJarvis("API key missing. Please check system settings.");
+                speakResponse("API key missing. Please check system settings.");
                 return;
             }
 
@@ -695,7 +670,7 @@
                     let reply = data.choices[0].message.content;
                     conversationHistory.push({ role: "assistant", content: reply });
                     appendMessage(reply, 'bot-msg');
-                    speakJarvis(reply);
+                    speakResponse(reply);
                 } else {
                     appendMessage("System Error: Invalid AI response.", 'bot-msg');
                 }
@@ -705,12 +680,58 @@
             }
         }
 
-        function speakJarvis(text) {
+        async function executeTranslation() {
+            const sourceText = document.getElementById('source-text').value.trim();
+            const targetLang = document.getElementById('target-lang').value;
+            const outputField = document.getElementById('output-text');
+
+            if (!sourceText) {
+                outputField.value = "Please enter text to translate.";
+                return;
+            }
+
+            if (!currentUser.groqApiKey) {
+                outputField.value = "Error: Groq API key missing in settings.";
+                return;
+            }
+
+            outputField.value = "Translating...";
+
+            try {
+                let res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${currentUser.groqApiKey}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "llama-3.3-70b-versatile",
+                        messages: [
+                            { role: "system", content: `Translate the following text accurately into ${targetLang}. Return ONLY the translated text without extra explanation.` },
+                            { role: "user", content: sourceText }
+                        ],
+                        temperature: 0.3,
+                        max_tokens: 500
+                    })
+                });
+
+                let data = await res.json();
+                if (data.choices && data.choices.length > 0) {
+                    outputField.value = data.choices[0].message.content;
+                } else {
+                    outputField.value = "Translation failed.";
+                }
+            } catch (err) {
+                outputField.value = "Connection error during translation.";
+            }
+        }
+
+        function speakResponse(text) {
             if (isMuted || !('speechSynthesis' in window)) return;
             window.speechSynthesis.cancel();
             let cleanText = text.replace(/[*#_`]/g, '');
             let utter = new SpeechSynthesisUtterance(cleanText);
-            utter.rate = 1.1; 
+            utter.rate = 1.0; 
             utter.pitch = 0.95;
             utter.volume = masterVolume;
             window.speechSynthesis.speak(utter);
@@ -737,101 +758,6 @@
             };
 
             recognition.start();
-        }
-
-        function activateVoiceActiveScreen() {
-            document.getElementById('voice-active-screen').style.display = 'flex';
-            document.getElementById('main-chat-screen').style.display = 'none';
-
-            const salutation = currentUser.gender === 'female' ? 'miss' : 'sir';
-            speakJarvis(`Awaiting your command, ${salutation}.`);
-
-            startListeningForActiveCommand();
-        }
-
-        function deactivateVoiceActiveScreen() {
-            document.getElementById('voice-active-screen').style.display = 'none';
-            document.getElementById('main-chat-screen').style.display = 'flex';
-        }
-
-        function startPermanentWakeWordListener() {
-            if (!('webkitSpeechRecognition' in window) || permanentVoiceHandler != null) return;
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            permanentVoiceHandler = new SpeechRecognition();
-            permanentVoiceHandler.continuous = true;
-            permanentVoiceHandler.lang = 'en-US';
-
-            permanentVoiceHandler.onresult = (event) => {
-                const resultIndex = event.resultIndex;
-                const transcript = event.results[resultIndex][0].transcript.trim().toLowerCase();
-
-                if (transcript.includes('activate voice control') || transcript.includes('do voice control')) {
-                    activateVoiceActiveScreen();
-                }
-            };
-
-            permanentVoiceHandler.onerror = (err) => {
-                if(err.error === 'no-speech') return;
-            };
-
-            permanentVoiceHandler.onend = () => {
-                if (currentUser) permanentVoiceHandler.start(); 
-            };
-
-            permanentVoiceHandler.start();
-        }
-
-        function startListeningForActiveCommand() {
-            if (!('webkitSpeechRecognition' in window)) return;
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const commandRecognition = new SpeechRecognition();
-            commandRecognition.lang = 'en-US';
-
-            commandRecognition.onresult = (event) => {
-                const commandText = event.results[0][0].transcript.trim().toLowerCase();
-                handleVoiceCommandInput(commandText);
-                deactivateVoiceActiveScreen();
-            };
-
-            commandRecognition.onerror = () => {
-                deactivateVoiceActiveScreen();
-            };
-
-            commandRecognition.start();
-        }
-
-        function handleVoiceCommandInput(command) {
-            if (command.includes('weather')) {
-                pullUpWeatherPlaceHolder();
-            } else if (command.includes('news')) {
-                pullUpNewsPlaceholder();
-            } else if (command.includes('map') || command.includes('maps')) {
-                pullUpGoogleMapsPlaceholder(command);
-            } else {
-                document.getElementById('user-input').value = command;
-                sendMessage();
-            }
-        }
-
-        function pullUpWeatherPlaceHolder() {
-            appendMessage(`Accessing weather protocols... *Add API key for live feed.*`, 'bot-msg');
-            speakJarvis(`Opening weather interface.`);
-        }
-
-        function pullUpNewsPlaceholder() {
-            appendMessage(`Accessing news headlines... *Add API key for live feed.*`, 'bot-msg');
-            speakJarvis(`Fetching current news briefings.`);
-        }
-
-        function pullUpGoogleMapsPlaceholder(command) {
-            appendMessage(`Accessing Google Maps protocols...`, 'bot-msg');
-            speakJarvis(`Initializing map search.`);
-            const mapQuery = command.replace('map of', '').replace('open map for', '').replace('maps', '').trim();
-            if (mapQuery) {
-                window.open(`https://www.google.com/maps/search/${encodeURIComponent(mapQuery)}`, '_blank');
-            } else {
-                window.open(`https://www.google.com/maps`, '_blank');
-            }
         }
     </script>
 </body>
