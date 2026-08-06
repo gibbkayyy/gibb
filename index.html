@@ -570,12 +570,12 @@
         </div>
         
         <div class="hud-main-layout">
-            <div class="hud-side-panel">
-                <h4>⚙️ SYSTEM SETTINGS</h4>
+            <div class="hud-side-panel" style="display: flex !important; visibility: visible !important; opacity: 1 !important;">
+                <h4 style="color: var(--theme-color); border-bottom: 1px solid var(--theme-color); padding-bottom: 5px;">⚙️ SYSTEM SETTINGS</h4>
                 
-                <div class="setting-group">
-                    <label>⚡ Neural Link API Key (Groq Core)</label>
-                    <input type="text" id="groq-key-input" placeholder="gsk_..." oninput="saveGroqKey(this.value)">
+                <div class="setting-group" style="display: flex !important; flex-direction: column !important; gap: 4px !important;">
+                    <label style="font-size: 0.75rem; font-weight: bold; color: var(--theme-color);">⚡ Neural Link API Key (Groq Core)</label>
+                    <input type="text" id="groq-key-input" placeholder="gsk_..." oninput="saveGroqKey(this.value)" style="display: block !important; width: 100% !important; background: var(--theme-input-bg); color: var(--theme-color); border: 1px solid var(--theme-color); padding: 8px; border-radius: 4px; box-sizing: border-box;">
                 </div>
 
                 <div class="setting-group">
