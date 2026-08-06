@@ -430,6 +430,23 @@
             color: var(--theme-color);
             box-shadow: 0 0 12px var(--theme-glow);
         }
+
+        /* --- Animated Thinking Indicator (...) --- */
+        .thinking-dots span {
+            animation: blinkDots 1.4s infinite;
+            display: inline-block;
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blinkDots {
+            0% { opacity: 0.2; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-3px); }
+            100% { opacity: 0.2; transform: translateY(0); }
+        }
+
         .input-area {
             display: flex;
             padding: 12px;
@@ -688,7 +705,8 @@
             loadSettings();
             
             if(groqApiKey) {
-                document.getElementById("groq-key-input").value = groqApiKey;
+                let keyInput = document.getElementById("groq-key-input");
+                if(keyInput) keyInput.value = groqApiKey;
                 updateKeyStatusUI(true);
             }
         });
@@ -973,13 +991,18 @@
             processGroqAI(text);
         }
 
-        function appendMessage(text, className) {
+        function appendMessage(text, className, isHTML = false) {
             let chatBox = document.getElementById("chat-box");
             let msgDiv = document.createElement("div");
             msgDiv.className = `message ${className}`;
-            msgDiv.innerText = text;
+            if (isHTML) {
+                msgDiv.innerHTML = text;
+            } else {
+                msgDiv.innerText = text;
+            }
             chatBox.appendChild(msgDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
+            return msgDiv;
         }
 
         function updateHUDClock() {
@@ -992,7 +1015,7 @@
             }
         }
 
-        // --- Groq AI Intelligence Integration ---
+        // --- Groq AI Intelligence Integration with Animated Dots ---
         async function processGroqAI(input) {
             if (!groqApiKey) {
                 let errText = "Sir, please enter your Groq API key in the settings menu on the home screen to activate neural intelligence.";
@@ -1001,9 +1024,9 @@
                 return;
             }
 
-            appendMessage("Thinking...", 'bot-msg');
-            let chatBox = document.getElementById("chat-box");
-            let loadingMsg = chatBox.lastChild;
+            // Append animated thinking dots indicator
+            let thinkingHTML = `<div class="thinking-dots"><span>.</span><span>.</span><span>.</span></div>`;
+            let loadingMsg = appendMessage(thinkingHTML, 'bot-msg', true);
 
             try {
                 let res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -1030,6 +1053,7 @@
                 });
 
                 let data = await res.json();
+                let chatBox = document.getElementById("chat-box");
                 chatBox.removeChild(loadingMsg);
                 
                 if (data.choices && data.choices.length > 0) {
@@ -1042,9 +1066,10 @@
                     speakJarvis(failText);
                 }
             } catch (err) {
+                let chatBox = document.getElementById("chat-box");
                 chatBox.removeChild(loadingMsg);
                 let failText = "Sir, connection to the Groq cloud matrix failed.";
-                appendMessage(failText, 'bot-spec bot-msg');
+                appendMessage(failText, 'bot-msg');
                 speakJarvis(failText);
             }
         }
