@@ -236,7 +236,7 @@
             flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
             background: rgba(0, 10, 0, 0.7); backdrop-filter: blur(5px);
         }
-        .message { max-width: 75%; padding: 14px 18px; border-radius: 8px; font-size: 1rem; line-height: 1.5; }
+        .message { max-width: 75%; padding: 14px 18px; border-radius: 8px; font-size: 1rem; line-height: 1.5; word-break: break-word; }
         .message.user { background: var(--accent-color); color: #000000; align-self: flex-end; border-bottom-right-radius: 2px; font-weight: bold; }
         .message.gibb { background: rgba(0, 255, 0, 0.05); color: var(--text-color); align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid var(--border-color); box-shadow: 0 0 10px rgba(0,255,0,0.1); }
         .chat-input-area {
@@ -330,7 +330,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 15px; font-size: 0.8rem; color: #88ff88; text-align: center;">Always-Listening Wake Word Enabled ("Hey GIBB")</p>
+                <p style="margin-top: 15px; font-size: 0.8rem; color: #88ff88; text-align: center;">Perpetual Wake Engine Enabled ("Hey GIBB")</p>
             </div>
 
             <div class="sidebar-panel">
@@ -344,7 +344,7 @@
                 </div>
                 <div class="widget-box" style="margin-bottom: 0;">
                     <div class="widget-title">Status</div>
-                    <p id="global-mic-status" style="font-size: 0.85rem; color: #10b981;">LISTENING GLOBALLY</p>
+                    <p id="global-mic-status" style="font-size: 0.85rem; color: #10b981;">PERPETUAL MIC ACTIVE</p>
                 </div>
             </div>
         </div>
@@ -357,8 +357,8 @@
             <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
             <div class="gibb-text-logo" style="font-size: 2rem;">G.I.B.B.</div>
         </div>
-        <div class="voice-status-text">VOICE HUD ACTIVE... (Say "Hey, G.I.B.B. [question]" or say "Deactivate Voice Control")</div>
-        <div id="voice-transcript" style="margin-top: 15px; font-size: 0.95rem; font-style: italic; color: #88ff88; max-width: 600px; text-align: center; height: 30px;">[Awaiting speech input...]</div>
+        <div class="voice-status-text">PERPETUAL VOICE HUD ACTIVE... (Say "Hey, G.I.B.B. [question]")</div>
+        <div id="voice-transcript" style="margin-top: 15px; font-size: 0.95rem; font-style: italic; color: #88ff88; max-width: 600px; text-align: center; height: 30px;">[Listening continuously...]</div>
         
         <button class="btn" style="position: absolute; bottom: 30px; width: auto; padding: 10px 25px; font-size: 0.9rem;" onclick="deactivateVoiceScreen()">MENU</button>
     </div>
@@ -366,8 +366,11 @@
     <div id="dashboard-screen" class="screen">
         <div class="chat-container">
             <div class="chat-header">
-                <span style="font-weight: bold; letter-spacing: 2px;">G.I.B.B. NEURAL CONNECT (POWERED BY GROQ)</span>
-                <button class="btn" style="width: auto; padding: 8px 16px; margin-bottom: 0;" onclick="openMenu()">SYSTEM MENU</button>
+                <span style="font-weight: bold; letter-spacing: 2px;">G.I.B.B. NEURAL CONNECT (MEMORY & GROQ INTEGRATED)</span>
+                <div>
+                    <button class="btn" style="width: auto; padding: 8px 16px; margin-bottom: 0; display: inline-block; margin-right: 10px; background: rgba(255,0,0,0.2); border-color: var(--danger-color); color: #ff8888;" onclick="clearChatMemory()">CLEAR MEMORY</button>
+                    <button class="btn" style="width: auto; padding: 8px 16px; margin-bottom: 0; display: inline-block;" onclick="openMenu()">SYSTEM MENU</button>
+                </div>
             </div>
             <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-area">
@@ -408,7 +411,7 @@
         
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let globalRecognition = null;
-        let isGlobalListening = false;
+        let isPerpetualListening = true;
 
         let db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { 
             profile: null, chatHistory: [], volume: 1.0, savedKey: ''
@@ -450,47 +453,100 @@
         // HARDWARE MIC PERMISSION INITIALIZER
         async function requestMicrophoneAccess() {
             try {
-                // Request physical media stream access to explicitly open browser microphone prompt
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                // Release the stream tracks right away since SpeechRecognition manages its own capture lifecycle
                 stream.getTracks().forEach(track => track.stop());
                 
-                // Hide permission overlay and proceed to auth / main system entry
                 document.getElementById('mic-permission-screen').classList.remove('active');
                 
                 if (sessionStorage.getItem('gibb_logged_in') === 'true' && db.profile) {
                     showLoadingScreen();
                 } else {
-                    renderAuthScreen();
+                    renderLoginScreen();
                     switchScreen('auth-screen');
                 }
             } catch (err) {
-                alert("Microphone permission was denied. G.I.B.B. voice features require microphone access to function.");
+                alert("Microphone permission was denied. G.I.B.B. perpetual wake engine requires microphone access.");
             }
         }
 
-        function renderAuthScreen() {
+        // RENDER LOGIN SCREEN
+        function renderLoginScreen() {
             const panel = document.getElementById('auth-panel');
-            if (db.profile && db.profile.name) {
-                panel.innerHTML = `
-                    <h2 style="margin-bottom: 15px; letter-spacing: 2px;">WELCOME BACK</h2>
-                    <p style="margin-bottom: 25px; color: #88ff88;">USER: ${db.profile.name.toUpperCase()}</p>
-                    <button class="btn" onclick="quickLogin()">LOGIN</button>
-                    <button class="btn" style="background: transparent; border-color: rgba(0,255,0,0.2); font-size: 0.8rem;" onclick="clearProfileData()">CREATE NEW ACCOUNT</button>
-                `;
-            } else {
-                panel.innerHTML = `
-                    <h2 style="margin-bottom: 15px; letter-spacing: 2px;">INITIALIZE PROFILE</h2>
-                    <div id="auth-error" class="error-msg"></div>
-                    <input type="text" id="username-input" placeholder="Enter Username">
-                    <select id="gender-input">
-                        <option value="" disabled selected>Select Title Preference</option>
-                        <option value="sir">Male (Sir)</option>
-                        <option value="miss">Female (Miss)</option>
-                    </select>
-                    <button class="btn" onclick="initializeProfile()">ESTABLISH CONNECTION</button>
-                `;
+            panel.innerHTML = `
+                <h2 style="margin-bottom: 15px; letter-spacing: 2px;">SYSTEM LOGIN</h2>
+                <div id="auth-error" class="error-msg"></div>
+                <input type="text" id="login-username" placeholder="Username">
+                <input type="password" id="login-password" placeholder="Password">
+                <button class="btn" onclick="verifyLogin()">SECURE LOGIN</button>
+                <button class="btn" style="background: transparent; border-color: rgba(0,255,0,0.2); font-size: 0.85rem;" onclick="renderRegisterScreen()">CREATE NEW ACCOUNT</button>
+            `;
+        }
+
+        // RENDER REGISTER SCREEN
+        function renderRegisterScreen() {
+            const panel = document.getElementById('auth-panel');
+            panel.innerHTML = `
+                <h2 style="margin-bottom: 15px; letter-spacing: 2px;">CREATE ACCOUNT</h2>
+                <div id="auth-error" class="error-msg"></div>
+                <input type="text" id="reg-username" placeholder="Choose Username">
+                <select id="reg-gender">
+                    <option value="" disabled selected>Select Title Preference</option>
+                    <option value="sir">Male (Sir)</option>
+                    <option value="miss">Female (Miss)</option>
+                </select>
+                <input type="password" id="reg-password" placeholder="Create Password (Secure)">
+                <button class="btn" onclick="registerAccount()">REGISTER ACCOUNT</button>
+                <button class="btn" style="background: transparent; border-color: rgba(0,255,0,0.2); font-size: 0.85rem;" onclick="renderLoginScreen()">BACK TO LOGIN</button>
+            `;
+        }
+
+        function verifyLogin() {
+            const user = document.getElementById('login-username').value.trim();
+            const pass = document.getElementById('login-password').value;
+            const errorBox = document.getElementById('auth-error');
+
+            if (!db.profile || db.profile.name.toLowerCase() !== user.toLowerCase()) {
+                errorBox.innerText = "User account not found. Please create an account.";
+                errorBox.style.display = 'block';
+                return;
             }
+
+            if (!db.profile.password || db.profile.password !== pass) {
+                errorBox.innerText = "Incorrect password! Access denied.";
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            sessionStorage.setItem('gibb_logged_in', 'true');
+            showLoadingScreen();
+        }
+
+        function registerAccount() {
+            const user = document.getElementById('reg-username').value.trim();
+            const honorific = document.getElementById('reg-gender').value;
+            const pass = document.getElementById('reg-password').value;
+            const errorBox = document.getElementById('auth-error');
+
+            if (!user) {
+                errorBox.innerText = "Please enter a valid username.";
+                errorBox.style.display = 'block';
+                return;
+            }
+            if (!honorific) {
+                errorBox.innerText = "Please select your title preference (Sir or Miss).";
+                errorBox.style.display = 'block';
+                return;
+            }
+            if (!pass || pass.length < 4) {
+                errorBox.innerText = "Password must be at least 4 characters for security.";
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            db.profile = { name: user, honorific: honorific, password: pass };
+            saveDatabase();
+            sessionStorage.setItem('gibb_logged_in', 'true');
+            showLoadingScreen();
         }
 
         function switchScreen(screenId) {
@@ -525,28 +581,6 @@
 
         function updateVolume() { db.volume = parseFloat(document.getElementById('volume-slider').value); saveDatabase(); }
 
-        function quickLogin() {
-            sessionStorage.setItem('gibb_logged_in', 'true');
-            showLoadingScreen();
-        }
-
-        function initializeProfile() {
-            const user = document.getElementById('username-input').value.trim();
-            const honorific = document.getElementById('gender-input').value;
-            const errorBox = document.getElementById('auth-error');
-
-            if (!honorific) {
-                errorBox.innerText = "Please select your title preference (Sir or Miss).";
-                errorBox.style.display = 'block';
-                return;
-            }
-
-            db.profile = { name: user || "User", honorific: honorific };
-            saveDatabase();
-            sessionStorage.setItem('gibb_logged_in', 'true');
-            showLoadingScreen();
-        }
-
         function showLoadingScreen() {
             switchScreen('loading-screen');
             document.getElementById('loading-bar').style.width = '0%';
@@ -565,11 +599,12 @@
         function completeInit() { 
             speakWelcomeMsg(); 
             showMenuScreen(); 
-            initGlobalAlwaysListening();
+            initPerpetualListeningEngine();
         }
 
         function speak(text, callback) {
-            if (globalRecognition && isGlobalListening) {
+            // Temporarily pause recognition to prevent feedback loop from AI's own voice
+            if (globalRecognition) {
                 try { globalRecognition.stop(); } catch(e){}
             }
 
@@ -582,8 +617,11 @@
             
             utterance.onend = () => {
                 if (callback) callback();
-                if (isGlobalListening && globalRecognition) {
-                    setTimeout(() => { try { globalRecognition.start(); } catch(e){} }, 500);
+                // Resume perpetual microphone capture
+                if (isPerpetualListening && globalRecognition) {
+                    setTimeout(() => {
+                        try { globalRecognition.start(); } catch(e){}
+                    }, 300);
                 }
             };
             window.speechSynthesis.speak(utterance);
@@ -591,8 +629,8 @@
 
         function speakWelcomeMsg() {
             if (hasSpokenWelcome) return;
-            const honorific = db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
-            speak(`Ready when you are, ${honorific}. Always-listening engine active.`);
+            const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
+            speak(`Ready when you are, ${honorific}. Perpetual microphone engine is locked active.`);
             hasSpokenWelcome = true;
         }
 
@@ -642,11 +680,10 @@
             }
         });
 
-        // ALWAYS-LISTENING GLOBAL RECOGNITION WAKE ENGINE
-        function initGlobalAlwaysListening() {
+        // 100% UNSTOPPABLE PERPETUAL MICROPHONE RECOGNITION ENGINE
+        function initPerpetualListeningEngine() {
             if (!SpeechRecognition) return;
-            if (isGlobalListening && globalRecognition) return;
-
+            
             globalRecognition = new SpeechRecognition();
             globalRecognition.continuous = true;
             globalRecognition.interimResults = true;
@@ -665,13 +702,6 @@
                     transcriptDisplay.innerText = fullSentence;
                 }
 
-                if (lowerText.includes("activate voice control")) {
-                    globalRecognition.stop();
-                    isGlobalListening = false;
-                    activateVoiceScreen();
-                    return;
-                }
-
                 if (lowerText.includes("hey gibb") || lowerText.includes("hey, gibb")) {
                     let parts = lowerText.split(/hey,?\s+gibb[.,]?\s*/i);
                     let questionQuery = parts[1] ? parts[1].trim() : "";
@@ -679,72 +709,94 @@
                     const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
 
                     if (questionQuery.length > 0) {
-                        globalRecognition.stop();
-                        isGlobalListening = false;
+                        try { globalRecognition.stop(); } catch(e){}
                         
                         if (!db.savedKey || !db.savedKey.startsWith('gsk_')) {
                             speak(`Please provide a valid Groq API key in settings, ${honorific}.`, () => {
-                                restartGlobalListener();
+                                restartPerpetualListener();
                             });
                             return;
                         }
 
                         const aiAnswer = await callGroqAPI(questionQuery);
                         speak(aiAnswer, () => {
-                            restartGlobalListener();
+                            restartPerpetualListener();
                         });
                     } else {
-                        speak(`Yes, ${honorific}? I am listening.`);
+                        speak(`Yes, ${honorific}? Perpetual audio receiver standing by.`);
                     }
                 }
             };
 
             globalRecognition.onerror = (e) => {
-                console.warn("Speech engine event warning:", e.error);
+                // Silently swallow harmless browser timeout/no-speech errors to ensure never stopping
+                console.warn("Speech recognition warning:", e.error);
             };
 
+            // BULLETPROOF SELF-RESTART BINDING: Never turns off permanently
             globalRecognition.onend = () => {
-                if (isGlobalListening) {
+                if (isPerpetualListening) {
                     setTimeout(() => {
-                        try { globalRecognition.start(); } catch(err) {}
-                    }, 300);
+                        try {
+                            globalRecognition.start();
+                        } catch(err) {
+                            // If context failed or closed, recreate cleanly
+                            initPerpetualListeningEngine();
+                        }
+                    }, 150);
                 }
             };
 
             try {
                 globalRecognition.start();
-                isGlobalListening = true;
+                isPerpetualListening = true;
                 const statusEl = document.getElementById('global-mic-status');
-                if(statusEl) statusEl.innerText = "ALWAYS LISTENING";
+                if(statusEl) statusEl.innerText = "PERPETUAL MIC ACTIVE";
             } catch(e) {
-                console.error("Failed to start speech listener:", e);
+                setTimeout(initPerpetualListeningEngine, 1000);
             }
         }
 
-        function restartGlobalListener() {
-            isGlobalListening = true;
+        function restartPerpetualListener() {
+            isPerpetualListening = true;
             try {
                 if (globalRecognition) globalRecognition.start();
             } catch(e) {
-                initGlobalAlwaysListening();
+                initPerpetualListeningEngine();
             }
         }
 
         function activateVoiceScreen() {
             switchScreen('voice-screen');
-            document.getElementById('voice-transcript').innerText = '[Awaiting speech input...]';
-            const honorific = db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
-            speak(`Voice HUD Interface opened, ${honorific}.`);
+            document.getElementById('voice-transcript').innerText = '[Listening continuously...]';
+            const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
+            speak(`Perpetual Voice HUD active, ${honorific}. Say "Hey GIBB" anytime.`);
         }
 
         function deactivateVoiceScreen() {
             showMenuScreen();
         }
 
-        // GROQ API CLOUD CALL
+        // FULL GROQ CLOUD INTEGRATION WITH MULTI-TURN MEMORY CONTEXT
         async function callGroqAPI(promptText) {
             const apiKey = db.savedKey;
-            if (!apiKey) return "Groq API key is missing.";
+            if (!apiKey) return "Groq API key is missing or invalid.";
+
+            // Build historical context array from persistent chat memory storage
+            let messageContext = [
+                { role: "system", content: "You are G.I.B.B., a futuristic, highly intelligent AI system assistant with full conversational context memory." }
+            ];
+
+            // Push past memory turns so Groq remembers everything
+            if (db.chatHistory && db.chatHistory.length > 0) {
+                db.chatHistory.forEach(item => {
+                    let roleMapping = item.sender === 'user' ? 'user' : 'assistant';
+                    messageContext.push({ role: roleMapping, content: item.text });
+                });
+            }
+
+            // Append current prompt query
+            messageContext.push({ role: "user", content: promptText });
 
             try {
                 const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -755,26 +807,25 @@
                     },
                     body: JSON.stringify({
                         model: "llama-3.3-70b-versatile",
-                        messages: [
-                            { role: "system", content: "You are G.I.B.B., a futuristic, concise AI system assistant. Keep responses brief, sharp, and helpful." },
-                            { role: "user", content: promptText }
-                        ],
-                        max_tokens: 150
+                        messages: messageContext,
+                        max_tokens: 300
                     })
                 });
 
                 const data = await response.json();
                 if (data && data.choices && data.choices.length > 0) {
                     return data.choices[0].message.content.trim();
+                } else if (data && data.error) {
+                    return `Groq Error: ${data.error.message || 'Unknown API failure'}`;
                 } else {
                     return "Received empty response from Groq cloud core.";
                 }
             } catch (err) {
-                return "Network connection error while contacting Groq.";
+                return "Network connection error while contacting Groq API server.";
             }
         }
 
-        // CHAT LOGIC
+        // CHAT INTERFACE WITH FULL PERSISTENT MEMORY STORAGE
         function showDashboard() {
             switchScreen('dashboard-screen');
             loadChatHistory();
@@ -787,7 +838,7 @@
             
             if (history.length === 0) {
                 const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
-                appendMessage(`System Core initialized, ${honorific}. Secure Groq channel established.`, 'gibb', false);
+                appendMessage(`System Core initialized, ${honorific}. Secure Groq memory channel established.`, 'gibb', false);
             } else {
                 history.forEach(msg => appendMessage(msg.text, msg.sender, false));
             }
@@ -801,7 +852,16 @@
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
 
-            if (save) { db.chatHistory.push({ text, sender }); saveDatabase(); }
+            if (save) { 
+                db.chatHistory.push({ text, sender }); 
+                saveDatabase(); 
+            }
+        }
+
+        function clearChatMemory() {
+            db.chatHistory = [];
+            saveDatabase();
+            loadChatHistory();
         }
 
         function checkEnter(e) { if (e.key === 'Enter') sendMessage(); }
@@ -810,6 +870,7 @@
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if (!text) return;
+            
             appendMessage(text, 'user');
             input.value = '';
 
@@ -874,18 +935,12 @@
         }
 
         function logout() {
-            isGlobalListening = false;
+            isPerpetualListening = false;
             if(globalRecognition) globalRecognition.stop();
             sessionStorage.removeItem('gibb_logged_in');
             hasSpokenWelcome = false;
-            renderAuthScreen();
+            renderLoginScreen();
             switchScreen('auth-screen');
-        }
-
-        function clearProfileData() {
-            localStorage.removeItem('gibb_permanent_db');
-            db = { profile: null, chatHistory: [], volume: 1.0, savedKey: '' };
-            renderAuthScreen();
         }
     </script>
 </body>
