@@ -3,710 +3,653 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G.I.B.B.</title>
-    <link rel="icon" type="image/png" href="gibblogo.png">
+    <title>G.I.B.B. System</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
-
         :root {
-            --theme-color: #00ff66;
-            --theme-glow: rgba(0, 255, 100, 0.8);
-            --theme-panel-bg: rgba(2, 15, 7, 0.95);
-            --theme-input-bg: #010a04;
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(17, 24, 39, 0.85);
+            --border-color: rgba(59, 130, 246, 0.3);
+            --text-color: #f3f4f6;
+            --accent-color: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            --danger-color: #ef4444;
         }
 
-        body, html {
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            min-height: 100vh;
-            background-color: #010a04;
-            color: var(--theme-color);
-            font-family: 'Orbitron', monospace;
-            overflow-x: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* --- Loading Screen --- */
-        #loading-screen {
-            position: fixed;
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #010a04;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            padding: 30px;
-            box-sizing: border-box;
-            z-index: 100;
-            transition: opacity 0.5s ease;
-        }
-        .boot-sequence {
-            font-size: 0.9rem;
-            line-height: 1.8;
-            text-shadow: 0 0 10px var(--theme-color);
-        }
-        .boot-cursor {
-            display: inline-block;
-            width: 8px;
-            height: 16px;
-            background-color: var(--theme-color);
-            animation: blink 0.8s infinite;
-            vertical-align: middle;
-            margin-left: 5px;
-        }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
-        /* --- Login Screen --- */
-        #login-screen {
-            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
             padding: 20px;
-            box-sizing: border-box;
-            gap: 20px;
         }
-        #login-screen img {
-            width: 160px;
-            filter: drop-shadow(0 0 25px var(--theme-glow));
-        }
-        .login-box {
-            border: 1px solid var(--theme-color);
-            padding: 25px;
-            border-radius: 12px;
-            background: var(--theme-panel-bg);
-            box-shadow: 0 0 20px rgba(0, 255, 100, 0.2);
+
+        .screen.active {
             display: flex;
-            flex-direction: column;
+        }
+
+        /* Logo with Orbiting Rings */
+        .logo-container {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 15px;
-            width: 100%;
-            max-width: 320px;
-            box-sizing: border-box;
-        }
-        #login-screen input {
-            background-color: var(--theme-input-bg);
-            color: var(--theme-color);
-            border: 1px solid var(--theme-color);
-            padding: 12px;
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 1rem;
-            text-align: center;
-            outline: none;
-            width: 100%;
-            box-sizing: border-box;
-            -webkit-text-security: disc;
-        }
-        #login-screen button {
-            background: #02260f;
-            color: var(--theme-color);
-            border: 1px solid var(--theme-color);
-            padding: 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: bold;
-            width: 100%;
-            transition: 0.2s;
-        }
-        #login-screen button:hover {
-            background-color: var(--theme-color);
-            color: #010a04;
-        }
-        #error-msg { color: #ff3333; display: none; font-size: 0.8rem; }
-
-        /* --- Main Menu Dashboard --- */
-        #home-screen {
-            display: none;
-            flex-direction: column;
-            min-height: 100vh;
-            width: 100vw;
-            box-sizing: border-box;
-            padding: 20px;
-            gap: 20px;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-        .hud-top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--theme-color);
-            padding-bottom: 10px;
-            font-size: 0.75rem;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .hud-widget {
-            background: var(--theme-panel-bg);
-            border: 1px solid var(--theme-color);
-            padding: 6px 12px;
-            border-radius: 6px;
+            margin-bottom: 30px;
         }
 
-        .dashboard-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            max-width: 700px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        @media(min-width: 850px) {
-            .dashboard-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                max-width: 1100px;
-            }
-        }
-
-        .hud-card {
-            background: var(--theme-panel-bg);
-            border: 2px solid var(--theme-color);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 15px rgba(0,255,100,0.15);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            box-sizing: border-box;
-        }
-        .hud-card h4 {
-            margin: 0;
-            font-size: 0.95rem;
-            border-bottom: 1px solid var(--theme-color);
-            padding-bottom: 8px;
-        }
-        .setting-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            font-size: 0.8rem;
-        }
-        .setting-group input[type="range"] {
-            width: 100%;
-            background: var(--theme-input-bg);
-            color: var(--theme-color);
-            border: 1px solid var(--theme-color);
-            padding: 10px;
-            border-radius: 6px;
-            font-family: inherit;
-            box-sizing: border-box;
-            outline: none;
-        }
-        .theme-swatches { display: flex; gap: 10px; }
-        .swatch {
-            width: 24px;
-            height: 24px;
+        .main-logo {
+            width: 140px;
+            height: 140px;
             border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid #fff;
-        }
-        .settings-btn {
-            background: var(--theme-input-bg);
-            color: var(--theme-color);
-            border: 1px solid var(--theme-color);
-            padding: 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: bold;
-            font-size: 0.8rem;
-        }
-        .settings-btn:hover, .settings-btn.active {
-            background-color: var(--theme-color);
-            color: #010a04;
+            object-fit: cover;
+            z-index: 10;
+            box-shadow: 0 0 25px var(--accent-glow);
         }
 
-        /* Center Hub App Switcher Panel */
-        .hub-center-panel {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
+        /* Outer Orbiting Ring (Clockwise) */
+        .orbit-ring-outer {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 1px dashed rgba(59, 130, 246, 0.4);
+            animation: spinClockwise 12s linear infinite;
+        }
+
+        .dot-outer {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-color);
+            top: -4px;
+            left: calc(50% - 4px);
+        }
+
+        /* Inner Orbiting Ring (Anti-Clockwise) */
+        .orbit-ring-inner {
+            position: absolute;
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            border: 1px dashed rgba(59, 130, 246, 0.2);
+            animation: spinCounterClockwise 8s linear infinite;
+        }
+
+        .dot-inner {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: rgba(59, 130, 246, 0.6);
+            border-radius: 50%;
+            bottom: -2.5px;
+            left: calc(50% - 2.5px);
+        }
+
+        @keyframes spinClockwise {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes spinCounterClockwise {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(-360deg); }
+        }
+
+        /* Form & Panels */
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             text-align: center;
         }
-        .hub-center-panel img {
-            width: 130px;
-            filter: drop-shadow(0 0 20px var(--theme-glow));
-        }
-        .app-launch-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 100%;
-        }
-        .app-launch-btn {
-            background: var(--theme-panel-bg);
-            color: var(--theme-color);
-            border: 1px solid var(--theme-color);
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: bold;
-            font-size: 0.9rem;
-            box-shadow: 0 0 10px rgba(0,255,100,0.1);
-            transition: 0.2s;
-        }
-        .app-launch-btn:hover {
-            background: rgba(0, 255, 100, 0.2);
-            box-shadow: 0 0 15px var(--theme-glow);
+
+        h2 {
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
         }
 
-        /* --- App Views (Chat & Translation) --- */
-        .app-view {
-            display: none;
-            flex-direction: column;
-            height: 100vh;
-            width: 100vw;
-            background: #010a04;
-            box-sizing: border-box;
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
         }
-        header {
-            background: var(--theme-panel-bg);
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--theme-color);
+
+        input:focus, select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        select option {
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px var(--accent-glow);
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .link-text {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #9ca3af;
+            cursor: pointer;
+        }
+
+        .link-text span {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+
+        .error-msg {
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        /* Carousel Menu */
+        .carousel-container {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            font-weight: bold;
+            justify-content: center;
+            gap: 20px;
+            height: 120px;
+            margin-top: 20px;
         }
-        header img { height: 28px; }
-        .back-home {
-            background: transparent;
-            border: 1px solid var(--theme-color);
-            color: var(--theme-color);
-            padding: 6px 12px;
-            border-radius: 6px;
+
+        .carousel-btn {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 15px 25px;
+            border-radius: 12px;
             cursor: pointer;
-            font-family: inherit;
+            transition: all 0.4s ease;
             font-weight: bold;
         }
 
-        /* Chat layout */
+        .carousel-btn.small {
+            transform: scale(0.8);
+            opacity: 0.4;
+            font-size: 0.9rem;
+        }
+
+        .carousel-btn.big {
+            transform: scale(1.1);
+            opacity: 1;
+            font-size: 1.2rem;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* Dashboard Interface */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr 260px;
+            width: 100vw;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .sidebar {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
         .chat-container {
+            display: flex;
+            flex-direction: column;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .chat-messages {
             flex: 1;
-            padding: 15px;
+            padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
+
         .message {
+            max-width: 75%;
             padding: 12px 16px;
-            border-radius: 8px;
-            max-width: 85%;
-            word-wrap: break-word;
-            font-size: 0.9rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
             line-height: 1.4;
         }
-        .user-msg {
-            background-color: rgba(4, 31, 14, 0.9);
-            border: 1px solid var(--theme-color);
+
+        .message.user {
+            background: var(--accent-color);
+            color: white;
             align-self: flex-end;
-            color: #ffffff;
+            border-bottom-right-radius: 2px;
         }
-        .bot-msg {
-            background-color: var(--theme-panel-bg);
-            border: 1px solid var(--theme-color);
+
+        .message.gibb {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-color);
             align-self: flex-start;
-            color: var(--theme-color);
+            border-bottom-left-radius: 2px;
         }
 
-        /* Animated Thinking Dots (...) */
-        .thinking-dots span {
-            animation: blinkDots 1.4s infinite;
-            display: inline-block;
-            font-size: 1.4rem;
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
-        .thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes blinkDots {
-            0% { opacity: 0.2; transform: translateY(0); }
-            50% { opacity: 1; transform: translateY(-4px); }
-            100% { opacity: 0.2; transform: translateY(0); }
-        }
-
-        .input-area {
+        .chat-input-area {
             display: flex;
-            padding: 12px;
-            background: var(--theme-panel-bg);
-            border-top: 1px solid var(--theme-color);
-            gap: 8px;
-        }
-        .input-area input {
-            flex: 1;
-            background-color: var(--theme-input-bg);
-            color: var(--theme-color);
-            border: 1px solid var(--theme-color);
-            padding: 10px;
-            border-radius: 6px;
-            font-family: inherit;
-            outline: none;
-        }
-        .input-area button, .voice-btn {
-            background: #02260f;
-            color: var(--theme-color);
-            border: 1px solid var(--theme-color);
-            padding: 0 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: bold;
-        }
-
-        /* Translation view */
-        .translate-wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
             padding: 15px;
-            gap: 15px;
-            max-width: 800px;
-            margin: 0 auto;
-            width: 100%;
-            box-sizing: border-box;
-            justify-content: center;
+            border-top: 1px solid var(--border-color);
+            background: rgba(0,0,0,0.2);
+            gap: 10px;
         }
-        .translate-controls { display: flex; gap: 10px; flex-wrap: wrap; }
-        .translate-controls select { flex: 1; background: var(--theme-input-bg); color: var(--theme-color); border: 1px solid var(--theme-color); padding: 10px; border-radius: 6px; font-family: inherit; }
-        .translate-boxes { display: flex; flex-direction: column; gap: 15px; }
-        @media(min-width: 768px) { .translate-boxes { flex-direction: row; } }
-        .translate-box { flex: 1; background: var(--theme-panel-bg); border: 1px solid var(--theme-color); border-radius: 8px; padding: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .translate-box textarea { background: var(--theme-input-bg); color: var(--theme-color); border: 1px solid var(--theme-color); border-radius: 4px; padding: 10px; font-family: inherit; resize: none; height: 100px; outline: none; }
+
+        .chat-input-area input {
+            margin-bottom: 0;
+        }
+
+        .chat-input-area button {
+            width: 100px;
+            margin-bottom: 0;
+        }
+
+        .widget-box {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .widget-title {
+            font-size: 0.85rem;
+            color: #9ca3af;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body>
 
-    <div id="loading-screen">
-        <div class="boot-sequence" id="boot-text">INITIALIZING KERNEL...<span class="boot-cursor"></span></div>
-    </div>
-
-    <div id="login-screen">
-        <img src="gibblogo.png" alt="Logo">
-        <div class="login-box">
-            <h3 style="margin:0; font-size: 0.9rem;">🔒 Enter Authorised Password:</h3>
-            <input type="text" id="password-input" placeholder="••••••••">
-            <button onclick="checkPassword()">Initialise G.I.B.B.</button>
-            <p id="error-msg">Access Denied. Incorrect Security Protocol.</p>
-        </div>
-    </div>
-
-    <div id="home-screen">
-        <div class="hud-top-bar">
-            <div class="hud-widget" id="hud-date-time">TIME LOADING...</div>
-            <div class="hud-widget" id="key-status-hud">🔑 KEY PENDING</div>
-            <div class="hud-widget">CHROMEBOOK MODE ACTIVE</div>
+    <div id="auth-screen" class="screen active">
+        <div class="logo-container">
+            <div class="orbit-ring-outer"><div class="dot-outer"></div></div>
+            <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
+            <img src="gibblogo.png" alt="G.I.B.B. Logo" class="main-logo" onerror="this.src='https://via.placeholder.com/140?text=GIBB'">
         </div>
         
-        <div class="dashboard-grid">
-            <div class="hud-card" style="display: flex !important; flex-direction: column !important; visibility: visible !important;">
-                <h4 style="color: #00ff66; border-bottom: 1px solid #00ff66; padding-bottom: 8px;">⚙️ SYSTEM SETTINGS</h4>
-                
-                <div style="background: #000c03; border: 2px solid #00ff66; padding: 12px; border-radius: 6px; display: flex; flex-direction: column; gap: 6px;">
-                    <label style="font-size: 0.8rem; font-weight: bold; color: #00ff66;">⚡ Neural Link API Key (Groq Core)</label>
-                    <input type="text" id="groq-key-input" placeholder="gsk_..." oninput="saveGroqKey(this.value)" style="width: 100%; background: #010a04; color: #00ff66; border: 1px solid #00ff66; padding: 10px; border-radius: 4px; font-family: inherit; font-size: 0.9rem; box-sizing: border-box; outline: none;">
-                </div>
+        <div class="panel">
+            <h2 id="auth-title">CREATE ACCOUNT</h2>
+            <div id="auth-error" class="error-msg"></div>
+            
+            <input type="text" id="username-input" placeholder="Username">
+            <input type="password" id="password-input" placeholder="Password">
+            
+            <div id="gender-group">
+                <select id="gender-input">
+                    <option value="" disabled selected>Select Title / Pronoun Style</option>
+                    <option value="male">Male (Sir)</option>
+                    <option value="female">Female (Miss)</option>
+                </select>
+            </div>
 
-                <div class="setting-group">
-                    <label>🎨 HUD Theme / Color</label>
-                    <div class="theme-swatches">
-                        <div class="swatch" style="background: #00ff66;" onclick="setTheme('#00ff66', 'rgba(0,255,100,0.8)')"></div>
-                        <div class="swatch" style="background: #00bfff;" onclick="setTheme('#00bfff', 'rgba(0,191,255,0.8)')"></div>
-                        <div class="swatch" style="background: #ffaa00;" onclick="setTheme('#ffaa00', 'rgba(255,170,0,0.8)')"></div>
-                        <div class="swatch" style="background: #ff3366;" onclick="setTheme('#ff3366', 'rgba(255,51,102,0.8)')"></div>
+            <button class="btn" id="auth-action-btn" onclick="handleAuth()">Register Account</button>
+            <div class="link-text" id="auth-toggle-text" onclick="toggleAuthMode()">
+                Already have an account? <span>Log In</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="menu-screen" class="screen">
+        <div class="logo-container">
+            <div class="orbit-ring-outer"><div class="dot-outer"></div></div>
+            <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
+            <img src="gibblogo.png" alt="G.I.B.B. Logo" class="main-logo" onerror="this.src='https://via.placeholder.com/140?text=GIBB'">
+        </div>
+
+        <div style="font-size: 1.4rem; font-weight: bold; margin-bottom: 10px;" id="welcome-user-banner">SYSTEM READY</div>
+        <p style="color: #9ca3af; margin-bottom: 20px;">Use the carousel selector below to navigate</p>
+
+        <div class="carousel-container" id="carousel">
+            <button class="carousel-btn big" id="c-btn-0" onclick="selectCarouselOption(0)">Launch Chat Interface</button>
+            <button class="carousel-btn small" id="c-btn-1" onclick="selectCarouselOption(1)">System Settings</button>
+        </div>
+    </div>
+
+    <div id="dashboard-screen" class="screen">
+        <div class="dashboard-layout">
+            <div class="sidebar">
+                <div>
+                    <h3 style="margin-bottom: 15px; color: var(--accent-color);">PETS MODULE</h3>
+                    <div class="widget-box">
+                        <div class="widget-title">Active Companion</div>
+                        <p style="font-size: 0.9rem;">Virtual Core Pet: <span style="color: var(--accent-color); font-weight: bold;">G.I.B.B. Watcher</span></p>
                     </div>
                 </div>
-
-                <div class="setting-group">
-                    <label>🔊 Audio Mute Toggle</label>
-                    <button class="settings-btn" id="mute-btn" onclick="toggleMute()">MUTE: OFF</button>
-                </div>
-
-                <div class="setting-group">
-                    <label>🎚️ Master Volume: <span id="vol-val">100%</span></label>
-                    <input type="range" id="volume-slider" min="0" max="100" value="100" oninput="updateVolume(this.value)">
+                <div>
+                    <button class="btn" style="background: rgba(239, 68, 68, 0.2); border: 1px solid var(--danger-color); color: #fca5a5;" onclick="logout()">Log Out</button>
                 </div>
             </div>
 
-            <div class="hud-card hub-center-panel">
-                <img src="gibblogo.png" alt="Logo">
-                <div class="app-launch-buttons">
-                    <button class="app-launch-btn" onclick="openApp('chat')">💬 Open Terminal Chat</button>
-                    <button class="app-launch-btn" onclick="openApp('translate')">🌐 Open Translation Matrix</button>
+            <div class="chat-container">
+                <div style="padding: 15px 20px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: bold; letter-spacing: 1px;">G.I.B.B. NEURAL CORE</span>
+                    <button style="background: none; border: none; color: var(--accent-color); cursor: pointer; font-size: 0.9rem;" onclick="openMenu()">Menu</button>
                 </div>
-                <div id="live-location-data" style="font-size: 0.75rem; opacity: 0.8; margin-top: 10px;">
-                    Node links establishing...
+                <div class="chat-messages" id="chat-messages"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input" placeholder="Type a message to G.I.B.B...." onkeypress="checkEnter(event)">
+                    <button class="btn" onclick="sendMessage()">Send</button>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div class="app-view" id="chat-view">
-        <header>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <img src="gibblogo.png" alt="Logo">
-                <span>G.I.B.B. Neural Interface</span>
-            </div>
-            <button class="back-home" onclick="goHome()">Menu</button>
-        </header>
-        <div class="chat-container" id="chat-box">
-            <div class="message bot-msg">G.I.B.B. core online via Groq AI. Ready, sir.</div>
-        </div>
-        <div class="input-area">
-            <input type="text" id="user-input" placeholder="Ask G.I.B.B. anything..." onkeypress="handleKeyPress(event)">
-            <button onclick="sendMessage()">Enter</button>
-            <button class="voice-btn" onclick="startListening()">🎙️</button>
-        </div>
-    </div>
-
-    <div class="app-view" id="translate-view">
-        <header>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <img src="gibblogo.png" alt="Logo">
-                <span>G.I.B.B. Translation Engine</span>
-            </div>
-            <button class="back-home" onclick="goHome()">Menu</button>
-        </header>
-        <div class="translate-wrapper">
-            <div class="translate-controls">
-                <select id="target-language">
-                    <option value="es">Spanish</option>
-                    <option value="fr">French</option>
-                    <option value="de">German</option>
-                    <option value="ja">Japanese</option>
-                    <option value="zh">Chinese</option>
-                </select>
-                <button class="settings-btn" onclick="performTranslation()">Execute</button>
-            </div>
-            <div class="translate-boxes">
-                <div class="translate-box">
-                    <label>Source Text:</label>
-                    <textarea id="source-text" placeholder="Type text..."></textarea>
+            <div class="sidebar">
+                <div>
+                    <h3 style="margin-bottom: 15px; color: var(--accent-color);">LOCATION & HUD</h3>
+                    <div class="widget-box">
+                        <div class="widget-title">Location Status</div>
+                        <p id="location-display" style="font-size: 0.9rem; font-weight: bold;">Global Sector - Secure Node</p>
+                    </div>
+                    <div class="widget-box">
+                        <div class="widget-title">Display Performance</div>
+                        <p style="font-size: 0.9rem;">FPS: <span id="fps-counter" style="color: var(--accent-color); font-weight: bold;">60</span></p>
+                        <p style="font-size: 0.9rem; margin-top: 5px;">Resolution: <span style="color: var(--accent-color); font-weight: bold;" id="res-display">1920x1080</span></p>
+                    </div>
                 </div>
-                <div class="translate-box">
-                    <label>Translated Output:</label>
-                    <textarea id="output-text" readonly placeholder="Output..."></textarea>
+                <div>
+                    <div class="widget-box" style="margin-bottom: 0;">
+                        <div class="widget-title">Access Key</div>
+                        <p style="font-size: 0.85rem; color: #10b981;">✓ Key Verified & Permanent</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const PASSWORD = "prki3210";
-        let isMuted = false;
-        let masterVolume = 1.0;
-        let groqApiKey = localStorage.getItem("gibb_groq_key") || "";
+        // State management with persistent permanent storage
+        let isLoginMode = false;
+        let carouselIndex = 0;
+        
+        // Load persistent user database and session safely
+        let db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { users: {} };
+        let activeUserSession = localStorage.getItem('gibb_active_session') || null;
 
-        window.addEventListener("load", () => {
-            runBootSequence();
-            updateHUDClock();
-            setInterval(updateHUDClock, 1000);
-            fetchLiveWeatherAndLocation();
+        window.addEventListener('DOMContentLoaded', () => {
+            updateResolution();
+            window.addEventListener('resize', updateResolution);
             
-            if(groqApiKey) {
-                let keyInput = document.getElementById("groq-key-input");
-                if(keyInput) keyInput.value = groqApiKey;
-                updateKeyStatusUI(true);
+            // Start FPS monitor
+            let frameCount = 0;
+            let lastTime = performance.now();
+            function countFPS() {
+                frameCount++;
+                let currentTime = performance.now();
+                if (currentTime - lastTime >= 1000) {
+                    document.getElementById('fps-counter').innerText = frameCount;
+                    frameCount = 0;
+                    lastTime = currentTime;
+                }
+                requestAnimationFrame(countFPS);
+            }
+            requestAnimationFrame(countFPS);
+
+            // Check if user session already exists permanently
+            if (activeUserSession && db.users[activeUserSession]) {
+                showMenuScreen();
+            } else {
+                showAuthScreen();
             }
         });
 
-        async function runBootSequence() {
-            let steps = ["INITIALIZING KERNEL...", "LOADING MODULES...", "SYSTEM VERIFIED."];
-            let bootElem = document.getElementById("boot-text");
-            for (let i = 0; i < steps.length; i++) {
-                if (bootElem) bootElem.innerHTML = steps[i] + '<span class="boot-cursor"></span>';
-                await new Promise(r => setTimeout(r, 200));
-            }
-            setTimeout(() => {
-                let loader = document.getElementById("loading-screen");
-                if (loader) {
-                    loader.style.opacity = "0";
-                    setTimeout(() => {
-                        loader.style.display = "none";
-                        document.getElementById("login-screen").style.display = "flex";
-                    }, 300);
-                }
-            }, 200);
+        function updateResolution() {
+            document.getElementById('res-display').innerText = `${window.innerWidth}x${window.innerHeight}`;
         }
 
-        async function fetchLiveWeatherAndLocation() {
-            try {
-                let res = await fetch('https://ipapi.co/json/');
-                let loc = await res.json();
-                document.getElementById("live-location-data").innerHTML = `LOCATION: ${loc.city}, ${loc.country_name}<br>STATUS: Nominal`;
-            } catch(e) {
-                document.getElementById("live-location-data").innerHTML = `LOCATION: Node Online`;
-            }
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            document.getElementById('auth-title').innerText = isLoginMode ? "LOG IN" : "CREATE ACCOUNT";
+            document.getElementById('auth-action-btn').innerText = isLoginMode ? "Log In" : "Register Account";
+            document.getElementById('gender-group').style.display = isLoginMode ? "none" : "block";
+            document.getElementById('auth-toggle-text').innerHTML = isLoginMode ? 
+                "Don't have an account? <span>Register</span>" : 
+                "Already have an account? <span>Log In</span>";
+            document.getElementById('auth-error').style.display = 'none';
         }
 
-        function saveGroqKey(val) {
-            groqApiKey = val.trim();
-            localStorage.setItem("gibb_groq_key", groqApiKey);
-            updateKeyStatusUI(groqApiKey.length > 5);
-        }
+        function handleAuth() {
+            const user = document.getElementById('username-input').value.trim();
+            const pass = document.getElementById('password-input').value.trim();
+            const gender = document.getElementById('gender-input').value;
+            const errorBox = document.getElementById('auth-error');
 
-        function updateKeyStatusUI(isActivated) {
-            let statusText = isActivated ? "🔑 KEY ACTIVATED" : "🔑 KEY PENDING";
-            let hudStatus = document.getElementById("key-status-hud");
-            if (hudStatus) hudStatus.innerText = statusText;
-        }
-
-        function setTheme(color, glow) {
-            document.documentElement.style.setProperty('--theme-color', color);
-            document.documentElement.style.setProperty('--theme-glow', glow);
-            localStorage.setItem("gibb_theme_color", color);
-            localStorage.setItem("gibb_theme_glow", glow);
-        }
-
-        function toggleMute() {
-            isMuted = !isMuted;
-            let btn = document.getElementById("mute-btn");
-            btn.innerText = isMuted ? "MUTE: ON" : "MUTE: OFF";
-            btn.classList.toggle("active", isMuted);
-            localStorage.setItem("gibb_muted", isMuted);
-        }
-
-        function updateVolume(val) {
-            masterVolume = val / 100;
-            document.getElementById("vol-val").innerText = `${val}%`;
-            localStorage.setItem("gibb_volume", val);
-        }
-
-        function speakJarvis(text) {
-            if (!text || isMuted || !('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            let utterance = new SpeechSynthesisUtterance(text);
-            utterance.volume = masterVolume;
-            window.speechSynthesis.speak(utterance);
-        }
-
-        function checkPassword() {
-            if (document.getElementById("password-input").value === PASSWORD) {
-                document.getElementById("login-screen").style.display = "none";
-                let home = document.getElementById("home-screen");
-                home.style.display = "flex";
-                setTimeout(() => { home.style.opacity = "1"; }, 50);
-                speakJarvis("System online.");
-            } else {
-                document.getElementById("error-msg").style.display = "block";
-            }
-        }
-
-        function openApp(name) {
-            document.getElementById("home-screen").style.display = "none";
-            document.getElementById(name + "-view").style.display = "flex";
-        }
-
-        function goHome() {
-            window.speechSynthesis?.cancel();
-            document.getElementById("chat-view").style.display = "none";
-            document.getElementById("translate-view").style.display = "none";
-            let home = document.getElementById("home-screen");
-            home.style.display = "flex";
-            home.style.opacity = "1";
-        }
-
-        function handleKeyPress(e) { if (e.key === 'Enter') sendMessage(); }
-
-        function sendMessage() {
-            let input = document.getElementById("user-input");
-            let text = input.value.trim();
-            if (!text) return;
-            appendMessage(text, 'user-msg');
-            input.value = "";
-            processGroqAI(text);
-        }
-
-        function appendMessage(text, className, isHTML = false) {
-            let box = document.getElementById("chat-box");
-            let msg = document.createElement("div");
-            msg.className = `message ${className}`;
-            if (isHTML) msg.innerHTML = text; else msg.innerText = text;
-            box.appendChild(msg);
-            box.scrollTop = box.scrollHeight;
-            return msg;
-        }
-
-        function updateHUDClock() {
-            let now = new Date();
-            let elem = document.getElementById("hud-date-time");
-            if (elem) elem.innerText = `${now.toLocaleDateString()} // ${now.toLocaleTimeString()}`;
-        }
-
-        async function processGroqAI(input) {
-            if (!groqApiKey) {
-                appendMessage("Sir, please enter your Groq API key in the system settings panel.", 'bot-msg');
-                speakJarvis("API key missing.");
+            if (!user || !pass) {
+                errorBox.innerText = "Please fill in all required fields.";
+                errorBox.style.display = 'block';
                 return;
             }
 
-            // Animated thinking dots (...)
-            let loadingMsg = appendMessage('<div class="thinking-dots"><span>.</span><span>.</span><span>.</span></div>', 'bot-msg', true);
-
-            try {
-                let res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: { "Authorization": `Bearer ${groqApiKey}`, "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
-                        messages: [
-                            { role: "system", content: "You are G.I.B.B., an advanced AI assistant styled after Jarvis. Address the user as 'sir'." },
-                            { role: "user", content: input }
-                        ],
-                        temperature: 0.7,
-                        max_tokens: 400
-                    })
-                });
-                let data = await res.json();
-                document.getElementById("chat-box").removeChild(loadingMsg);
-                
-                if (data.choices && data.choices.length > 0) {
-                    let reply = data.choices[0].message.content;
-                    appendMessage(reply, 'bot-msg');
-                    speakJarvis(reply);
-                } else {
-                    appendMessage("Neural network error encountered.", 'bot-msg');
+            if (!isLoginMode) {
+                if (!gender) {
+                    errorBox.innerText = "Please select your title preference.";
+                    errorBox.style.display = 'block';
+                    return;
                 }
-            } catch (err) {
-                document.getElementById("chat-box").removeChild(loadingMsg);
-                appendMessage("Connection to Groq cloud failed.", 'bot-msg');
+                // Register account (Permanent storage - never deletes automatically)
+                if (db.users[user]) {
+                    errorBox.innerText = "Username already exists. Log in instead.";
+                    errorBox.style.display = 'block';
+                    return;
+                }
+                db.users[user] = {
+                    password: pass,
+                    gender: gender,
+                    chatHistory: []
+                };
+                saveDatabase();
+            } else {
+                // Log in
+                if (!db.users[user] || db.users[user].password !== pass) {
+                    errorBox.innerText = "Invalid username or password.";
+                    errorBox.style.display = 'block';
+                    return;
+                }
+            }
+
+            activeUserSession = user;
+            localStorage.setItem('gibb_active_session', user);
+            showMenuScreen();
+        }
+
+        function saveDatabase() {
+            localStorage.setItem('gibb_permanent_db', JSON.stringify(db));
+        }
+
+        function showAuthScreen() {
+            document.getElementById('auth-screen').classList.add('active');
+            document.getElementById('menu-screen').classList.remove('active');
+            document.getElementById('dashboard-screen').classList.remove('active');
+        }
+
+        function showMenuScreen() {
+            document.getElementById('auth-screen').classList.remove('active');
+            document.getElementById('menu-screen').classList.add('active');
+            document.getElementById('dashboard-screen').classList.remove('active');
+            
+            const userData = db.users[activeUserSession];
+            const title = userData.gender === 'male' ? 'Sir' : 'Miss';
+            document.getElementById('welcome-user-banner').innerText = `WELCOME BACK, ${title.toUpperCase()} ${activeUserSession.toUpperCase()}`;
+        }
+
+        function openMenu() {
+            showMenuScreen();
+        }
+
+        // Carousel Logic
+        function selectCarouselOption(index) {
+            carouselIndex = index;
+            updateCarouselUI();
+            if (index === 0) {
+                setTimeout(showDashboard, 300);
             }
         }
 
-        async function performTranslation() {
-            let text = document.getElementById("source-text").value.trim();
-            let lang = document.getElementById("target-language").value;
-            let output = document.getElementById("output-text");
-            if (!text) return;
-            output.value = "Translating...";
-            try {
-                let res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=autodetect|${lang}`);
-                let data = await res.json();
-                output.value = data.responseData.translatedText || "Error";
-            } catch (e) {
-                output.value = "Translation offline.";
+        function updateCarouselUI() {
+            const btn0 = document.getElementById('c-btn-0');
+            const btn1 = document.getElementById('c-btn-1');
+            if (carouselIndex === 0) {
+                btn0.className = "carousel-btn big";
+                btn1.className = "carousel-btn small";
+            } else {
+                btn0.className = "carousel-btn small";
+                btn1.className = "carousel-btn big";
             }
         }
 
-        function startListening() {
-            let SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRec) { alert("Speech recognition not supported."); return; }
-            let rec = new SpeechRec();
-            rec.onresult = (e) => {
-                document.getElementById("user-input").value = e.results[0][0].transcript;
+        // Allow carousel navigation via scrolling
+        window.addEventListener('wheel', (e) => {
+            if (document.getElementById('menu-screen').classList.contains('active')) {
+                if (e.deltaY > 0) {
+                    carouselIndex = 1;
+                } else {
+                    carouselIndex = 0;
+                }
+                updateCarouselUI();
+            }
+        });
+
+        function showDashboard() {
+            document.getElementById('auth-screen').classList.remove('active');
+            document.getElementById('menu-screen').classList.remove('active');
+            document.getElementById('dashboard-screen').classList.add('active');
+            loadChatHistory();
+        }
+
+        function loadChatHistory() {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = '';
+            const history = db.users[activeUserSession].chatHistory || [];
+            
+            if (history.length === 0) {
+                const userData = db.users[activeUserSession];
+                const honorific = userData.gender === 'male' ? 'Sir' : 'Miss';
+                appendMessage(`Greetings, ${honorific}. G.I.B.B. core initialized and ready.`, 'gibb', false);
+            } else {
+                history.forEach(msg => {
+                    appendMessage(msg.text, msg.sender, false);
+                });
+            }
+        }
+
+        function appendMessage(text, sender, save = true) {
+            const container = document.getElementById('chat-messages');
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            div.innerText = text;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+
+            if (save && activeUserSession) {
+                db.users[activeUserSession].chatHistory.push({ text, sender });
+                saveDatabase();
+            }
+        }
+
+        function checkEnter(e) {
+            if (e.key === 'Enter') {
                 sendMessage();
-            };
-            rec.start();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            appendMessage(text, 'user');
+            input.value = '';
+
+            // G.I.B.B. Response Simulation & Rule Enforcement
+            setTimeout(() => {
+                const lowerText = text.toLowerCase();
+                const userData = db.users[activeUserSession];
+                const honorific = userData.gender === 'male' ? 'Sir' : 'Miss';
+
+                let reply = "";
+                if (lowerText.includes('who made you') || lowerText.includes('creator') || lowerText.includes('created you')) {
+                    reply = `gibbkayyy made me, ${honorific}.`;
+                } else {
+                    reply = `Acknowledged, ${honorific}. All chat sessions and account parameters remain securely remembered in permanent storage.`;
+                }
+
+                appendMessage(reply, 'gibb');
+            }, 500);
+        }
+
+        function logout() {
+            activeUserSession = null;
+            localStorage.removeItem('gibb_active_session');
+            showAuthScreen();
         }
     </script>
 </body>
