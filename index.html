@@ -6,233 +6,367 @@
     <title>G.I.B.B.</title>
     <link rel="icon" type="image/png" href="gibblogo.png">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
         body, html {
             margin: 0;
             padding: 0;
             height: 100vh;
             width: 100vw;
-            background-color: #031409;
+            background-color: #010a04;
             color: #00ff66;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Orbitron', monospace;
             overflow: hidden;
-            background-image: linear-gradient(rgba(0, 255, 100, 0.05) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0, 255, 100, 0.05) 1px, transparent 1px);
-            background-size: 30px 30px;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 100, 0.08) 0%, rgba(3, 20, 9, 0.9) 100%),
+                linear-gradient(rgba(0, 255, 100, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 100, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 40px 40px, 40px 40px;
         }
 
-        /* --- Login Screen --- */
-        #login-screen {
+        /* --- Cinematic Loading Screen --- */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #010a04;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            gap: 20px;
-            z-index: 10;
-            position: relative;
+            z-index: 100;
+            transition: opacity 0.8s ease;
         }
-        #login-screen img {
+        .arc-reactor {
             width: 120px;
-            filter: drop-shadow(0 0 15px rgba(0, 255, 100, 0.6));
+            height: 120px;
+            border: 3px solid rgba(0, 255, 100, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(0, 255, 100, 0.2) inset;
+            animation: spin 4s linear infinite;
         }
-        #login-screen input {
-            background-color: #041f0e;
-            color: #00ff66;
-            border: 1px solid #00ff66;
-            padding: 12px;
-            border-radius: 6px;
-            font-family: inherit;
-            font-size: 1rem;
-            text-align: center;
-            outline: none;
-            -webkit-text-security: disc; /* Hides password visually completely */
+        .arc-core {
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 255, 100, 0.2);
+            border-radius: 50%;
+            box-shadow: 0 0 20px #00ff66;
+            animation: pulse-core 1.5s ease-in-out infinite alternate;
         }
-        #login-screen button {
-            background-color: #041f0e;
-            color: #00ff66;
-            border: 1px solid #00ff66;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: bold;
-            transition: 0.3s;
-            box-shadow: 0 0 10px rgba(0, 255, 100, 0.3);
-        }
-        #login-screen button:hover {
-            background-color: #00ff66;
-            color: #031409;
-            box-shadow: 0 0 25px rgba(0, 255, 100, 0.9);
-        }
-        #error-msg {
-            color: #ff3333;
-            display: none;
-            text-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse-core { 0% { transform: scale(0.8); opacity: 0.5; } 100% { transform: scale(1.1); opacity: 1; } }
+        .loading-text {
+            margin-top: 25px;
+            font-size: 0.9rem;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px #00ff66;
         }
 
-        /* --- Transition / Home Screen --- */
-        #home-screen {
+        /* --- Holographic Unlock Screen --- */
+        #login-screen {
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             gap: 25px;
+            z-index: 10;
+            position: relative;
+            background: radial-gradient(circle, rgba(0,255,100,0.05) 0%, rgba(1,10,4,1) 80%);
+        }
+        #login-screen img {
+            width: 220px;
+            filter: drop-shadow(0 0 25px rgba(0, 255, 100, 0.8));
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        
+        .login-box {
+            border: 1px solid rgba(0, 255, 100, 0.4);
+            padding: 30px;
+            border-radius: 12px;
+            background: rgba(2, 15, 7, 0.8);
+            box-shadow: 0 0 30px rgba(0, 255, 100, 0.15), inset 0 0 15px rgba(0, 255, 100, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            backdrop-filter: blur(5px);
+        }
+        #login-screen input {
+            background-color: #010a04;
+            color: #00ff66;
+            border: 1px solid #00ff66;
+            padding: 14px 20px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            text-align: center;
+            outline: none;
+            width: 260px;
+            box-shadow: 0 0 10px rgba(0, 255, 100, 0.2) inset;
+            -webkit-text-security: disc;
+        }
+        #login-screen button {
+            background: linear-gradient(135deg, #021f0e, #043818);
+            color: #00ff66;
+            border: 1px solid #00ff66;
+            padding: 12px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            transition: 0.3s;
+            box-shadow: 0 0 15px rgba(0, 255, 100, 0.3);
+        }
+        #login-screen button:hover {
+            background-color: #00ff66;
+            color: #010a04;
+            box-shadow: 0 0 30px rgba(0, 255, 100, 1);
+        }
+        #error-msg {
+            color: #ff3333;
+            display: none;
+            text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
+            font-size: 0.85rem;
+        }
+
+        /* --- Next-Gen Home Screen --- */
+        #home-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 35px;
             opacity: 0;
             transition: opacity 1s ease-in-out;
         }
         #home-screen img {
-            width: 150px;
-            filter: drop-shadow(0 0 20px rgba(0, 255, 100, 0.8));
-            animation: pulse 2s infinite;
+            width: 180px;
+            filter: drop-shadow(0 0 30px rgba(0, 255, 100, 0.9));
         }
-        @keyframes pulse {
-            0% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(0, 255, 100, 0.6)); }
-            50% { transform: scale(1.05); filter: drop-shadow(0 0 25px rgba(0, 255, 100, 1)); }
-            100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(0, 255, 100, 0.6)); }
+        .home-title {
+            font-size: 2.8rem;
+            font-weight: 900;
+            letter-spacing: 6px;
+            text-shadow: 0 0 20px rgba(0, 255, 100, 0.8);
+            margin: 0;
         }
         .menu-grid {
             display: flex;
-            gap: 20px;
+            gap: 25px;
         }
         .menu-btn {
-            background-color: #041f0e;
+            background: rgba(2, 20, 9, 0.9);
             color: #00ff66;
             border: 1px solid #00ff66;
-            padding: 15px 30px;
-            border-radius: 8px;
+            padding: 20px 40px;
+            border-radius: 10px;
             cursor: pointer;
             font-family: inherit;
             font-size: 1.1rem;
+            font-weight: bold;
+            letter-spacing: 1px;
             transition: 0.3s;
-            box-shadow: 0 0 12px rgba(0, 255, 100, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 100, 0.2);
+            backdrop-filter: blur(5px);
         }
         .menu-btn:hover {
             background-color: #00ff66;
-            color: #031409;
-            box-shadow: 0 0 25px rgba(0, 255, 100, 0.9);
+            color: #010a04;
+            box-shadow: 0 0 35px rgba(0, 255, 100, 1);
+            transform: translateY(-3px);
         }
         .menu-btn.disabled {
-            border-color: #004411;
-            color: #006622;
+            border-color: #003311;
+            color: #005522;
             cursor: not-allowed;
             box-shadow: none;
+            background: rgba(1, 10, 4, 0.5);
         }
 
-        /* --- Full Screen App Containers --- */
+        /* --- Full Screen App Views --- */
         .app-view {
             display: none;
             flex-direction: column;
             height: 100vh;
             width: 100vw;
             box-sizing: border-box;
+            background: #010a04;
         }
         header {
-            background-color: #041f0e;
-            padding: 15px 25px;
+            background: rgba(2, 18, 8, 0.95);
+            padding: 15px 30px;
             border-bottom: 1px solid #00ff66;
             display: flex;
             align-items: center;
             justify-content: space-between;
             font-size: 1.2rem;
             font-weight: bold;
-            box-shadow: 0 0 15px rgba(0, 255, 100, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 100, 0.2);
         }
         header img {
-            height: 35px;
+            height: 45px;
+            filter: drop-shadow(0 0 10px rgba(0,255,100,0.6));
         }
         .back-home {
-            background: none;
+            background: transparent;
             border: 1px solid #00ff66;
             color: #00ff66;
-            padding: 5px 12px;
-            border-radius: 4px;
+            padding: 8px 18px;
+            border-radius: 6px;
             cursor: pointer;
             font-family: inherit;
+            font-weight: bold;
+            transition: 0.3s;
         }
         .back-home:hover {
             background-color: #00ff66;
-            color: #031409;
+            color: #010a04;
+            box-shadow: 0 0 15px rgba(0, 255, 100, 0.8);
         }
 
-        #chat-box {
+        /* --- Chat & Translation Layouts --- */
+        .chat-container {
             flex: 1;
             padding: 25px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 15px;
+            scroll-behavior: smooth;
         }
         .message {
-            padding: 14px 18px;
+            padding: 15px 20px;
             border-radius: 8px;
             max-width: 75%;
             word-wrap: break-word;
-            font-size: 1.05rem;
-            line-height: 1.4;
+            font-size: 1rem;
+            line-height: 1.5;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
         .user-msg {
-            background-color: #041f0e;
+            background-color: rgba(4, 31, 14, 0.9);
             border: 1px solid rgba(0, 255, 100, 0.5);
             align-self: flex-end;
             color: #ffffff;
         }
         .bot-msg {
-            background-color: #020d06;
+            background-color: rgba(1, 10, 4, 0.95);
             border: 1px solid #00ff66;
             align-self: flex-start;
             color: #00ff66;
-            box-shadow: 0 0 10px rgba(0, 255, 100, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 100, 0.25);
         }
         .input-area {
             display: flex;
             padding: 20px;
-            background-color: #041f0e;
+            background: rgba(2, 18, 8, 0.95);
             border-top: 1px solid #00ff66;
-            gap: 12px;
+            gap: 15px;
         }
-        .input-area input {
+        .input-area input, .translate-controls select {
             flex: 1;
-            background-color: #031409;
+            background-color: #010a04;
             color: #00ff66;
             border: 1px solid #00ff66;
-            padding: 14px;
+            padding: 15px;
             border-radius: 6px;
             font-family: inherit;
             font-size: 1rem;
             outline: none;
+            box-shadow: 0 0 10px rgba(0, 255, 100, 0.1) inset;
         }
         .input-area button {
-            background-color: #031409;
+            background: linear-gradient(135deg, #021f0e, #043818);
             color: #00ff66;
             border: 1px solid #00ff66;
-            padding: 0 22px;
+            padding: 0 28px;
             border-radius: 6px;
             cursor: pointer;
             font-family: inherit;
             font-size: 1rem;
+            font-weight: bold;
             transition: 0.3s;
         }
         .input-area button:hover {
             background-color: #00ff66;
-            color: #031409;
-            box-shadow: 0 0 15px rgba(0, 255, 100, 0.8);
+            color: #010a04;
+            box-shadow: 0 0 20px rgba(0, 255, 100, 0.9);
+        }
+
+        /* --- Separate Translation View Styling --- */
+        .translate-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+            justify-content: center;
+        }
+        .translate-controls {
+            display: flex;
+            gap: 15px;
+        }
+        .translate-box {
+            flex: 1;
+            background: rgba(2, 15, 7, 0.8);
+            border: 1px solid #00ff66;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 100, 0.15);
+        }
+        .translate-box textarea {
+            background: #010a04;
+            color: #00ff66;
+            border: 1px solid rgba(0,255,100,0.4);
+            border-radius: 4px;
+            padding: 12px;
+            font-family: inherit;
+            resize: none;
+            height: 120px;
+            outline: none;
+            font-size: 1rem;
         }
     </style>
 </head>
 <body>
 
+    <div id="loading-screen">
+        <div class="arc-reactor">
+            <div class="arc-core"></div>
+        </div>
+        <div class="loading-text">INITIALIZING MATRIX PROTOCOLS...</div>
+    </div>
+
     <div id="login-screen">
         <img src="gibblogo.png" alt="G.I.B.B. Logo">
-        <h3>🔒 Enter Authorised Password:</h3>
-        <input type="text" id="password-input" placeholder="••••••••">
-        <button onclick="checkPassword()">Initialise G.I.B.B.</button>
-        <p id="error-msg">Access Denied. Incorrect Security Protocol.</p>
+        <div class="login-box">
+            <h3 style="margin:0; text-shadow: 0 0 10px rgba(0,255,100,0.6);">🔒 Enter Authorised Password:</h3>
+            <input type="text" id="password-input" placeholder="••••••••">
+            <button onclick="checkPassword()">Initialise G.I.B.B.</button>
+            <p id="error-msg">Access Denied. Incorrect Security Protocol.</p>
+        </div>
     </div>
 
     <div id="home-screen">
         <img src="gibblogo.png" alt="G.I.B.B. Logo">
-        <h2 style="text-shadow: 0 0 15px rgba(0, 255, 100, 0.6);">G.I.B.B. SYSTEM ARCHITECTURE ONLINE</h2>
+        <div class="home-title">MENU</div>
         <div class="menu-grid">
             <button class="menu-btn" onclick="openApp('chat')">💬 Terminal Chat</button>
             <button class="menu-btn" onclick="openApp('translate')">🌐 Translation Matrix</button>
@@ -242,33 +376,55 @@
 
     <div class="app-view" id="chat-view">
         <header>
-            <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
                 <img src="gibblogo.png" alt="Logo">
                 <span>G.I.B.B. Neural Interface</span>
             </div>
-            <button class="back-home" onclick="goHome()">🏠 Home</button>
+            <button class="back-home" onclick="goHome()">Menu</button>
         </header>
-        <div id="chat-box">
-            <div class="message bot-msg">G.I.B.B. core online. Awaiting data inputs or queries, sir.</div>
+        <div class="chat-container" id="chat-box">
+            <div class="message bot-msg">G.I.B.B. core online. Awaiting queries, sir.</div>
         </div>
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="Query mathematics, language arts, or web databases..." onkeypress="handleKeyPress(event)">
-            <button onclick="sendMessage()">Transmit</button>
+            <input type="text" id="user-input" placeholder="Query mathematics, language arts, science, or web databases..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Enter</button>
             <button onclick="startListening()" title="Voice Input">🎙️</button>
         </div>
     </div>
 
     <div class="app-view" id="translate-view">
         <header>
-            <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 15px;">
                 <img src="gibblogo.png" alt="Logo">
-                <span>G.I.B.B. Translation Matrix</span>
+                <span>G.I.B.B. Multilingual Translation Engine</span>
             </div>
-            <button class="back-home" onclick="goHome()">🏠 Home</button>
+            <button class="back-home" onclick="goHome()">Menu</button>
         </header>
-        <div id="chat-box" style="justify-content: center; align-items: center;">
-            <h2 style="text-shadow: 0 0 10px rgba(0,255,100,0.5);">Multilingual Translation Protocol Active</h2>
-            <p>Input query strings in the main terminal interface for real-time translation mapping.</p>
+        <div class="translate-wrapper">
+            <div class="translate-controls">
+                <select id="target-language">
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="ja">Japanese</option>
+                    <option value="zh">Chinese (Mandarin)</option>
+                    <option value="ru">Russian</option>
+                    <option value="ar">Arabic</option>
+                    <option value="it">Italian</option>
+                    <option value="en">English (Reverse Translate)</option>
+                </select>
+                <button onclick="performTranslation()">Execute Translation</button>
+            </div>
+            <div style="display: flex; gap: 20px;">
+                <div class="translate-box">
+                    <label>Source Text (English or any language):</label>
+                    <textarea id="source-text" placeholder="Type text to translate..."></textarea>
+                </div>
+                <div class="translate-box">
+                    <label>Translated Output Stream:</label>
+                    <textarea id="output-text" readonly placeholder="Translation will display here..."></textarea>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -276,21 +432,33 @@
         const PASSWORD = "prki3210";
         let jarvisVoice = null;
 
-        // Initialize unique male non-generic voice selection
-        function loadVoices() {
+        // Cinematic Loading Sequence handler
+        window.addEventListener("load", () => {
+            setTimeout(() => {
+                let loader = document.getElementById("loading-screen");
+                loader.style.opacity = "0";
+                setTimeout(() => {
+                    loader.style.display = "none";
+                    document.getElementById("login-screen").style.display = "flex";
+                }, 800);
+            }, 1200);
+            initVoices();
+        });
+
+        function initVoices() {
             let voices = window.speechSynthesis.getVoices();
-            // Look for advanced deep/natural male voices (like Google UK English Male, Microsoft David, or natural variants)
-            jarvisValue = voices.find(v => v.name.includes("Male") || v.name.includes("David") || v.name.includes("UK English Male") || v.name.includes("George")) || voices[0];
+            // Locate an optimal high-grade male artificial intelligence voice profile instantly
+            jarvisVoice = voices.find(v => (v.name.includes("Male") || v.name.includes("David") || v.name.includes("UK English Male") || v.name.includes("George") || v.name.includes("Oliver")) && v.lang.startsWith("en")) || voices[0];
         }
-        window.speechSynthesis.onvoiceschanged = loadVoices;
+        window.speechSynthesis.onvoiceschanged = initVoices;
 
         function speakJarvis(text) {
             if (!text) return;
-            window.speechSynthesis.cancel(); // Stop any overlapping speech
+            window.speechSynthesis.cancel(); // Clears output instantly to avoid buffering delay
             let speech = new SpeechSynthesisUtterance(text);
-            speech.rate = 1.0;
-            speech.pitch = 0.85; // Lower pitch for a mature, sophisticated male artificial intelligence tone
-            if (jarvisValue) speech.voice = jarvisValue;
+            speech.rate = 1.05;
+            speech.pitch = 0.8; // Deep resonant masculine timbre matching advanced AI architecture
+            if (jarvisVoice) speech.voice = jarvisVoice;
             window.speechSynthesis.speak(speech);
         }
 
@@ -302,8 +470,8 @@
                 home.style.display = "flex";
                 setTimeout(() => { home.style.opacity = "1"; }, 50);
                 
-                // Jarvis startup voice sequence
-                speakJarvis("Systems online");
+                // Immediate audio activation output for JARVIS protocol
+                speakJarvis("SYSTEM ONLINE");
             } else {
                 document.getElementById("error-msg").style.display = "block";
             }
@@ -319,6 +487,9 @@
         }
 
         function goHome() {
+            // Instantly terminates speech synthesis when exiting application views
+            window.speechSynthesis.cancel();
+            
             document.getElementById("chat-view").style.display = "none";
             document.getElementById("translate-view").style.display = "none";
             let home = document.getElementById("home-screen");
@@ -349,40 +520,51 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // --- Real-time Web Search Integration & Smart Knowledge Engine ---
+        // --- Smart Adaptive AI & Universal Web Database Fetching Engine ---
         async function processJarvisAI(input) {
             let lower = input.toLowerCase();
             let response = "";
 
-            // 1. Permanent Memory Handling
-            if (lower.includes("remember that") && lower.includes("is")) {
+            // User Memory Persistence Handling ("remember me" context & key-value storage)
+            if (lower.includes("remember me")) {
+                let savedUser = localStorage.getItem("user_profile_name");
+                if (savedUser) {
+                    response = `I have you logged in permanent memory records as ${savedUser}, sir.`;
+                } else {
+                    response = `I have no user identity linked in local records. State your designation using: Remember that my name is [name], sir.`;
+                }
+            }
+            else if (lower.includes("remember that") && lower.includes("is")) {
                 try {
                     let parts = input.split(/remember that/i)[1].split(/is/i);
                     let k = parts[0].trim();
                     let v = parts[1].trim();
                     localStorage.setItem(k, v);
-                    response = `Data logged to core matrix: ${k} is recorded as ${v}, sir.`;
+                    if (k.includes("name")) {
+                        localStorage.setItem("user_profile_name", v);
+                    }
+                    response = `Data successfully integrated into persistent core matrix: ${k} is logged as ${v}, sir.`;
                 } catch(e) {
-                    response = "Formatting syntax error detected in your memory parameter.";
+                    response = "Formatting error detected in memory parameter stream.";
                 }
             } 
-            // 2. Advanced Math Computation Matrix
+            // Advanced Mathematical Engine
             else if (lower.startsWith("calculate") || lower.startsWith("solve") || /[0-9]+\s*[\+\-\*\/\^]\s*[0-9]+/.test(lower)) {
                 try {
                     let expr = lower.replace(/calculate/i, "").replace(/solve/i, "").trim();
                     let res = eval(expr);
-                    response = `The calculated value is ${res}, sir.`;
+                    response = `${res}`;
                 } catch(e) {
-                    response = "Mathematical computation query could not be resolved.";
+                    response = "Mathematical computation query could not be verified.";
                 }
             } 
-            // 3. Check Local Memory
+            // Check local permanent memory bank first
             else {
-                let foundKey = Object.keys(localStorage).find(k => lower.includes(k));
+                let foundKey = Object.keys(localStorage).find(k => k !== "user_profile_name" && lower.includes(k));
                 if (foundKey) {
-                    response = `Retrieved from records: ${foundKey} is ${localStorage.getItem(foundKey)}.`;
+                    response = `${localStorage.getItem(foundKey)}`;
                 } else {
-                    // 4. Live Multi-Source Google/DuckDuckGo Web Data Fetching
+                    // Deep multi-source web cross-referencing for all subjects (Math, English, Science, etc.)
                     response = await fetchWebData(input);
                 }
             }
@@ -403,14 +585,41 @@
                 } else if (data.RelatedTopics && data.RelatedTopics.length > 0 && data.RelatedTopics[0].Text) {
                     return data.RelatedTopics[0].Text;
                 } else {
-                    return `Analysis complete for "${query}". Cross-referencing external data nodes indicates optimal alignment with standard academic parameters.`;
+                    return `Analysis complete for "${query}". Data nodes confirm alignment with standard academic parameters, sir.`;
                 }
             } catch (err) {
-                return `Sir, network connection metrics indicate restricted access to external cloud nodes at this moment.`;
+                return `Sir, network connection metrics indicate restricted access to external cloud nodes.`;
             }
         }
 
-        // --- Speech to Text Microphones ---
+        // --- Dedicated Translation Matrix Feature ---
+        async function performTranslation() {
+            let text = document.getElementById("source-text").value.trim();
+            let targetLang = document.getElementById("target-language").value;
+            let outputField = document.getElementById("output-text");
+
+            if (!text) {
+                outputField.value = "Please input source text strings for processing.";
+                return;
+            }
+
+            outputField.value = "Translating across linguistic nodes...";
+            try {
+                // Utilizing MyMemory free public translation API endpoint
+                let res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=autodetect|${targetLang}`);
+                let data = await res.json();
+                if (data && data.responseData && data.responseData.translatedText) {
+                    outputField.value = data.responseData.translatedText;
+                    speakJarvis("Translation complete, sir.");
+                } else {
+                    outputField.value = "Translation routing error encountered.";
+                }
+            } catch (e) {
+                outputField.value = "Translation node offline.";
+            }
+        }
+
+        // --- Voice-to-Text Microphone Integration ---
         function startListening() {
             window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
