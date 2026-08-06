@@ -418,7 +418,6 @@
         ];
 
         let carouselIndex = 1;
-        let hasSpokenWelcome = false;
         
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let globalRecognition = null;
@@ -463,6 +462,13 @@
             }
             requestAnimationFrame(countFPS);
         });
+
+        // Ensure ChromeOS voice list initializes properly
+        if (window.speechSynthesis) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
+        }
 
         async function requestMicrophoneAccess() {
             try {
@@ -608,26 +614,43 @@
             initPerpetualListeningEngine();
         }
 
+        // CHROMEBOOK-OPTIMIZED MALE SPEECH ENGINE WITH INSTANT CLEARING
         function speak(text, callback) {
             if (!window.speechSynthesis) {
                 if (callback) callback();
                 return;
             }
+
+            // Immediately cancel previous streams to get rid of audio lag
             window.speechSynthesis.cancel();
             isSpeakingNow = true;
 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.volume = db.volume;
+            utterance.rate = 1.05; // Snappier delivery
+
+            const voices = window.speechSynthesis.getVoices();
             
+            // Forces a Chromebook male voice (change 'Google UK English Male' if you want a different specific one)
+            const targetVoice = voices.find(v => v.name.includes('Google UK English Male') || (v.name.includes('Male') && v.lang.includes('en')));
+            
+            if (targetVoice) {
+                utterance.voice = targetVoice;
+            }
+
             utterance.onend = () => {
                 isSpeakingNow = false;
                 if (callback) callback();
             };
+            
             utterance.onerror = () => {
                 isSpeakingNow = false;
                 if (callback) callback();
             };
-            window.speechSynthesis.speak(utterance);
+
+            setTimeout(() => {
+                window.speechSynthesis.speak(utterance);
+            }, 50);
         }
 
         function saveDatabase() { localStorage.setItem('gibb_permanent_db', JSON.stringify(db)); }
@@ -821,7 +844,7 @@
             }
         }
 
-        // CONTINUOUS SPEECH ENGINE WITH DEDICATED LOCKOUT TO PREVENT DUPLICATE RECOGNITION
+        // CONTINUOUS SPEECH ENGINE WITH LOCKOUT TO PREVENT DUPLICATE LOOPS
         function initPerpetualListeningEngine() {
             if (!SpeechRecognition) return;
 
@@ -835,19 +858,17 @@
             globalRecognition.lang = 'en-US';
 
             globalRecognition.onresult = (event) => {
-                if (isSpeakingNow) return; // Do not listen while GIBB is speaking
+                if (isSpeakingNow) return; 
 
                 const transcript = event.results[0][0].transcript.toLowerCase().trim();
                 const transcriptEl = document.getElementById('voice-transcript');
                 if (transcriptEl) transcriptEl.innerText = `Heard: "${transcript}"`;
 
-                // Wake word activation via normal speech "hey gibb" or "activate voice control"
                 if (transcript.includes('activate voice control') || transcript.includes('hey gibb')) {
                     activateVoiceScreenViaManual();
                     return;
                 }
 
-                // If user is currently in Voice Control mode, treat any statement as a live query
                 if (voiceActiveMode) {
                     sendMessage(transcript);
                 }
