@@ -24,7 +24,7 @@
             background-size: 100% 100%, 40px 40px, 40px 40px;
         }
 
-        /* --- Cinematic Loading Screen --- */
+        /* --- Replaced Cinematic Loading Screen (Stark HUD Terminal Boot) --- */
         #loading-screen {
             position: fixed;
             top: 0;
@@ -34,38 +34,29 @@
             background-color: #010a04;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            align-items: flex-start;
+            justify-content: flex-end;
+            padding: 50px;
+            box-sizing: border-box;
             z-index: 100;
             transition: opacity 0.8s ease;
         }
-        .arc-reactor {
-            width: 120px;
-            height: 120px;
-            border: 3px solid rgba(0, 255, 100, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 30px rgba(0, 255, 100, 0.2) inset;
-            animation: spin 4s linear infinite;
-        }
-        .arc-core {
-            width: 60px;
-            height: 60px;
-            background: rgba(0, 255, 100, 0.2);
-            border-radius: 50%;
-            box-shadow: 0 0 20px #00ff66;
-            animation: pulse-core 1.5s ease-in-out infinite alternate;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes pulse-core { 0% { transform: scale(0.8); opacity: 0.5; } 100% { transform: scale(1.1); opacity: 1; } }
-        .loading-text {
-            margin-top: 25px;
-            font-size: 0.9rem;
-            letter-spacing: 4px;
+        .boot-sequence {
+            font-size: 1rem;
+            line-height: 1.8;
             text-shadow: 0 0 10px #00ff66;
+            letter-spacing: 2px;
         }
+        .boot-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background-color: #00ff66;
+            animation: blink 0.8s infinite;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
         /* --- Holographic Unlock Screen --- */
         #login-screen {
@@ -80,8 +71,8 @@
             background: radial-gradient(circle, rgba(0,255,100,0.05) 0%, rgba(1,10,4,1) 80%);
         }
         #login-screen img {
-            width: 280px;
-            filter: drop-shadow(0 0 30px rgba(0, 255, 100, 0.9));
+            width: 320px; /* Enormously bigger logo */
+            filter: drop-shadow(0 0 35px rgba(0, 255, 100, 0.9));
             animation: float 3s ease-in-out infinite;
         }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
@@ -138,7 +129,7 @@
             font-size: 0.85rem;
         }
 
-        /* --- Stark HUD Next-Gen Menu Screen --- */
+        /* --- Stark HUD Next-Gen Carousel Menu Screen --- */
         #home-screen {
             display: none;
             flex-direction: column;
@@ -165,61 +156,88 @@
             font-size: 0.85rem;
             box-shadow: 0 0 10px rgba(0,255,100,0.1);
         }
-        .hud-center {
+        
+        /* Layout split: Logo Right, Carousel Left */
+        .hud-main-layout {
+            display: flex;
+            flex: 1;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 50px;
+        }
+        .hud-logo-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 20px;
         }
-        .hud-center img {
-            width: 240px;
-            filter: drop-shadow(0 0 35px rgba(0, 255, 100, 0.9));
+        .hud-logo-container img {
+            width: 380px; /* Extremely large, dominant logo on the right */
+            filter: drop-shadow(0 0 45px rgba(0, 255, 100, 0.95));
             animation: pulse 3s infinite alternate;
         }
         @keyframes pulse {
-            0% { transform: scale(1); filter: drop-shadow(0 0 25px rgba(0, 255, 100, 0.7)); }
-            100% { transform: scale(1.03); filter: drop-shadow(0 0 45px rgba(0, 255, 100, 1)); }
+            0% { transform: scale(1); filter: drop-shadow(0 0 35px rgba(0, 255, 100, 0.8)); }
+            100% { transform: scale(1.04); filter: drop-shadow(0 0 55px rgba(0, 255, 100, 1)); }
         }
-        .menu-title {
-            font-size: 3rem;
-            font-weight: 900;
-            letter-spacing: 8px;
-            text-shadow: 0 0 25px rgba(0, 255, 100, 0.9);
-            margin: 0;
-        }
-        .menu-grid {
+
+        /* Carousel Menu Container on the Left */
+        .carousel-container {
+            height: 320px;
+            width: 380px;
             display: flex;
-            gap: 25px;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+            user-select: none;
         }
-        .menu-btn {
-            background: rgba(2, 20, 9, 0.9);
+        .carousel-container:active { cursor: grabbing; }
+
+        .carousel-track {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+        }
+
+        .carousel-item {
+            background: rgba(2, 20, 9, 0.85);
             color: #00ff66;
-            border: 1px solid #00ff66;
-            padding: 20px 40px;
+            border: 1px solid rgba(0, 255, 100, 0.4);
+            padding: 15px 30px;
             border-radius: 10px;
             cursor: pointer;
             font-family: inherit;
-            font-size: 1.1rem;
             font-weight: bold;
-            letter-spacing: 1px;
-            transition: 0.3s;
-            box-shadow: 0 0 20px rgba(0, 255, 100, 0.2);
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
             backdrop-filter: blur(5px);
+            white-space: nowrap;
         }
-        .menu-btn:hover {
-            background-color: #00ff66;
-            color: #010a04;
-            box-shadow: 0 0 35px rgba(0, 255, 100, 1);
-            transform: translateY(-3px);
+
+        /* Dynamic Carousel State Styles */
+        .carousel-item.active {
+            transform: scale(1.18);
+            background: rgba(0, 255, 100, 0.15);
+            border-color: #00ff66;
+            opacity: 1;
+            font-size: 1.25rem;
+            padding: 22px 45px;
+            box-shadow: 0 0 35px rgba(0, 255, 100, 0.8);
+            z-index: 5;
         }
-        .menu-btn.disabled {
-            border-color: #003311;
-            color: #005522;
-            cursor: not-allowed;
+        .carousel-item.faded {
+            transform: scale(0.85);
+            opacity: 0.35;
+            font-size: 0.95rem;
+            border-color: rgba(0, 255, 100, 0.2);
             box-shadow: none;
-            background: rgba(1, 10, 4, 0.5);
+            z-index: 1;
         }
 
         /* --- Full Screen App Views --- */
@@ -243,7 +261,7 @@
             box-shadow: 0 0 20px rgba(0, 255, 100, 0.2);
         }
         header img {
-            height: 50px;
+            height: 55px; /* Bigger logo in headers */
             filter: drop-shadow(0 0 10px rgba(0,255,100,0.6));
         }
         .back-home {
@@ -314,7 +332,7 @@
             outline: none;
             box-shadow: 0 0 10px rgba(0, 255, 100, 0.1) inset;
         }
-        .input-area button, .translate-exec-btn {
+        .input-area button, .translate-exec-btn, .voice-btn-designed {
             background: linear-gradient(135deg, #021f0e, #043818);
             color: #00ff66;
             border: 1px solid #00ff66;
@@ -326,14 +344,18 @@
             font-weight: bold;
             transition: 0.3s;
             box-shadow: 0 0 10px rgba(0,255,100,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        .input-area button:hover, .translate-exec-btn:hover {
+        .input-area button:hover, .translate-exec-btn:hover, .voice-btn-designed:hover {
             background-color: #00ff66;
             color: #010a04;
             box-shadow: 0 0 20px rgba(0, 255, 100, 0.9);
         }
 
-        /* --- Separate Translation View Styling --- */
+        /* --- Dedicated Translation View Styling --- */
         .translate-wrapper {
             flex: 1;
             display: flex;
@@ -378,10 +400,7 @@
 <body>
 
     <div id="loading-screen">
-        <div class="arc-reactor">
-            <div class="arc-core"></div>
-        </div>
-        <div class="loading-text">INITIALIZING MATRIX PROTOCOLS...</div>
+        <div class="boot-sequence" id="boot-text">INITIALIZING KERNEL MATRIX...<span class="boot-cursor"></span></div>
     </div>
 
     <div id="login-screen">
@@ -397,19 +416,25 @@
     <div id="home-screen">
         <div class="hud-top-bar">
             <div class="hud-widget" id="hud-date-time">TIME/DATE MATRIX LOADING...</div>
-            <div class="hud-widget" id="hud-weather">WEATHER NODES LOADING...</div>
+            <div class="hud-widget" id="hud-telemetry">FPS: -- // RES: ----x----</div>
         </div>
-        <div class="hud-center">
-            <img src="gibblogo.png" alt="G.I.B.B. Logo">
-            <div class="menu-title">Menu</div>
-            <div class="menu-grid">
-                <button class="menu-btn" onclick="openApp('chat')">💬 Terminal Chat</button>
-                <button class="menu-btn" onclick="openApp('translate')">🌐 Translation Matrix</button>
-                <button class="menu-btn disabled">🛡️ G.I.B.B. Detect (Coming Soon)</button>
+        
+        <div class="hud-main-layout">
+            <div class="carousel-container" id="carousel-box">
+                <div class="carousel-track" id="carousel-track">
+                    <div class="carousel-item faded" onclick="selectMenuItem(0)">🌐 Translation Matrix</div>
+                    <div class="carousel-item active" onclick="selectMenuItem(1)">💬 Terminal Chat</div>
+                    <div class="carousel-item faded" onclick="selectMenuItem(2)">🛡️ G.I.B.B. Detect</div>
+                </div>
+            </div>
+
+            <div class="hud-logo-container">
+                <img src="gibblogo.png" alt="G.I.B.B. Logo">
             </div>
         </div>
-        <div class="hud-bottom-bar" style="text-align: center; font-size: 0.8rem; opacity: 0.6; letter-spacing: 2px;">
-            STARK OS // SECURE PROTOCOL ACTIVE
+
+        <div class="hud-bottom-bar" style="text-align: center; font-size: 0.8rem; opacity: 0.7; letter-spacing: 3px;">
+            SYSTEM ONLINE
         </div>
     </div>
 
@@ -427,7 +452,7 @@
         <div class="input-area">
             <input type="text" id="user-input" placeholder="Query web databases, mathematics, science..." onkeypress="handleKeyPress(event)">
             <button onclick="sendMessage()">Enter</button>
-            <button onclick="startListening('chat')" title="Voice Input">🎙️</button>
+            <button onclick="startListening('chat')" title="Voice Input">🎙️ Voice</button>
         </div>
     </div>
 
@@ -453,7 +478,9 @@
                     <option value="en">English (Reverse Translate)</option>
                 </select>
                 <button class="translate-exec-btn" onclick="performTranslation()">Execute Translation</button>
-                <button onclick="startListening('translate')" title="Voice Input for Source Text">🎙️</button>
+                <button class="voice-btn-designed" onclick="startListening('translate')">
+                    🎙️ Voice Input
+                </button>
             </div>
             <div style="display: flex; gap: 20px;">
                 <div class="translate-box">
@@ -471,45 +498,95 @@
     <script>
         const PASSWORD = "prki3210";
         let jarvisVoice = null;
+        let currentCarouselIndex = 1; // 0: Translate, 1: Chat, 2: Detect
+        let activeVoicesCache = [];
 
-        // Cinematic Loading Sequence handler
+        // Terminal Boot Sequence Animation handler
         window.addEventListener("load", () => {
-            setTimeout(() => {
-                let loader = document.getElementById("loading-screen");
-                loader.style.opacity = "0";
-                setTimeout(() => {
-                    loader.style.display = "none";
-                    document.getElementById("login-screen").style.display = "flex";
-                }, 800);
-            }, 1200);
-            loadOptimalMaleVoice();
+            runBootSequence();
+            initVoices();
             updateHUDClock();
             setInterval(updateHUDClock, 1000);
-            fetchLiveWeather();
+            measureTelemetry();
+            setupCarouselInteraction();
         });
 
-        function loadOptimalMaleVoice() {
-            let voices = window.speechSynthesis.getVoices();
-            // Strict selection targeting distinct deep male identifiers to avoid female defaults
-            jarvisVoice = voices.find(v => 
-                (v.name.includes("Male") || v.name.includes("David") || v.name.includes("George") || v.name.includes("Oliver") || v.name.includes("Daniel") || v.name.includes("Mark") || v.name.includes("James")) && 
-                v.lang.startsWith("en")
-            ) || voices.find(v => v.lang.startsWith("en")) || voices[0];
+        async function runBootSequence() {
+            let steps = [
+                "INITIALIZING KERNEL MATRIX...",
+                "LOADING NEURAL VOICE SYNTHESIS MODULES...",
+                "CALIBRATING HOLOGRAPHIC RENDERING NODES...",
+                "SYSTEM VERIFIED. READY FOR AUTHORISATION."
+            ];
+            let bootElem = document.getElementById("boot-text");
+            for (let i = 0; i < steps.length; i++) {
+                if (bootElem) {
+                    bootElem.innerHTML = steps[i] + '<span class="boot-cursor"></span>';
+                }
+                await new Promise(r => setTimeout(r, 350));
+            }
+            setTimeout(() => {
+                let loader = document.getElementById("loading-screen");
+                if (loader) {
+                    loader.style.opacity = "0";
+                    setTimeout(() => {
+                        loader.style.display = "none";
+                        document.getElementById("login-screen").style.display = "flex";
+                    }, 500);
+                }
+            }, 500);
         }
-        
-        if ('onvoiceschanged' in window.speechSynthesis) {
-            window.speechSynthesis.onvoiceschanged = loadOptimalMaleVoice;
+
+        function measureTelemetry() {
+            // Live FPS & Screen Resolution Detection
+            let resWidth = window.screen.width || window.innerWidth;
+            let resHeight = window.screen.height || window.innerHeight;
+            let telemetryElem = document.getElementById("hud-telemetry");
+            
+            let lastTime = performance.now();
+            let frameCount = 0;
+            function calcFPS(now) {
+                frameCount++;
+                if (now - lastTime >= 1000) {
+                    let fps = Math.round((frameCount * 1000) / (now - lastTime));
+                    if (telemetryElem) {
+                        telemetryElem.innerText = `FPS: ${fps} // RES: ${resWidth}x${resHeight}`;
+                    }
+                    frameCount = 0;
+                    lastTime = now;
+                }
+                requestAnimationFrame(calcFPS);
+            }
+            requestAnimationFrame(calcFPS);
+        }
+
+        // --- Forced Deep Male Voice & Zero Delay Speech Engine ---
+        function initVoices() {
+            if (!('speechSynthesis' in window)) return;
+            activeVoicesCache = window.speechSynthesis.getVoices();
+            
+            // Aggressively search for authentic masculine speech engines
+            jarvisVoice = activeVoicesCache.find(v => 
+                (v.name.includes("Male") || v.name.includes("David") || v.name.includes("George") || v.name.includes("Oliver") || v.name.includes("Daniel") || v.name.includes("Mark") || v.name.includes("James") || v.name.includes("Microsoft Zira") === false && v.name.includes("Google") && v.name.includes("en-GB")) && 
+                v.lang.startsWith("en")
+            ) || activeVoicesCache.find(v => v.lang.startsWith("en") && !v.name.toLowerCase().includes("female") && !v.name.toLowerCase().includes("zira") && !v.name.toLowerCase().includes("hazel")) || activeVoicesCache[0];
+        }
+
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = initVoices;
         }
 
         function speakJarvis(text) {
             if (!text) return;
-            window.speechSynthesis.cancel(); // Instantly clears pending queue for zero lag
+            if (!('speechSynthesis' in window)) return;
+            
+            window.speechSynthesis.cancel(); // Instantly cancels queue to eliminate all latency/stutter
             
             let speech = new SpeechSynthesisUtterance(text);
-            speech.rate = 1.15; // Snappy speed to prevent audio lagging
-            speech.pitch = 0.7; // Deep male timbre
+            speech.rate = 1.12; // Snappy instant response rate
+            speech.pitch = 0.65; // Deep resonant male timbre
             
-            if (!jarvisVoice) loadOptimalMaleVoice();
+            if (!jarvisVoice) initVoices();
             if (jarvisVoice) speech.voice = jarvisVoice;
             
             window.speechSynthesis.speak(speech);
@@ -526,6 +603,63 @@
                 speakJarvis("SYSTEM ONLINE");
             } else {
                 document.getElementById("error-msg").style.display = "block";
+            }
+        }
+
+        // --- Interactive Carousel Navigation System ---
+        function setupCarouselInteraction() {
+            let container = document.getElementById("carousel-box");
+            let startY = 0;
+
+            container.addEventListener("touchstart", (e) => { startY = e.touches[0].clientY; }, {passive: true});
+            container.addEventListener("touchend", (e) => {
+                let diff = e.changedTouches[0].clientY - startY;
+                if (diff > 40) moveCarousel(-1); // Swiped down -> previous
+                else if (diff < -40) moveCarousel(1); // Swiped up -> next
+            });
+
+            container.addEventListener("wheel", (e) => {
+                e.preventDefault();
+                if (e.deltaY > 0) moveCarousel(1);
+                else moveCarousel(-1);
+            }, {passive: false});
+
+            updateCarouselView();
+        }
+
+        function moveCarousel(direction) {
+            currentCarouselIndex += direction;
+            if (currentCarouselIndex < 0) currentCarouselIndex = 2;
+            if (currentCarouselIndex > 2) currentCarouselIndex = 2; // Restrict bounds
+            updateCarouselView();
+        }
+
+        function selectMenuItem(index) {
+            currentCarouselIndex = index;
+            updateCarouselView();
+            
+            // Trigger app click action if middle item is clicked
+            setTimeout(() => {
+                if (currentCarouselIndex === 0) openApp('translate');
+                else if (currentCarouselIndex === 1) openApp('chat');
+                else if (currentCarouselIndex === 2) alert("G.I.B.B. Detect module currently compiling neural security frameworks.");
+            }, 250);
+        }
+
+        function updateCarouselView() {
+            let track = document.getElementById("carousel-track");
+            let items = track.children;
+            
+            // Calculate pixel shift to center the active item (each item slot is ~75px)
+            let offset = (1 - currentCarouselIndex) * 75;
+            track.style.transform = `translateY(${offset}px)`;
+
+            for (let i = 0; i < items.length; i++) {
+                if (i === currentCarouselIndex) {
+                    items[i].className = "carousel-item active";
+                } else {
+                    items[i].className = "carousel-item faded";
+                }
             }
         }
 
@@ -580,21 +714,7 @@
             }
         }
 
-        async function fetchLiveWeather() {
-            try {
-                let res = await fetch('https://ipapi.co/json/');
-                let loc = await res.json();
-                let weatherElem = document.getElementById("hud-weather");
-                if (weatherElem) {
-                    weatherElem.innerText = `LOCATION: ${loc.city}, ${loc.country_name} // STATUS: OPTIMAL`;
-                }
-            } catch(e) {
-                let weatherElem = document.getElementById("hud-weather");
-                if (weatherElem) weatherElem.innerText = `LOCATION: GLOBAL MATRIX // STATUS: NOMINAL`;
-            }
-        }
-
-        // --- Keyless Live Web Search & AI Engine (No API Key Required) ---
+        // --- Smart Keyless Web Search & AI Engine ---
         async function processJarvisAI(input) {
             let lower = input.toLowerCase().trim();
             let response = "";
@@ -632,7 +752,6 @@
                 if (foundKey) {
                     response = `${localStorage.getItem(foundKey)}`;
                 } else {
-                    // Uses free public search proxy stream simulating real-time Google/DuckDuckGo web snippets without keys
                     response = await fetchKeylessWebSearch(input);
                 }
             }
@@ -644,7 +763,6 @@
         async function fetchKeylessWebSearch(query) {
             try {
                 let encoded = encodeURIComponent(query);
-                // Utilizing free public CORS proxy + instant text search feed
                 let url = `https://api.duckduckgo.com/?q=${encoded}&format=json&no_html=1&skip_disambig=1`;
                 
                 let res = await fetch(url);
@@ -655,10 +773,10 @@
                 } else if (data.RelatedTopics && data.RelatedTopics.length > 0 && data.RelatedTopics[0].Text) {
                     return data.RelatedTopics[0].Text.split('.')[0] + '.';
                 } else {
-                    return `Live search query analyzed for "${query}". Database protocols confirm standard data patterns, sir.`;
+                    return `Live search query analyzed for "${query}". Telemetry verified, sir.`;
                 }
             } catch (err) {
-                return `Sir, web telemetry matrix connection experienced interference.`;
+                return `Sir, external web telemetry connection experienced interference.`;
             }
         }
 
@@ -689,7 +807,7 @@
             }
         }
 
-        // --- Voice-to-Text Microphone Integration (Chat and Translation) ---
+        // --- Voice-to-Text Microphone Integration (Supports Chat & Translation) ---
         function startListening(targetApp) {
             window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
