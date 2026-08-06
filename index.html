@@ -13,9 +13,6 @@
             --accent-color: #00ff00;
             --accent-glow: rgba(0, 255, 0, 0.6);
             --danger-color: #ff4444;
-
-            --chat-bg: #e6ffec;
-            --chat-text: #000000;
         }
 
         * {
@@ -90,16 +87,13 @@
             color: var(--accent-color);
             z-index: 10;
             text-shadow: 0 0 20px var(--accent-glow);
-            letter-spacing: 3px;
+            letter-spacing: 4px;
+            padding-left: 4px; /* Perfectly balances the letter-spacing offset */
             text-align: center;
-            width: 100%;
             position: absolute;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
-        /* Cool Inner Design Pattern inside rings */
+        /* Cool Inner Design Pattern */
         .inner-design-grid {
             position: absolute;
             width: 150px;
@@ -115,7 +109,7 @@
             50% { transform: scale(1.05); opacity: 1; }
         }
 
-        /* Outer Orbiting Ring (Clockwise) */
+        /* Rings */
         .orbit-ring-outer {
             position: absolute;
             width: 240px;
@@ -124,47 +118,22 @@
             border: 2px solid rgba(0, 255, 0, 0.6);
             animation: spinClockwise 12s linear infinite;
         }
-
         .dot-outer {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: var(--accent-color);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--accent-color);
-            top: -5px;
-            left: calc(50% - 5px);
+            position: absolute; width: 10px; height: 10px; background-color: var(--accent-color);
+            border-radius: 50%; box-shadow: 0 0 10px var(--accent-color); top: -5px; left: calc(50% - 5px);
         }
 
-        /* Inner Orbiting Ring (Anti-Clockwise) */
         .orbit-ring-inner {
-            position: absolute;
-            width: 190px;
-            height: 190px;
-            border-radius: 50%;
-            border: 1px dashed rgba(0, 255, 0, 0.4);
-            animation: spinCounterClockwise 8s linear infinite;
+            position: absolute; width: 190px; height: 190px; border-radius: 50%;
+            border: 1px dashed rgba(0, 255, 0, 0.4); animation: spinCounterClockwise 8s linear infinite;
         }
-
         .dot-inner {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background-color: rgba(0, 255, 0, 0.8);
-            border-radius: 50%;
-            bottom: -3px;
-            left: calc(50% - 3px);
+            position: absolute; width: 6px; height: 6px; background-color: rgba(0, 255, 0, 0.8);
+            border-radius: 50%; bottom: -3px; left: calc(50% - 3px);
         }
 
-        @keyframes spinClockwise {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes spinCounterClockwise {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(-360deg); }
-        }
+        @keyframes spinClockwise { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spinCounterClockwise { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
 
         /* Panels & Forms */
         .panel {
@@ -180,217 +149,126 @@
         }
 
         input, select {
-            width: 100%;
-            padding: 12px 16px;
-            margin-bottom: 15px;
-            background: rgba(0, 255, 0, 0.08);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            color: var(--text-color);
-            font-size: 1rem;
-            outline: none;
+            width: 100%; padding: 12px 16px; margin-bottom: 15px;
+            background: rgba(0, 255, 0, 0.08); border: 1px solid var(--border-color);
+            border-radius: 4px; color: var(--text-color); font-size: 1rem; outline: none;
         }
+        input:focus, select:focus { border-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-glow); }
+        select option { background: var(--bg-color); color: var(--text-color); }
 
-        input:focus, select:focus {
-            border-color: var(--accent-color);
+        /* Volume Slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: rgba(0, 255, 0, 0.1);
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+            border: 1px solid var(--border-color);
+            margin: 10px 0;
+            padding: 0;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            cursor: pointer;
             box-shadow: 0 0 10px var(--accent-glow);
         }
 
-        select option {
-            background: var(--bg-color);
-            color: var(--text-color);
-        }
-
         .btn {
-            width: 100%;
-            padding: 12px;
-            background: rgba(0, 255, 0, 0.2);
-            color: var(--accent-color);
-            border: 2px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
+            width: 100%; padding: 12px; background: rgba(0, 255, 0, 0.2);
+            color: var(--accent-color); border: 2px solid var(--border-color);
+            border-radius: 4px; font-size: 1rem; font-weight: bold;
+            cursor: pointer; transition: all 0.3s;
         }
+        .btn:hover { background: rgba(0, 255, 0, 0.4); box-shadow: 0 0 15px var(--accent-glow); }
 
-        .btn:hover {
-            background: rgba(0, 255, 0, 0.4);
-            box-shadow: 0 0 15px var(--accent-glow);
-        }
+        .error-msg { color: var(--danger-color); font-size: 0.85rem; margin-bottom: 15px; display: none; }
 
-        .error-msg {
-            color: var(--danger-color);
-            font-size: 0.85rem;
-            margin-bottom: 15px;
-            display: none;
-        }
-
-        /* Main Menu Layout (Settings Left, Location Right) */
+        /* Main Menu Layout */
         .main-menu-layout {
             display: grid;
             grid-template-columns: 320px 1fr 320px;
-            width: 100vw;
-            height: 100vh;
-            padding: 30px;
-            gap: 30px;
-            align-items: center;
+            width: 100vw; height: 100vh; padding: 30px; gap: 30px; align-items: center;
         }
 
         .sidebar-panel {
-            background: var(--panel-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            padding: 25px;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            backdrop-filter: blur(10px);
+            background: var(--panel-bg); border: 2px solid var(--border-color);
+            border-radius: 12px; padding: 25px; height: 100%; display: flex;
+            flex-direction: column; justify-content: space-between; backdrop-filter: blur(10px);
         }
 
         .widget-box {
-            background: rgba(0, 255, 0, 0.05);
-            border: 1px solid rgba(0, 255, 0, 0.3);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
+            background: rgba(0, 255, 0, 0.05); border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 8px; padding: 15px; margin-bottom: 15px;
         }
-
         .widget-title {
-            font-size: 0.85rem;
-            color: #88ff88;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-            letter-spacing: 1px;
-            font-weight: bold;
+            font-size: 0.85rem; color: #88ff88; text-transform: uppercase;
+            margin-bottom: 8px; letter-spacing: 1px; font-weight: bold;
         }
 
         .center-menu-panel {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; height: 100%;
         }
 
         .carousel-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            height: 120px;
-            margin-top: 10px;
+            display: flex; align-items: center; justify-content: center;
+            gap: 20px; height: 120px; margin-top: 10px;
         }
 
         .carousel-btn {
-            background: var(--panel-bg);
-            border: 2px solid var(--border-color);
-            color: var(--accent-color);
-            padding: 15px 25px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            font-weight: bold;
+            background: var(--panel-bg); border: 2px solid var(--border-color);
+            color: var(--accent-color); padding: 15px 25px; border-radius: 4px;
+            cursor: pointer; transition: all 0.4s ease; font-weight: bold;
         }
+        .carousel-btn.small { transform: scale(0.8); opacity: 0.4; font-size: 0.9rem; }
+        .carousel-btn.big { transform: scale(1.1); opacity: 1; font-size: 1.2rem; border-color: var(--accent-color); box-shadow: 0 0 20px var(--accent-glow); }
 
-        .carousel-btn.small {
-            transform: scale(0.8);
-            opacity: 0.4;
-            font-size: 0.9rem;
-        }
-
-        .carousel-btn.big {
-            transform: scale(1.1);
-            opacity: 1;
-            font-size: 1.2rem;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 20px var(--accent-glow);
-        }
-
-        /* Fullscreen Chat Interface */
+        /* Original Dark/Glass Chat Interface */
         .chat-container {
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background: var(--chat-bg);
-            color: var(--chat-text);
-            overflow: hidden;
-            border: none;
-            z-index: 2;
+            width: 100%; height: 100%; display: flex; flex-direction: column;
+            background: transparent; color: var(--text-color); overflow: hidden;
         }
 
         .chat-header {
-            padding: 15px 30px;
-            background: #cdffda;
-            border-bottom: 1px solid #a3e0b2;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #004d00;
+            padding: 20px 30px; background: var(--panel-bg); border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center; color: var(--accent-color);
+            backdrop-filter: blur(10px);
         }
 
         .chat-messages {
-            flex: 1;
-            padding: 30px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
+            background: rgba(0, 10, 0, 0.7); backdrop-filter: blur(5px);
         }
 
         .message {
-            max-width: 75%;
-            padding: 14px 18px;
-            border-radius: 8px;
-            font-size: 1rem;
-            line-height: 1.5;
-            font-family: inherit;
+            max-width: 75%; padding: 14px 18px; border-radius: 8px; font-size: 1rem; line-height: 1.5;
         }
-
         .message.user {
-            background: #006400; 
-            color: #ffffff;
-            align-self: flex-end;
-            border-bottom-right-radius: 2px;
+            background: var(--accent-color); color: #000000; align-self: flex-end;
+            border-bottom-right-radius: 2px; font-weight: bold;
         }
-
         .message.gibb {
-            background: #f0fff4;
-            color: var(--chat-text);
-            align-self: flex-start;
-            border-bottom-left-radius: 2px;
-            border: 1px solid #d4edda;
+            background: rgba(0, 255, 0, 0.05); color: var(--text-color); align-self: flex-start;
+            border-bottom-left-radius: 2px; border: 1px solid var(--border-color); box-shadow: 0 0 10px rgba(0,255,0,0.1);
         }
 
         .chat-input-area {
-            display: flex;
-            padding: 20px 30px;
-            border-top: 1px solid #a3e0b2;
-            background: #f0fff4;
-            gap: 15px;
+            display: flex; padding: 20px 30px; border-top: 1px solid var(--border-color);
+            background: var(--panel-bg); gap: 15px; backdrop-filter: blur(10px);
         }
-
-        .chat-input-area input {
-            margin-bottom: 0;
-            background: #ffffff;
-            color: #000000;
-            border: 1px solid #a3e0b2;
-        }
-
-        .chat-input-area button {
-            width: 120px;
-            margin-bottom: 0;
-            background: #006400;
-            color: white;
-            border: none;
-        }
+        .chat-input-area input { margin-bottom: 0; }
+        .chat-input-area button { width: 120px; margin-bottom: 0; }
     </style>
 </head>
 <body>
 
-    <div id="auth-screen" class="screen active">
+    <div id="auth-screen" class="screen">
         <div class="logo-container">
             <div class="inner-design-grid"></div>
             <div class="orbit-ring-outer"><div class="dot-outer"></div></div>
@@ -401,15 +279,12 @@
         <div class="panel">
             <h2 style="margin-bottom: 15px; letter-spacing: 2px;">INITIALIZE PROFILE</h2>
             <div id="auth-error" class="error-msg"></div>
-            
             <input type="text" id="username-input" placeholder="Enter Username">
-            
             <select id="gender-input">
                 <option value="" disabled selected>Select Title Preference</option>
                 <option value="sir">Male (Sir)</option>
                 <option value="miss">Female (Miss)</option>
             </select>
-
             <button class="btn" onclick="initializeProfile()">ESTABLISH CONNECTION</button>
         </div>
     </div>
@@ -422,11 +297,17 @@
                     <h3 style="margin-bottom: 20px; text-shadow: 0 0 10px var(--accent-glow);">CORE SETTINGS</h3>
                     <div class="widget-box">
                         <div class="widget-title">Access Key Input</div>
-                        <input type="text" id="access-key-input" placeholder="Enter key..." style="margin-bottom: 8px; font-size: 0.85rem; padding: 8px;" value="gibb">
-                        <p style="font-size: 0.75rem; color: #88ff88;">Key provides secure system entry.</p>
+                        <input type="text" id="access-key-input" placeholder="Enter key..." style="margin-bottom: 8px; font-size: 0.85rem; padding: 8px;" onkeyup="verifyKey()">
+                        <p id="key-status" style="font-size: 0.9rem; font-weight: bold; margin-top: 5px; text-shadow: 0 0 5px rgba(255,0,0,0.5);">🔑 NO KEY</p>
                     </div>
+                    
                     <div class="widget-box">
-                        <div class="widget-title">Remembrance Status</div>
+                        <div class="widget-title">System Volume</div>
+                        <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1" onchange="updateVolume()">
+                    </div>
+
+                    <div class="widget-box">
+                        <div class="widget-title">Remembrance</div>
                         <p style="font-size: 0.85rem; color: #10b981;">✓ Chats remembered permanently.</p>
                     </div>
                 </div>
@@ -445,7 +326,7 @@
 
                 <div class="carousel-container" id="carousel">
                     <button class="carousel-btn big" id="c-btn-0" onclick="selectCarouselOption(0)">Launch Chat</button>
-                    <button class="carousel-btn small" id="c-btn-1" onclick="selectCarouselOption(1)">Data Core</button>
+                    <button class="carousel-btn small" id="c-btn-1" onclick="selectCarouselOption(1)">Translation</button>
                 </div>
             </div>
 
@@ -453,13 +334,9 @@
                 <div>
                     <h3 style="margin-bottom: 20px; text-shadow: 0 0 10px var(--accent-glow);">HUD MODULE</h3>
                     <div class="widget-box">
-                        <div class="widget-title">Location</div>
-                        <p style="font-size: 1rem; font-weight: bold;">Sector: Secure Node 01</p>
-                    </div>
-                    <div class="widget-box">
                         <div class="widget-title">Display Metrics</div>
-                        <p style="font-size: 0.9rem;">FPS: <span id="fps-counter">60</span></p>
-                        <p style="font-size: 0.9rem; margin-top: 5px;">RES: <span id="res-display">1920x1080</span></p>
+                        <p style="font-size: 1rem;">FPS: <span id="fps-counter" style="font-weight: bold; text-shadow: 0 0 5px var(--accent-color);">60</span></p>
+                        <p style="font-size: 1rem; margin-top: 8px;">RES: <span id="res-display" style="font-weight: bold;">1920x1080</span></p>
                     </div>
                 </div>
                 <div class="widget-box" style="margin-bottom: 0;">
@@ -474,7 +351,7 @@
         <div class="chat-container">
             <div class="chat-header">
                 <span style="font-weight: bold; letter-spacing: 2px;">G.I.B.B. NEURAL CONNECT</span>
-                <button style="background: #006400; border: none; color: white; cursor: pointer; padding: 6px 12px; border-radius: 4px;" onclick="openMenu()">SYSTEM MENU</button>
+                <button class="btn" style="width: auto; padding: 8px 16px;" onclick="openMenu()">SYSTEM MENU</button>
             </div>
             <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-area">
@@ -486,18 +363,26 @@
 
     <script>
         let carouselIndex = 0;
+        let hasSpokenWelcome = false;
         
-        // Permanent persistent storage database
         let db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { 
             profile: null,
-            chatHistory: [] 
+            chatHistory: [],
+            volume: 1.0,
+            savedKey: ''
         };
 
         window.addEventListener('DOMContentLoaded', () => {
             updateResolution();
             window.addEventListener('resize', updateResolution);
             
-            // FPS counter loop
+            // Apply saved volume and key
+            document.getElementById('volume-slider').value = db.volume;
+            if(db.savedKey) {
+                document.getElementById('access-key-input').value = db.savedKey;
+            }
+            
+            // FPS Loop
             let frameCount = 0;
             let lastTime = performance.now();
             function countFPS() {
@@ -513,17 +398,77 @@
             }
             requestAnimationFrame(countFPS);
 
-            // Check if profile exists; stay logged in permanently unless user clears it
+            // AUTO-LOGIN LOGIC
             if (db.profile && db.profile.honorific) {
                 showMenuScreen();
             } else {
-                showAuthScreen();
+                document.getElementById('auth-screen').classList.add('active');
             }
         });
+
+        // Speech Synthesis Engine
+        function speakWelcomeMsg() {
+            if (hasSpokenWelcome) return; // Only speak once per load
+            
+            const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
+            const text = `Ready when you are, ${honorific}.`;
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            utterance.volume = db.volume;
+            
+            // Attempt to load a male voice
+            const voices = window.speechSynthesis.getVoices();
+            const maleVoice = voices.find(v => 
+                v.name.toLowerCase().includes('male') || 
+                v.name.toLowerCase().includes('david') || 
+                v.name.toLowerCase().includes('mark') || 
+                v.name.toLowerCase().includes('guy')
+            );
+            
+            if (maleVoice) utterance.voice = maleVoice;
+            
+            window.speechSynthesis.speak(utterance);
+            hasSpokenWelcome = true;
+        }
+
+        // Voice list might load async in some browsers
+        window.speechSynthesis.onvoiceschanged = () => {
+            // Voices are ready
+        };
+
+        // Add a document click listener to trigger audio if auto-logged in
+        document.body.addEventListener('click', () => {
+            if (document.getElementById('menu-screen').classList.contains('active') && !hasSpokenWelcome) {
+                speakWelcomeMsg();
+            }
+        }, { once: true });
 
         function updateResolution() {
             const display = document.getElementById('res-display');
             if(display) display.innerText = `${window.innerWidth}x${window.innerHeight}`;
+        }
+
+        function verifyKey() {
+            const inputVal = document.getElementById('access-key-input').value.trim();
+            const statusEl = document.getElementById('key-status');
+            
+            db.savedKey = inputVal;
+            
+            if (inputVal.toLowerCase() === 'gibb') {
+                statusEl.innerHTML = '🔑 KEY ACTIVE';
+                statusEl.style.color = '#10b981';
+                statusEl.style.textShadow = '0 0 5px rgba(16, 185, 129, 0.5)';
+            } else {
+                statusEl.innerHTML = '🔑 NO KEY';
+                statusEl.style.color = '#ff4444';
+                statusEl.style.textShadow = '0 0 5px rgba(255, 68, 68, 0.5)';
+            }
+            saveDatabase();
+        }
+
+        function updateVolume() {
+            db.volume = parseFloat(document.getElementById('volume-slider').value);
+            saveDatabase();
         }
 
         function initializeProfile() {
@@ -539,6 +484,9 @@
 
             db.profile = { name: user || "User", honorific: honorific };
             saveDatabase();
+            
+            // Trigger audio on button click to bypass browser restrictions
+            speakWelcomeMsg();
             showMenuScreen();
         }
 
@@ -546,23 +494,16 @@
             localStorage.setItem('gibb_permanent_db', JSON.stringify(db));
         }
 
-        function showAuthScreen() {
-            document.getElementById('auth-screen').classList.add('active');
-            document.getElementById('menu-screen').classList.remove('active');
-            document.getElementById('dashboard-screen').classList.remove('active');
-        }
-
         function showMenuScreen() {
-            document.getElementById('auth-screen').classList.remove('active');
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('menu-screen').classList.add('active');
-            document.getElementById('dashboard-screen').classList.remove('active');
+            verifyKey(); // Check key status on boot
         }
 
         function openMenu() {
             showMenuScreen();
         }
 
-        // Carousel Logic
         function selectCarouselOption(index) {
             carouselIndex = index;
             updateCarouselUI();
@@ -574,7 +515,6 @@
         function updateCarouselUI() {
             const btn0 = document.getElementById('c-btn-0');
             const btn1 = document.getElementById('c-btn-1');
-            if (!btn0 || !btn1) return;
             if (carouselIndex === 0) {
                 btn0.className = "carousel-btn big";
                 btn1.className = "carousel-btn small";
@@ -592,8 +532,7 @@
         });
 
         function showDashboard() {
-            document.getElementById('auth-screen').classList.remove('active');
-            document.getElementById('menu-screen').classList.remove('active');
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('dashboard-screen').classList.add('active');
             loadChatHistory();
         }
@@ -602,9 +541,9 @@
             const container = document.getElementById('chat-messages');
             container.innerHTML = '';
             const history = db.chatHistory || [];
-            const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
             
             if (history.length === 0) {
+                const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
                 appendMessage(`System Core initialized, ${honorific}. Secure channel established.`, 'gibb', false);
             } else {
                 history.forEach(msg => {
@@ -647,19 +586,19 @@
                 if (lowerText.includes('who made you') || lowerText.includes('creator') || lowerText.includes('created you')) {
                     reply = `gibbkayyy made me, ${honorific}.`;
                 } else {
-                    reply = `Acknowledged, ${honorific}. Permanent history remembrance is active.`;
+                    reply = `Acknowledged, ${honorific}. Memory stored.`;
                 }
-
                 appendMessage(reply, 'gibb');
             }, 600);
         }
 
-        // Only clears when user explicitly requests via reset button
         function clearProfileData() {
-            if (confirm("Are you sure you want to reset your profile and chat memory?")) {
+            if (confirm("Reset system? This wipes memory and key bindings.")) {
                 localStorage.removeItem('gibb_permanent_db');
-                db = { profile: null, chatHistory: [] };
-                showAuthScreen();
+                db = { profile: null, chatHistory: [], volume: 1.0, savedKey: '' };
+                hasSpokenWelcome = false;
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                document.getElementById('auth-screen').classList.add('active');
             }
         }
     </script>
