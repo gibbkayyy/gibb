@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>G.I.B.B.</title>
     <link rel="icon" type="image/png" href="gibblogo.png">
     <style>
@@ -12,7 +12,7 @@
             --theme-color: #00ff66;
             --theme-glow: rgba(0, 255, 100, 0.8);
             --theme-bg-gradient: radial-gradient(circle at 50% 50%, rgba(0, 255, 100, 0.08) 0%, rgba(3, 20, 9, 0.9) 100%);
-            --theme-panel-bg: rgba(2, 15, 7, 0.75);
+            --theme-panel-bg: rgba(2, 15, 7, 0.85);
             --theme-input-bg: #010a04;
         }
 
@@ -45,21 +45,21 @@
             flex-direction: column;
             align-items: flex-start;
             justify-content: flex-end;
-            padding: 50px;
+            padding: 30px;
             box-sizing: border-box;
             z-index: 100;
             transition: opacity 0.8s ease;
         }
         .boot-sequence {
-            font-size: 1rem;
+            font-size: 0.9rem;
             line-height: 1.8;
             text-shadow: 0 0 10px var(--theme-color);
             letter-spacing: 2px;
         }
         .boot-cursor {
             display: inline-block;
-            width: 10px;
-            height: 18px;
+            width: 8px;
+            height: 16px;
             background-color: var(--theme-color);
             animation: blink 0.8s infinite;
             vertical-align: middle;
@@ -74,21 +74,24 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            gap: 25px;
+            padding: 20px;
+            box-sizing: border-box;
+            gap: 20px;
             z-index: 10;
             position: relative;
             background: radial-gradient(circle, rgba(0,255,100,0.05) 0%, rgba(1,10,4,1) 80%);
         }
         #login-screen img {
-            width: 320px;
+            width: 220px;
+            max-width: 80%;
             filter: drop-shadow(0 0 35px var(--theme-glow));
             animation: float 3s ease-in-out infinite;
         }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         
         .login-box {
             border: 1px solid var(--theme-color);
-            padding: 30px;
+            padding: 25px;
             border-radius: 12px;
             background: var(--theme-panel-bg);
             box-shadow: 0 0 30px rgba(0, 255, 100, 0.15), inset 0 0 15px rgba(0, 255, 100, 0.1);
@@ -96,19 +99,23 @@
             flex-direction: column;
             align-items: center;
             gap: 15px;
+            width: 100%;
+            max-width: 320px;
+            box-sizing: border-box;
             backdrop-filter: blur(5px);
         }
         #login-screen input {
             background-color: var(--theme-input-bg);
             color: var(--theme-color);
             border: 1px solid var(--theme-color);
-            padding: 14px 20px;
+            padding: 12px 15px;
             border-radius: 6px;
             font-family: inherit;
-            font-size: 1.1rem;
+            font-size: 1rem;
             text-align: center;
             outline: none;
-            width: 260px;
+            width: 100%;
+            box-sizing: border-box;
             box-shadow: 0 0 10px rgba(0, 255, 100, 0.2) inset;
             -webkit-text-security: disc;
         }
@@ -116,13 +123,14 @@
             background: linear-gradient(135deg, #021f0e, #043818);
             color: var(--theme-color);
             border: 1px solid var(--theme-color);
-            padding: 12px 30px;
+            padding: 12px 20px;
             border-radius: 6px;
             cursor: pointer;
             font-family: inherit;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 0.95rem;
             letter-spacing: 2px;
+            width: 100%;
             transition: 0.3s;
             box-shadow: 0 0 15px var(--theme-glow);
         }
@@ -135,34 +143,38 @@
             color: #ff3333;
             display: none;
             text-shadow: 0 0 8px rgba(255, 0, 0, 0.8);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
+            text-align: center;
         }
 
-        /* --- Stark HUD 3-Column Menu Screen --- */
+        /* --- Mobile-Responsive HUD Main Menu Screen --- */
         #home-screen {
             display: none;
             flex-direction: column;
             height: 100vh;
             width: 100vw;
             box-sizing: border-box;
-            padding: 30px;
+            padding: 15px;
             opacity: 0;
             transition: opacity 1s ease-in-out;
             justify-content: space-between;
+            overflow-y: auto;
         }
         .hud-top-bar {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
             border-bottom: 1px solid var(--theme-color);
-            padding-bottom: 15px;
+            padding-bottom: 10px;
+            font-size: 0.75rem;
+            gap: 10px;
+            flex-wrap: wrap;
         }
         .hud-widget {
             background: var(--theme-panel-bg);
             border: 1px solid var(--theme-color);
-            padding: 12px 20px;
+            padding: 8px 12px;
             border-radius: 6px;
-            font-size: 0.85rem;
             box-shadow: 0 0 10px rgba(0,255,100,0.1);
         }
         
@@ -170,47 +182,54 @@
             display: flex;
             flex: 1;
             align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+            padding: 10px 0;
         }
 
-        /* Left Column: Interactive Settings Panel */
+        @media(min-width: 900px) {
+            .hud-main-layout {
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 0 20px;
+            }
+        }
+
+        /* Side Panels for Desktop & Mobile */
         .hud-side-panel {
-            width: 290px;
+            width: 100%;
+            max-width: 300px;
             background: var(--theme-panel-bg);
             border: 1px solid var(--theme-color);
             border-radius: 10px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 0 15px rgba(0, 255, 100, 0.1);
             backdrop-filter: blur(5px);
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
+            box-sizing: border-box;
         }
         .hud-side-panel h4 {
             margin: 0 0 5px 0;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             letter-spacing: 1px;
             border-bottom: 1px solid var(--theme-color);
-            padding-bottom: 6px;
+            padding-bottom: 5px;
             color: var(--theme-color);
         }
         .setting-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            font-size: 0.78rem;
+            gap: 4px;
+            font-size: 0.75rem;
         }
         .setting-group label {
             opacity: 0.9;
             font-weight: bold;
         }
-        .setting-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-        .setting-group select, .setting-group input[type="range"] {
+        .setting-group input[type="range"], .setting-group input[type="text"] {
             width: 100%;
             background: var(--theme-input-bg);
             color: var(--theme-color);
@@ -219,19 +238,20 @@
             border-radius: 4px;
             font-family: inherit;
             outline: none;
+            box-sizing: border-box;
         }
         .theme-swatches {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-top: 4px;
         }
         .swatch {
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             cursor: pointer;
             border: 2px solid #ffffff;
-            box-shadow: 0 0 8px rgba(0,0,0,0.5);
+            box-shadow: 0 0 6px rgba(0,0,0,0.5);
             transition: transform 0.2s;
         }
         .swatch:hover { transform: scale(1.15); }
@@ -239,12 +259,12 @@
             background: var(--theme-input-bg);
             color: var(--theme-color);
             border: 1px solid var(--theme-color);
-            padding: 8px 12px;
+            padding: 8px;
             border-radius: 4px;
             cursor: pointer;
             font-family: inherit;
             font-weight: bold;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             transition: 0.3s;
             text-align: center;
         }
@@ -259,21 +279,23 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 25px;
+            gap: 15px;
         }
         .hud-logo-container img {
-            width: 280px;
-            filter: drop-shadow(0 0 40px var(--theme-glow));
+            width: 180px;
+            max-width: 60%;
+            filter: drop-shadow(0 0 30px var(--theme-glow));
             animation: pulse 3s infinite alternate;
         }
         @keyframes pulse {
-            0% { transform: scale(1); filter: drop-shadow(0 0 30px var(--theme-glow)); }
-            100% { transform: scale(1.03); filter: drop-shadow(0 0 50px var(--theme-glow)); }
+            0% { transform: scale(1); filter: drop-shadow(0 0 20px var(--theme-glow)); }
+            100% { transform: scale(1.03); filter: drop-shadow(0 0 35px var(--theme-glow)); }
         }
 
         .carousel-container {
-            height: 160px;
-            width: 380px;
+            height: 140px;
+            width: 280px;
+            max-width: 90vw;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -293,7 +315,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             transition: transform 0.35s cubic-bezier(0.1, 0.9, 0.2, 1);
         }
 
@@ -301,7 +323,7 @@
             background: var(--theme-panel-bg);
             color: var(--theme-color);
             border: 1px solid var(--theme-color);
-            padding: 12px 25px;
+            padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
             font-family: inherit;
@@ -310,22 +332,23 @@
             transition: all 0.4s cubic-bezier(0.1, 0.9, 0.2, 1);
             backdrop-filter: blur(5px);
             white-space: nowrap;
+            font-size: 0.85rem;
         }
 
         .carousel-item.active {
-            transform: scale(1.15);
+            transform: scale(1.1);
             background: rgba(0, 255, 100, 0.2);
             border-color: var(--theme-color);
             opacity: 1;
-            font-size: 1.1rem;
-            padding: 15px 35px;
-            box-shadow: 0 0 30px var(--theme-glow);
+            font-size: 0.95rem;
+            padding: 12px 25px;
+            box-shadow: 0 0 25px var(--theme-glow);
             z-index: 5;
         }
         .carousel-item.faded {
             transform: scale(0.8);
             opacity: 0.3;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             border-color: rgba(0, 255, 100, 0.15);
             box-shadow: none;
             z-index: 1;
@@ -342,53 +365,54 @@
         }
         header {
             background: var(--theme-panel-bg);
-            padding: 15px 30px;
+            padding: 12px 20px;
             border-bottom: 1px solid var(--theme-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            font-size: 1.2rem;
+            font-size: 0.95rem;
             font-weight: bold;
-            box-shadow: 0 0 20px rgba(0, 255, 100, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 100, 0.2);
         }
         header img {
-            height: 55px;
-            filter: drop-shadow(0 0 10px var(--theme-glow));
+            height: 35px;
+            filter: drop-shadow(0 0 8px var(--theme-glow));
         }
         .back-home {
             background: transparent;
             border: 1px solid var(--theme-color);
             color: var(--theme-color);
-            padding: 8px 18px;
+            padding: 6px 12px;
             border-radius: 6px;
             cursor: pointer;
             font-family: inherit;
             font-weight: bold;
+            font-size: 0.8rem;
             transition: 0.3s;
         }
         .back-home:hover {
             background-color: var(--theme-color);
             color: #010a04;
-            box-shadow: 0 0 15px var(--theme-glow);
+            box-shadow: 0 0 12px var(--theme-glow);
         }
 
         /* --- Chat & Translation Layouts --- */
         .chat-container {
             flex: 1;
-            padding: 25px;
+            padding: 15px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
             scroll-behavior: smooth;
         }
         .message {
-            padding: 15px 20px;
+            padding: 12px 16px;
             border-radius: 8px;
-            max-width: 75%;
+            max-width: 85%;
             word-wrap: break-word;
-            font-size: 1rem;
-            line-height: 1.5;
+            font-size: 0.9rem;
+            line-height: 1.4;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
         .user-msg {
@@ -402,24 +426,25 @@
             border: 1px solid var(--theme-color);
             align-self: flex-start;
             color: var(--theme-color);
-            box-shadow: 0 0 15px var(--theme-glow);
+            box-shadow: 0 0 12px var(--theme-glow);
         }
         .input-area {
             display: flex;
-            padding: 20px;
+            padding: 12px;
             background: var(--theme-panel-bg);
             border-top: 1px solid var(--theme-color);
-            gap: 15px;
+            gap: 8px;
+            box-sizing: border-box;
         }
         .input-area input, .translate-controls select {
             flex: 1;
             background-color: var(--theme-input-bg);
             color: var(--theme-color);
             border: 1px solid var(--theme-color);
-            padding: 15px;
+            padding: 10px 12px;
             border-radius: 6px;
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 0.9rem;
             outline: none;
             box-shadow: 0 0 10px rgba(0, 255, 100, 0.1) inset;
         }
@@ -427,23 +452,24 @@
             background: linear-gradient(135deg, #021f0e, #043818);
             color: var(--theme-color);
             border: 1px solid var(--theme-color);
-            padding: 0 28px;
+            padding: 0 16px;
             border-radius: 6px;
             cursor: pointer;
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 0.85rem;
             font-weight: bold;
             transition: 0.3s;
-            box-shadow: 0 0 10px var(--theme-glow);
+            box-shadow: 0 0 8px var(--theme-glow);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 5px;
+            white-space: nowrap;
         }
         .input-area button:hover, .translate-exec-btn:hover, .voice-btn-designed:hover {
             background-color: var(--theme-color);
             color: #010a04;
-            box-shadow: 0 0 20px var(--theme-color);
+            box-shadow: 0 0 15px var(--theme-color);
         }
 
         /* --- Dedicated Translation View Styling --- */
@@ -451,40 +477,53 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 30px;
-            gap: 20px;
+            padding: 15px;
+            gap: 15px;
             max-width: 900px;
             margin: 0 auto;
             width: 100%;
             box-sizing: border-box;
             justify-content: center;
+            overflow-y: auto;
         }
         .translate-controls {
             display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .translate-boxes-container {
+            display: flex;
+            flex-direction: column;
             gap: 15px;
+        }
+        @media(min-width: 768px) {
+            .translate-boxes-container {
+                flex-direction: row;
+            }
         }
         .translate-box {
             flex: 1;
             background: var(--theme-panel-bg);
             border: 1px solid var(--theme-color);
             border-radius: 8px;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            box-shadow: 0 0 15px var(--theme-glow);
+            gap: 8px;
+            box-shadow: 0 0 12px var(--theme-glow);
+            box-sizing: border-box;
         }
         .translate-box textarea {
             background: var(--theme-input-bg);
             color: var(--theme-color);
             border: 1px solid var(--theme-color);
             border-radius: 4px;
-            padding: 12px;
+            padding: 10px;
             font-family: inherit;
             resize: none;
-            height: 120px;
+            height: 100px;
             outline: none;
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -497,7 +536,7 @@
     <div id="login-screen">
         <img src="gibblogo.png" alt="G.I.B.B. Logo">
         <div class="login-box">
-            <h3 style="margin:0; text-shadow: 0 0 10px var(--theme-glow);">🔒 Enter Authorised Password:</h3>
+            <h3 style="margin:0; font-size: 0.95rem; text-shadow: 0 0 10px var(--theme-glow); text-align: center;">🔒 Enter Authorised Password:</h3>
             <input type="text" id="password-input" placeholder="••••••••">
             <button onclick="checkPassword()">Initialise G.I.B.B.</button>
             <p id="error-msg">Access Denied. Incorrect Security Protocol.</p>
@@ -506,14 +545,19 @@
 
     <div id="home-screen">
         <div class="hud-top-bar">
-            <div class="hud-widget" id="hud-date-time">TIME/DATE MATRIX LOADING...</div>
-            <div class="hud-widget" id="hud-telemetry">FPS: -- // RES: ----x----</div>
+            <div class="hud-widget" id="hud-date-time">TIME/DATE LOADING...</div>
+            <div class="hud-widget" id="hud-telemetry">FPS: -- // MOBILE MODE</div>
         </div>
         
         <div class="hud-main-layout">
             <div class="hud-side-panel">
                 <h4>⚙️ SYSTEM SETTINGS</h4>
                 
+                <div class="setting-group">
+                    <label>🔑 Groq API Key Config</label>
+                    <input type="text" id="groq-key-input" placeholder="gsk_..." onchange="saveGroqKey(this.value)">
+                </div>
+
                 <div class="setting-group">
                     <label>🎨 HUD Theme / Color</label>
                     <div class="theme-swatches">
@@ -553,48 +597,48 @@
                 </div>
             </div>
 
-            <div class="hud-side-panel" id="hud-weather-panel" style="gap: 10px;">
+            <div class="hud-side-panel" id="hud-weather-panel">
                 <h4>🌍 TELEMETRY & WEATHER</h4>
-                <div id="live-location-data" style="font-size: 0.8rem; line-height: 1.6; opacity: 0.85;">
+                <div id="live-location-data" style="font-size: 0.75rem; line-height: 1.6; opacity: 0.85;">
                     Acquiring GPS coordinates & local atmospheric nodes...
                 </div>
             </div>
         </div>
 
-        <div class="hud-bottom-bar" style="text-align: center; font-size: 0.8rem; opacity: 0.7; letter-spacing: 3px;">
-            SYSTEM ONLINE
+        <div class="hud-bottom-bar" style="text-align: center; font-size: 0.75rem; opacity: 0.7; letter-spacing: 2px; padding-bottom: 5px;">
+            SYSTEM ONLINE // MOBILE READY
         </div>
     </div>
 
     <div class="app-view" id="chat-view">
         <header>
-            <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
                 <img src="gibblogo.png" alt="Logo">
                 <span>G.I.B.B. Neural Interface</span>
             </div>
             <button class="back-home" onclick="goHome()">Menu</button>
         </header>
         <div class="chat-container" id="chat-box">
-            <div class="message bot-msg">G.I.B.B. core online. Awaiting queries, sir.</div>
+            <div class="message bot-msg">G.I.B.B. core online via Groq AI. Awaiting your queries, sir.</div>
         </div>
         <div class="input-area">
-            <input type="text" id="user-input" placeholder="Chat with G.I.B.B. or query web databases..." onkeypress="handleKeyPress(event)">
+            <input type="text" id="user-input" placeholder="Ask G.I.B.B. anything..." onkeypress="handleKeyPress(event)">
             <button onclick="sendMessage()">Enter</button>
-            <button class="voice-btn-designed" onclick="startListening('chat')">🎙️ Voice</button>
+            <button class="voice-btn-designed" onclick="startListening('chat')">🎙️</button>
         </div>
     </div>
 
     <div class="app-view" id="translate-view">
         <header>
-            <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
                 <img src="gibblogo.png" alt="Logo">
-                <span>G.I.B.B. Multilingual Translation Engine</span>
+                <span>G.I.B.B. Translation Engine</span>
             </div>
             <button class="back-home" onclick="goHome()">Menu</button>
         </header>
         <div class="translate-wrapper">
             <div class="translate-controls">
-                <select id="target-language">
+                <select id="target-language" style="flex:1;">
                     <option value="es">Spanish</option>
                     <option value="fr">French</option>
                     <option value="de">German</option>
@@ -605,17 +649,17 @@
                     <option value="it">Italian</option>
                     <option value="en">English (Reverse Translate)</option>
                 </select>
-                <button class="translate-exec-btn" onclick="performTranslation()">Execute Translation</button>
-                <button class="voice-btn-designed" onclick="startListening('translate')">🎙️ Voice Input</button>
+                <button class="translate-exec-btn" onclick="performTranslation()">Execute</button>
+                <button class="voice-btn-designed" onclick="startListening('translate')">🎙️</button>
             </div>
-            <div style="display: flex; gap: 20px;">
+            <div class="translate-boxes-container">
                 <div class="translate-box">
-                    <label>Source Text (English or any language):</label>
-                    <textarea id="source-text" placeholder="Type or speak text to translate..."></textarea>
+                    <label>Source Text:</label>
+                    <textarea id="source-text" placeholder="Type text to translate..."></textarea>
                 </div>
                 <div class="translate-box">
-                    <label>Translated Output Stream:</label>
-                    <textarea id="output-text" readonly placeholder="Translation will display here..."></textarea>
+                    <label>Translated Output:</label>
+                    <textarea id="output-text" readonly placeholder="Translation displays here..."></textarea>
                 </div>
             </div>
         </div>
@@ -627,6 +671,7 @@
         let currentCarouselIndex = 1;
         let isMuted = false;
         let masterVolume = 1.0;
+        let groqApiKey = localStorage.getItem("gibb_groq_key") || "";
 
         window.addEventListener("load", () => {
             runBootSequence();
@@ -636,13 +681,16 @@
             fetchLiveWeatherAndLocation();
             setupCarouselInteraction();
             loadSettings();
+            if(groqApiKey) {
+                document.getElementById("groq-key-input").value = groqApiKey;
+            }
         });
 
         async function runBootSequence() {
             let steps = [
                 "INITIALIZING KERNEL MATRIX...",
-                "LOADING SYNTHESIZER VOICE MODULES...",
-                "CALIBRATING HOLOGRAPHIC RENDERING NODES...",
+                "LOADING GROQ LLAMA 3 MODULES...",
+                "CALIBRATING MOBILE VIEWPORT NODES...",
                 "SYSTEM VERIFIED. READY FOR AUTHORISATION."
             ];
             let bootElem = document.getElementById("boot-text");
@@ -650,7 +698,7 @@
                 if (bootElem) {
                     bootElem.innerHTML = steps[i] + '<span class="boot-cursor"></span>';
                 }
-                await new Promise(r => setTimeout(r, 350));
+                await new Promise(r => setTimeout(r, 300));
             }
             setTimeout(() => {
                 let loader = document.getElementById("loading-screen");
@@ -676,7 +724,7 @@
                 if (now - lastTime >= 1000) {
                     let fps = Math.round((frameCount * 1000) / (now - lastTime));
                     if (telemetryElem) {
-                        telemetryElem.innerText = `FPS: ${fps} // RES: ${resWidth}x${resHeight}`;
+                        telemetryElem.innerText = `FPS: ${fps} // ${resWidth}x${resHeight}`;
                     }
                     frameCount = 0;
                     lastTime = now;
@@ -693,18 +741,23 @@
                 let weatherDiv = document.getElementById("live-location-data");
                 if (weatherDiv) {
                     weatherDiv.innerHTML = `
-                        <strong>LOCATION:</strong> ${loc.city}, ${loc.region}, ${loc.country_name}<br>
+                        <strong>LOCATION:</strong> ${loc.city}, ${loc.country_name}<br>
                         <strong>IP NODE:</strong> ${loc.ip}<br>
                         <strong>ISP:</strong> ${loc.org || 'Global Matrix'}<br>
-                        <strong>ATMOSPHERE:</strong> Optimal / Nominal
+                        <strong>STATUS:</strong> Nominal
                     `;
                 }
             } catch(e) {
                 let weatherDiv = document.getElementById("live-location-data");
                 if (weatherDiv) {
-                    weatherDiv.innerHTML = `LOCATION: Global Matrix Node // STATUS: Active Link`;
+                    weatherDiv.innerHTML = `LOCATION: Mobile Node // STATUS: Online`;
                 }
             }
+        }
+
+        function saveGroqKey(val) {
+            groqApiKey = val.trim();
+            localStorage.setItem("gibb_groq_key", groqApiKey);
         }
 
         // --- Settings Control Logic ---
@@ -737,7 +790,7 @@
         }
 
         function clearMemory() {
-            if (confirm("Are you sure you want to clear stored user profiles and settings?")) {
+            if (confirm("Are you sure you want to clear stored settings?")) {
                 localStorage.clear();
                 location.reload();
             }
@@ -764,51 +817,30 @@
             }
         }
 
-        // --- High-Performance Lag-Free Native Voice Engine (Anti-Female Filter) ---
+        // --- Optimized Native Voice Engine ---
         function speakJarvis(text) {
             if (!text || isMuted || !('speechSynthesis' in window)) return;
 
-            // Instantly clear queue to remove speech delay
             window.speechSynthesis.cancel();
-
             let utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 1.05; // Snappy speed
-            utterance.pitch = 0.7;  // Deep authoritative tone
+            utterance.rate = 1.05;
+            utterance.pitch = 0.65;
             utterance.volume = masterVolume;
 
             let voices = window.speechSynthesis.getVoices();
             let selectedVoice = null;
 
-            // Strict search for a robust English male voice (avoiding female fallbacks like Zira/Hazel)
             for (let v of voices) {
-                let nameLower = v.name.toLowerCase();
-                if (v.lang.startsWith('en')) {
-                    if (nameLower.includes('male') || nameLower.includes('david') || nameLower.includes('george') || nameLower.includes('daniel') || nameLower.includes('mark') || nameLower.includes('ryan')) {
-                        selectedVoice = v;
-                        break;
-                    }
+                let name = v.name.toLowerCase();
+                if (v.lang.startsWith('en') && (name.includes('male') || name.includes('david') || name.includes('george') || name.includes('daniel') || name.includes('mark'))) {
+                    selectedVoice = v;
+                    break;
                 }
             }
-
-            // Fallback to first available English voice if specific match isn't found, avoiding known female identifiers
-            if (!selectedVoice) {
-                for (let v of voices) {
-                    let nameLower = v.name.toLowerCase();
-                    if (v.lang.startsWith('en') && !nameLower.includes('zira') && !nameLower.includes('hazel') && !nameLower.includes('helena') && !nameLower.includes('susan')) {
-                        selectedVoice = v;
-                        break;
-                    }
-                }
-            }
-
-            if (selectedVoice) {
-                utterance.voice = selectedVoice;
-            }
-
+            if (selectedVoice) utterance.voice = selectedVoice;
             window.speechSynthesis.speak(utterance);
         }
 
-        // Ensure voices load asynchronously in some browsers
         if ('speechSynthesis' in window) {
             window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
         }
@@ -820,14 +852,13 @@
                 let home = document.getElementById("home-screen");
                 home.style.display = "flex";
                 setTimeout(() => { home.style.opacity = "1"; }, 50);
-                
                 speakJarvis("SYSTEM ONLINE");
             } else {
                 document.getElementById("error-msg").style.display = "block";
             }
         }
 
-        // --- Fixed Bug-Free Carousel Interaction System ---
+        // --- Carousel Interaction System ---
         let isScrolling = false;
         function setupCarouselInteraction() {
             let container = document.getElementById("carousel-box");
@@ -836,9 +867,9 @@
             container.addEventListener("touchstart", (e) => { startY = e.touches[0].clientY; }, {passive: true});
             container.addEventListener("touchend", (e) => {
                 let diff = e.changedTouches[0].clientY - startY;
-                if (Math.abs(diff) > 25) {
-                    if (diff > 0) moveCarousel(-1); // Down
-                    else moveCarousel(1); // Up
+                if (Math.abs(diff) > 20) {
+                    if (diff > 0) moveCarousel(-1);
+                    else moveCarousel(1);
                 }
             });
 
@@ -846,10 +877,8 @@
                 e.preventDefault();
                 if (isScrolling) return;
                 isScrolling = true;
-                
                 if (e.deltaY > 0) moveCarousel(1);
                 else moveCarousel(-1);
-                
                 setTimeout(() => { isScrolling = false; }, 300);
             }, {passive: false});
 
@@ -869,14 +898,14 @@
             setTimeout(() => {
                 if (currentCarouselIndex === 0) openApp('translate');
                 else if (currentCarouselIndex === 1) openApp('chat');
-                else if (currentCarouselIndex === 2) alert("G.I.B.B. Detect module currently compiling neural security frameworks.");
+                else if (currentCarouselIndex === 2) alert("G.I.B.B. Detect module compiling security frameworks.");
             }, 250);
         }
 
         function updateCarouselView() {
             let track = document.getElementById("carousel-track");
             let items = track.children;
-            let offset = (1 - currentCarouselIndex) * 55;
+            let offset = (1 - currentCarouselIndex) * 45;
             track.style.transform = `translateY(${offset}px)`;
 
             for (let i = 0; i < items.length; i++) {
@@ -898,9 +927,7 @@
         }
 
         function goHome() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-            }
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
             document.getElementById("chat-view").style.display = "none";
             document.getElementById("translate-view").style.display = "none";
             let home = document.getElementById("home-screen");
@@ -919,7 +946,7 @@
 
             appendMessage(text, 'user-msg');
             inputField.value = "";
-            processJarvisAI(text);
+            processGroqAI(text);
         }
 
         function appendMessage(text, className) {
@@ -934,82 +961,67 @@
         function updateHUDClock() {
             let now = new Date();
             let timeStr = now.toLocaleTimeString();
-            let dateStr = now.toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+            let dateStr = now.toLocaleDateString();
             let clockElem = document.getElementById("hud-date-time");
             if (clockElem) {
-                clockElem.innerText = `DATE: ${dateStr} // TIME: ${timeStr}`;
+                clockElem.innerText = `${dateStr} // ${timeStr}`;
             }
         }
 
-        // --- Upgraded Conversational Intelligence & Knowledge Core ---
-        async function processJarvisAI(input) {
-            let lower = input.toLowerCase().trim();
-            let response = "";
-
-            if (lower === "hi" || lower === "hello" || lower === "hey" || lower === "greetings") {
-                let savedUser = localStorage.getItem("user_profile_name");
-                response = savedUser ? `Hello! Welcome back, ${savedUser}, sir.` : `Hello! My name is G.I.B.B.! What can I do for you today, sir?`;
-            }
-            else if (lower.includes("what is your name") || lower.includes("who are you")) {
-                response = `My name is G.I.B.B.! I am your advanced artificial intelligence neural assistant.`;
-            }
-            else if (lower.includes("what can you do") || lower.includes("your capabilities") || lower.includes("help me")) {
-                response = `Here is everything G.I.B.B. can do: I can chat with you naturally, remember personal details, execute instant calculations, perform multilingual translations across global languages, fetch live web telemetry and database summaries, and monitor system diagnostics in real-time, sir.`;
-            }
-            else if (lower.includes("remember me")) {
-                let savedUser = localStorage.getItem("user_profile_name");
-                response = savedUser ? `Logged in records as ${savedUser}, sir.` : `Identity unlinked. Use: Remember that my name is [name], sir.`;
-            }
-            else if (lower.includes("remember that") && lower.includes("is")) {
-                try {
-                    let parts = input.split(/remember that/i)[1].split(/is/i);
-                    let k = parts[0].trim();
-                    let v = parts[1].trim();
-                    localStorage.setItem(k, v);
-                    if (k.includes("name")) localStorage.setItem("user_profile_name", v);
-                    response = `Logged: ${k} is ${v}, sir.`;
-                } catch(e) {
-                    response = "Formatting error.";
-                }
-            } 
-            else if (lower.startsWith("calculate") || lower.startsWith("solve") || /[0-9]+\s*[\+\-\*\/\^]\s*[0-9]+/.test(lower)) {
-                try {
-                    let expr = lower.replace(/calculate/i, "").replace(/solve/i, "").trim();
-                    response = `${eval(expr)}`;
-                } catch(e) {
-                    response = "Computation error.";
-                }
-            } 
-            else {
-                let foundKey = Object.keys(localStorage).find(k => !k.startsWith("gibb_") && lower.includes(k));
-                if (foundKey) {
-                    response = `${localStorage.getItem(foundKey)}`;
-                } else {
-                    response = await fetchKeylessWebSearch(input);
-                }
+        // --- Groq AI Intelligence Integration ---
+        async function processGroqAI(input) {
+            if (!groqApiKey) {
+                let errText = "Sir, please enter your Groq API key in the settings menu on the home screen to activate neural intelligence.";
+                appendMessage(errText, 'bot-msg');
+                speakJarvis("API key missing.");
+                return;
             }
 
-            appendMessage(response, 'bot-msg');
-            speakJarvis(response);
-        }
+            appendMessage("Thinking...", 'bot-msg');
+            let chatBox = document.getElementById("chat-box");
+            let loadingMsg = chatBox.lastChild;
 
-        async function fetchKeylessWebSearch(query) {
             try {
-                let encoded = encodeURIComponent(query);
-                let url = `https://api.duckduckgo.com/?q=${encoded}&format=json&no_html=1&skip_disambig=1`;
-                
-                let res = await fetch(url);
+                let res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${groqApiKey}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "llama-3.3-70b-versatile",
+                        messages: [
+                            {
+                                role: "system",
+                                content: "You are G.I.B.B., an advanced artificial intelligence neural assistant patterned after Jarvis. You speak with a professional, sharp, sci-fi tone, addressing the user as 'sir'. Keep answers concise, informative, and high-tech."
+                            },
+                            {
+                                role: "user",
+                                content: input
+                            }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 500
+                    })
+                });
+
                 let data = await res.json();
+                chatBox.removeChild(loadingMsg);
                 
-                if (data.AbstractText) {
-                    return data.AbstractText;
-                } else if (data.RelatedTopics && data.RelatedTopics.length > 0 && data.RelatedTopics[0].Text) {
-                    return data.RelatedTopics[0].Text;
+                if (data.choices && data.choices.length > 0) {
+                    let aiResponse = data.choices[0].message.content;
+                    appendMessage(aiResponse, 'bot-msg');
+                    speakJarvis(aiResponse);
                 } else {
-                    return `Live search query analyzed for "${query}". Telemetry verified, sir.`;
+                    let failText = "Neural network encountered an error processing data.";
+                    appendMessage(failText, 'bot-msg');
+                    speakJarvis(failText);
                 }
             } catch (err) {
-                return `Sir, external web telemetry connection experienced interference.`;
+                chatBox.removeChild(loadingMsg);
+                let failText = "Sir, connection to the Groq cloud matrix failed.";
+                appendMessage(failText, 'bot-spec bot-msg');
+                speakJarvis(failText);
             }
         }
 
@@ -1020,7 +1032,7 @@
             let outputField = document.getElementById("output-text");
 
             if (!text) {
-                outputField.value = "Please input source text strings for processing.";
+                outputField.value = "Please input source text strings.";
                 return;
             }
 
