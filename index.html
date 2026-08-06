@@ -244,14 +244,28 @@
         }
         
         .voice-status-text {
-            margin-top: 40px; font-size: 1.5rem; letter-spacing: 2px; color: var(--accent-color);
-            text-shadow: 0 0 15px var(--accent-glow); animation: pulseText 2s infinite;
+            margin-top: 20px; font-size: 1rem; letter-spacing: 1px; color: var(--accent-color);
+            text-shadow: 0 0 10px var(--accent-glow); animation: pulseText 2s infinite;
         }
         @keyframes pulseText { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 
     </style>
 </head>
 <body>
+
+    <div id="mic-permission-screen" class="screen active" style="z-index: 999; background: var(--bg-color);">
+        <div class="logo-container">
+            <div class="inner-design-grid"></div>
+            <div class="orbit-ring-outer"><div class="dot-outer"></div></div>
+            <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
+            <div class="gibb-text-logo">G.I.B.B.</div>
+        </div>
+        <div class="panel" style="max-width: 450px;">
+            <h2 style="margin-bottom: 15px; letter-spacing: 2px;">MICROPHONE ACCESS REQUIRED</h2>
+            <p style="font-size: 0.9rem; color: #88ff88; margin-bottom: 25px; line-height: 1.5;">G.I.B.B. requires live microphone access to maintain continuous wake-word listening ("Hey GIBB") and voice control.</p>
+            <button class="btn" onclick="requestMicrophoneAccess()" style="padding: 15px; font-size: 1.1rem; box-shadow: 0 0 20px var(--accent-glow);">ACTIVATE MICROPHONE</button>
+        </div>
+    </div>
 
     <div id="auth-screen" class="screen">
         <div class="logo-container">
@@ -260,7 +274,6 @@
             <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
             <div class="gibb-text-logo">G.I.B.B.</div>
         </div>
-        
         <div class="panel" id="auth-panel"></div>
     </div>
 
@@ -338,16 +351,16 @@
     </div>
 
     <div id="voice-screen" class="screen">
-        <div class="logo-container" style="transform: scale(1.2);">
+        <div class="logo-container" style="transform: scale(0.9); margin-bottom: 10px;">
             <div class="inner-design-grid"></div>
-            <div class="orbit-ring-outer" style="border-color: #00ff00; box-shadow: 0 0 20px #00ff00;"><div class="dot-outer"></div></div>
+            <div class="orbit-ring-outer" style="border-color: #00ff00; box-shadow: 0 0 15px #00ff00;"><div class="dot-outer"></div></div>
             <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
-            <div class="gibb-text-logo">G.I.B.B.</div>
+            <div class="gibb-text-logo" style="font-size: 2rem;">G.I.B.B.</div>
         </div>
-        <div class="voice-status-text">VOICE HUD ACTIVE... (Say "Hey, G.I.B.B. [question]" or "Deactivate Voice Control")</div>
-        <div id="voice-transcript" style="margin-top: 20px; font-style: italic; color: #88ff88; max-width: 600px; text-align: center; height: 30px;"></div>
+        <div class="voice-status-text">VOICE HUD ACTIVE... (Say "Hey, G.I.B.B. [question]" or say "Deactivate Voice Control")</div>
+        <div id="voice-transcript" style="margin-top: 15px; font-size: 0.95rem; font-style: italic; color: #88ff88; max-width: 600px; text-align: center; height: 30px;">[Awaiting speech input...]</div>
         
-        <button class="btn" style="position: absolute; bottom: 40px; width: auto; padding: 10px 30px;" onclick="deactivateVoiceScreen()">MENU</button>
+        <button class="btn" style="position: absolute; bottom: 30px; width: auto; padding: 10px 25px; font-size: 0.9rem;" onclick="deactivateVoiceScreen()">MENU</button>
     </div>
 
     <div id="dashboard-screen" class="screen">
@@ -390,14 +403,13 @@
     </div>
 
     <script>
-        let carouselIndex = 1; // Default to Voice Control in center
+        let carouselIndex = 1;
         let hasSpokenWelcome = false;
         
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let globalRecognition = null;
         let isGlobalListening = false;
 
-        // Persistent database schema initialization
         let db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { 
             profile: null, chatHistory: [], volume: 1.0, savedKey: ''
         };
@@ -433,14 +445,29 @@
                 requestAnimationFrame(countFPS);
             }
             requestAnimationFrame(countFPS);
-
-            if (sessionStorage.getItem('gibb_logged_in') === 'true' && db.profile) {
-                showLoadingScreen();
-            } else {
-                renderAuthScreen();
-                switchScreen('auth-screen');
-            }
         });
+
+        // HARDWARE MIC PERMISSION INITIALIZER
+        async function requestMicrophoneAccess() {
+            try {
+                // Request physical media stream access to explicitly open browser microphone prompt
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                // Release the stream tracks right away since SpeechRecognition manages its own capture lifecycle
+                stream.getTracks().forEach(track => track.stop());
+                
+                // Hide permission overlay and proceed to auth / main system entry
+                document.getElementById('mic-permission-screen').classList.remove('active');
+                
+                if (sessionStorage.getItem('gibb_logged_in') === 'true' && db.profile) {
+                    showLoadingScreen();
+                } else {
+                    renderAuthScreen();
+                    switchScreen('auth-screen');
+                }
+            } catch (err) {
+                alert("Microphone permission was denied. G.I.B.B. voice features require microphone access to function.");
+            }
+        }
 
         function renderAuthScreen() {
             const panel = document.getElementById('auth-panel');
@@ -467,7 +494,9 @@
         }
 
         function switchScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.screen').forEach(s => {
+                if(s.id !== 'mic-permission-screen') s.classList.remove('active');
+            });
             document.getElementById(screenId).classList.add('active');
         }
 
@@ -540,7 +569,6 @@
         }
 
         function speak(text, callback) {
-            // Temporarily pause global listening while GIBB speaks to prevent self-triggering loops
             if (globalRecognition && isGlobalListening) {
                 try { globalRecognition.stop(); } catch(e){}
             }
@@ -554,7 +582,6 @@
             
             utterance.onend = () => {
                 if (callback) callback();
-                // Resume global listener after speech completion
                 if (isGlobalListening && globalRecognition) {
                     setTimeout(() => { try { globalRecognition.start(); } catch(e){} }, 500);
                 }
@@ -615,9 +642,7 @@
             }
         });
 
-        // ----------------------------------------------------
-        // ALWAYS-LISTENING CONTINUOUS GLOBAL WAKE WORD ENGINE
-        // ----------------------------------------------------
+        // ALWAYS-LISTENING GLOBAL RECOGNITION WAKE ENGINE
         function initGlobalAlwaysListening() {
             if (!SpeechRecognition) return;
             if (isGlobalListening && globalRecognition) return;
@@ -635,13 +660,11 @@
                 
                 const lowerText = fullSentence.toLowerCase().trim();
                 
-                // Update transcript badge if on voice screen
                 const transcriptDisplay = document.getElementById('voice-transcript');
                 if (transcriptDisplay && document.getElementById('voice-screen').classList.contains('active')) {
                     transcriptDisplay.innerText = fullSentence;
                 }
 
-                // Global Voice Triggers check anytime, anywhere in app
                 if (lowerText.includes("activate voice control")) {
                     globalRecognition.stop();
                     isGlobalListening = false;
@@ -677,8 +700,7 @@
             };
 
             globalRecognition.onerror = (e) => {
-                // Auto-recover silently from browser speech dropouts
-                console.warn("Speech engine event error:", e.error);
+                console.warn("Speech engine event warning:", e.error);
             };
 
             globalRecognition.onend = () => {
@@ -710,7 +732,7 @@
 
         function activateVoiceScreen() {
             switchScreen('voice-screen');
-            document.getElementById('voice-transcript').innerText = '';
+            document.getElementById('voice-transcript').innerText = '[Awaiting speech input...]';
             const honorific = db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
             speak(`Voice HUD Interface opened, ${honorific}.`);
         }
@@ -719,7 +741,7 @@
             showMenuScreen();
         }
 
-        // LIVE GROQ API CONNECTION FOR INTELLIGENT RESPONSES
+        // GROQ API CLOUD CALL
         async function callGroqAPI(promptText) {
             const apiKey = db.savedKey;
             if (!apiKey) return "Groq API key is missing.";
@@ -824,7 +846,7 @@
         const translationDictionary = {
             "hello": { "es": "hola", "fr": "bonjour", "de": "hallo", "it": "ciao", "pt": "olá", "ru": "привет", "ja": "こんにちは", "ko": "안녕하세요", "zh": "你好", "ar": "مرحبا", "hi": "नमस्ते", "nl": "hallo", "pl": "cześć", "tr": "merhaba", "vi": "xin chào", "th": "สวัสดี", "sv": "hej", "no": "hei", "da": "hej", "fi": "hei", "el": "γεια", "cs": "ahoj", "hu": "helló", "ro": "salut", "uk": "привіт", "id": "halo", "ms": "hai", "he": "שלום", "fa": "سلام", "bn": "হ্যালো", "ur": "ہیلو", "ta": "வணக்கம்", "te": "హలో", "mr": "नमस्कार", "gu": "નમસ્તે", "kn": "ಹಲೋ", "ml": "ഹലോ", "pa": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ", "sw": "habari", "fil": "kamusta", "bg": "здравейте", "hr": "bok", "sr": "здраво", "sk": "ahoj", "sl": "živjo", "et": "tere", "lv": "sveiki", "lt": "labas", "ga": "dia dhuit", "is": "hæ" },
             "how are you": { "es": "cómo estás", "fr": "comment ça va", "de": "wie geht es dir", "it": "come stai", "pt": "como você está", "ru": "как дела", "ja": "お元気ですか", "ko": "어떻게 지내세요", "zh": "你好吗", "ar": "كيف حالك", "hi": "आप कैसे हैं", "nl": "hoe gaat het", "pl": "jak się masz", "tr": "nasılsın", "vi": "bạn khỏe không", "th": "คุณเป็นอย่างไรบ้าง", "sv": "hur mår du", "no": "hvordan har du det", "da": "hvordan går det", "fi": "mitä kuuluu", "el": "ti kanete", "cs": "jak se máš", "hu": "hogy vagy", "ro": "ce mai faci", "uk": "як справи", "id": "apa kabar", "ms": "apa khabar", "he": "מה שלומך", "fa": "حالت چطور است", "bn": "কেমন আছেন", "ur": "آپ کیسے ہیں", "ta": "எப்படி இருக்கிறீர்கள்", "te": "మీరు ఎలా ఉన్నారు", "mr": "तुम्ही कसे आहात", "gu": "તમે કેમ છો", "kn": "ನೀವು ಹೇಗಿದ್ದೀರಿ", "ml": "സുഖമാണോ", "pa": "ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ", "sw": "habari gani", "fil": "kumusta ka", "bg": "как си", "hr": "kako si", "sr": "како си", "sk": "ako sa máš", "sl": "kako si", "et": "kuidas läheb", "lv": "kā klājas", "lt": "kaip laikaisi", "ga": "conas atá tú", "is": "hvernig hefurðu það" },
-            "system active": { "es": "sistema activo", "fr": "système actif", "de": "system aktiv", "it": "sistema attivo", "pt": "sistema ativo", "ru": "система активна", "ja": "システムアクティブ", "ko": "시스템 활성화", "zh": "系统激活", "ar": "النظام نشط", "hi": "सिस्टम सक्रिय", "nl": "systeem actief", "pl": "system aktywny", "tr": "sistem aktif", "vi": "hệ thống hoạt động", "th": "ระบบทำงานอยู่", "sv": "system aktivt", "no": "system aktiv", "da": "system aktiv", "fi": "järjestelmä aktiivinen", "el": "το σύστημα ενεργό", "cs": "systém aktivní", "hu": "rendszer aktív", "ro": "sistem activ", "uk": "система активна", "id": "sistem aktif", "ms": "sistem aktif", "he": "המערכת פעילה", "fa": "سیستم فعال است", "bn": "সিস্টেম সক্রিয়", "ur": "سسٹم فعال ہے", "ta": "கணினி செயலில் உள்ளது", "te": "సిస్టమ్ క్రియాశీలకంగా ఉంది", "mr": "सिस्टम सक्रिय आहे", "gu": "સિస్టમ સક્રિય છે", "kn": "ಸಿಸ್ಟಮ್ ಸಕ್ರಿಯವಾಗಿದೆ", "ml": "സിസ്റ്റം സജീവമാണ്", "pa": "ਸਿਸਟਮ ਸਰਗਰਮ ਹੈ", "sw": "mfumo uko hai", "fil": "aktibo ang sistema", "bg": "системата е активна", "hr": "sustav aktivan", "sr": "систем активан", "sk": "systém aktívny", "sl": "sistem aktiven", "et": "süsteem aktiivne", "lv": "sistēma aktīva", "lt": "sistema aktyvi", "ga": "córas gníomhach", "is": "kerfi virkt" }
+            "system active": { "es": "sistema activo", "fr": "système actif", "de": "system aktiv", "it": "sistema attivo", "pt": "sistema ativo", "ru": "система активна", "ja": "システムアクティブ", "ko": "시스템 활성화", "zh": "系统激活", "ar": "النظام نشط", "hi": "सिस्टम सक्रिय", "nl": "systeem actief", "pl": "system aktywny", "tr": "sistem aktif", "vi": "hệ thống hoạt động", "th": "ระบบทำงานอยู่", "sv": "system aktivt", "no": "system aktiv", "da": "system aktiv", "fi": "järjestelmä aktiivinen", "el": "το σύστημα ενεργό", "cs": "systém aktivní", "hu": "rendszer aktív", "ro": "sistem activ", "uk": "система активна", "id": "sistem aktif", "ms": "sistem aktif", "he": "המערכת פעילה", "fa": "سیستم فعال است", "bn": "সিস্টেম সক্রিয়", "ur": "سسٹم فعال ہے", "ta": "கணினி செயலில் உள்ளது", "te": "సిస్టమ్ క్రియాశీలకంగా ఉంది", "mr": "सिस्टम सक्रिय आहे", "gu": "સિસ્ટમ સક્રિય છે", "kn": "ಸಿಸ್ಟಮ್ ಸಕ್ರಿಯವಾಗಿದೆ", "ml": "സിസ്റ്റം സജീവമാണ്", "pa": "ਸਿਸਟਮ ਸਰਗਰਮ ਹੈ", "sw": "mfumo uko hai", "fil": "aktibo ang sistema", "bg": "системата е активна", "hr": "sustav aktivan", "sr": "систем активан", "sk": "systém aktívny", "sl": "sistem aktiven", "et": "süsteem aktiivne", "lv": "sistēma aktīva", "lt": "sistema aktyvi", "ga": "córas gníomhach", "is": "kerfi virkt" }
         };
 
         function showTranslation() {
