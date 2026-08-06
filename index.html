@@ -70,7 +70,7 @@
             display: flex;
         }
 
-        /* Perfectly Centered Logo with Inner Designs & Orbiting Rings */
+        /* Logo Design */
         .logo-container {
             position: relative;
             width: 260px;
@@ -88,12 +88,12 @@
             z-index: 10;
             text-shadow: 0 0 20px var(--accent-glow);
             letter-spacing: 4px;
-            padding-left: 4px; /* Perfectly balances the letter-spacing offset */
+            /* Shifted slightly more to the right to perfectly balance the letter-spacing offset */
+            transform: translateX(6px); 
             text-align: center;
             position: absolute;
         }
 
-        /* Cool Inner Design Pattern */
         .inner-design-grid {
             position: absolute;
             width: 150px;
@@ -109,7 +109,6 @@
             50% { transform: scale(1.05); opacity: 1; }
         }
 
-        /* Rings */
         .orbit-ring-outer {
             position: absolute;
             width: 240px;
@@ -156,27 +155,14 @@
         input:focus, select:focus { border-color: var(--accent-color); box-shadow: 0 0 10px var(--accent-glow); }
         select option { background: var(--bg-color); color: var(--text-color); }
 
-        /* Volume Slider */
         input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: rgba(0, 255, 0, 0.1);
-            height: 6px;
-            border-radius: 3px;
-            outline: none;
-            border: 1px solid var(--border-color);
-            margin: 10px 0;
-            padding: 0;
+            -webkit-appearance: none; width: 100%; background: rgba(0, 255, 0, 0.1);
+            height: 6px; border-radius: 3px; outline: none; border: 1px solid var(--border-color);
+            margin: 10px 0; padding: 0;
         }
         input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: var(--accent-color);
-            cursor: pointer;
-            box-shadow: 0 0 10px var(--accent-glow);
+            -webkit-appearance: none; appearance: none; width: 16px; height: 16px;
+            border-radius: 50%; background: var(--accent-color); cursor: pointer; box-shadow: 0 0 10px var(--accent-glow);
         }
 
         .btn {
@@ -229,7 +215,7 @@
         .carousel-btn.small { transform: scale(0.8); opacity: 0.4; font-size: 0.9rem; }
         .carousel-btn.big { transform: scale(1.1); opacity: 1; font-size: 1.2rem; border-color: var(--accent-color); box-shadow: 0 0 20px var(--accent-glow); }
 
-        /* Original Dark/Glass Chat Interface */
+        /* Chat Interface */
         .chat-container {
             width: 100%; height: 100%; display: flex; flex-direction: column;
             background: transparent; color: var(--text-color); overflow: hidden;
@@ -277,7 +263,7 @@
         </div>
         
         <div class="panel">
-            <h2 style="margin-bottom: 15px; letter-spacing: 2px;">INITIALIZE PROFILE</h2>
+            <h2 style="margin-bottom: 15px; letter-spacing: 2px;">LOGIN / INITIALIZE</h2>
             <div id="auth-error" class="error-msg"></div>
             <input type="text" id="username-input" placeholder="Enter Username">
             <select id="gender-input">
@@ -287,6 +273,23 @@
             </select>
             <button class="btn" onclick="initializeProfile()">ESTABLISH CONNECTION</button>
         </div>
+    </div>
+
+    <div id="loading-screen" class="screen">
+        <div class="logo-container" style="transform: scale(0.8); margin-bottom: 40px;">
+            <div class="inner-design-grid"></div>
+            <div class="orbit-ring-outer"><div class="dot-outer"></div></div>
+            <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
+            <div class="gibb-text-logo">G.I.B.B.</div>
+        </div>
+        
+        <h2 id="loading-text" style="margin-bottom: 20px; letter-spacing: 2px; animation: pulseCore 1.5s infinite;">SYSTEM BOOTING...</h2>
+        
+        <div style="width: 100%; max-width: 400px; height: 6px; background: rgba(0,255,0,0.1); border: 1px solid var(--border-color); border-radius: 3px; margin-bottom: 30px; overflow: hidden;">
+            <div id="loading-bar" style="width: 0%; height: 100%; background: var(--accent-color); transition: width 2.5s ease-in-out; box-shadow: 0 0 10px var(--accent-glow);"></div>
+        </div>
+
+        <button class="btn" id="init-btn" style="display: none; max-width: 300px; padding: 15px; font-size: 1.1rem; box-shadow: 0 0 20px var(--accent-glow);" onclick="completeInit()">INITIALISE G.I.B.B.</button>
     </div>
 
     <div id="menu-screen" class="screen">
@@ -312,7 +315,7 @@
                     </div>
                 </div>
                 <div>
-                    <button class="btn" style="border-color: var(--danger-color); color: #ff8888; font-size: 0.85rem;" onclick="clearProfileData()">RESET PROFILE</button>
+                    <button class="btn" style="border-color: var(--danger-color); color: #ff8888; font-size: 0.9rem;" onclick="logout()">LOG OUT</button>
                 </div>
             </div>
 
@@ -376,7 +379,6 @@
             updateResolution();
             window.addEventListener('resize', updateResolution);
             
-            // Apply saved volume and key
             document.getElementById('volume-slider').value = db.volume;
             if(db.savedKey) {
                 document.getElementById('access-key-input').value = db.savedKey;
@@ -398,50 +400,14 @@
             }
             requestAnimationFrame(countFPS);
 
-            // AUTO-LOGIN LOGIC
-            if (db.profile && db.profile.honorific) {
-                showMenuScreen();
+            // AUTH / SESSION LOGIC
+            // Using sessionStorage so the user stays logged in across reloads, but logs out if the tab is closed.
+            if (sessionStorage.getItem('gibb_logged_in') === 'true' && db.profile) {
+                showLoadingScreen();
             } else {
                 document.getElementById('auth-screen').classList.add('active');
             }
         });
-
-        // Speech Synthesis Engine
-        function speakWelcomeMsg() {
-            if (hasSpokenWelcome) return; // Only speak once per load
-            
-            const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
-            const text = `Ready when you are, ${honorific}.`;
-            const utterance = new SpeechSynthesisUtterance(text);
-            
-            utterance.volume = db.volume;
-            
-            // Attempt to load a male voice
-            const voices = window.speechSynthesis.getVoices();
-            const maleVoice = voices.find(v => 
-                v.name.toLowerCase().includes('male') || 
-                v.name.toLowerCase().includes('david') || 
-                v.name.toLowerCase().includes('mark') || 
-                v.name.toLowerCase().includes('guy')
-            );
-            
-            if (maleVoice) utterance.voice = maleVoice;
-            
-            window.speechSynthesis.speak(utterance);
-            hasSpokenWelcome = true;
-        }
-
-        // Voice list might load async in some browsers
-        window.speechSynthesis.onvoiceschanged = () => {
-            // Voices are ready
-        };
-
-        // Add a document click listener to trigger audio if auto-logged in
-        document.body.addEventListener('click', () => {
-            if (document.getElementById('menu-screen').classList.contains('active') && !hasSpokenWelcome) {
-                speakWelcomeMsg();
-            }
-        }, { once: true });
 
         function updateResolution() {
             const display = document.getElementById('res-display');
@@ -485,10 +451,64 @@
             db.profile = { name: user || "User", honorific: honorific };
             saveDatabase();
             
-            // Trigger audio on button click to bypass browser restrictions
+            sessionStorage.setItem('gibb_logged_in', 'true');
+            showLoadingScreen();
+        }
+
+        function showLoadingScreen() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('loading-screen').classList.add('active');
+            
+            // Reset UI states just in case
+            document.getElementById('loading-bar').style.width = '0%';
+            document.getElementById('init-btn').style.display = 'none';
+            document.getElementById('loading-text').innerText = "SYSTEM BOOTING...";
+            document.getElementById('loading-text').style.animation = "pulseCore 1.5s infinite";
+
+            // Trigger Loading Animation
+            setTimeout(() => {
+                document.getElementById('loading-bar').style.width = '100%';
+            }, 100);
+
+            // Show Initialize Button after loading completes
+            setTimeout(() => {
+                document.getElementById('loading-text').innerText = "SYSTEM READY";
+                document.getElementById('loading-text').style.animation = "none";
+                document.getElementById('init-btn').style.display = 'block';
+            }, 2600);
+        }
+
+        function completeInit() {
             speakWelcomeMsg();
             showMenuScreen();
         }
+
+        function speakWelcomeMsg() {
+            if (hasSpokenWelcome) return;
+            
+            const honorific = db.profile && db.profile.honorific === 'sir' ? 'Sir' : 'Miss';
+            const text = `Ready when you are, ${honorific}.`;
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            utterance.volume = db.volume;
+            
+            // Grab a male voice for G.I.B.B.
+            const voices = window.speechSynthesis.getVoices();
+            const maleVoice = voices.find(v => 
+                v.name.toLowerCase().includes('male') || 
+                v.name.toLowerCase().includes('david') || 
+                v.name.toLowerCase().includes('mark') || 
+                v.name.toLowerCase().includes('guy')
+            );
+            
+            if (maleVoice) utterance.voice = maleVoice;
+            
+            window.speechSynthesis.speak(utterance);
+            hasSpokenWelcome = true;
+        }
+
+        // Handle voice list loading async
+        window.speechSynthesis.onvoiceschanged = () => {};
 
         function saveDatabase() {
             localStorage.setItem('gibb_permanent_db', JSON.stringify(db));
@@ -497,7 +517,7 @@
         function showMenuScreen() {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('menu-screen').classList.add('active');
-            verifyKey(); // Check key status on boot
+            verifyKey(); 
         }
 
         function openMenu() {
@@ -592,14 +612,13 @@
             }, 600);
         }
 
-        function clearProfileData() {
-            if (confirm("Reset system? This wipes memory and key bindings.")) {
-                localStorage.removeItem('gibb_permanent_db');
-                db = { profile: null, chatHistory: [], volume: 1.0, savedKey: '' };
-                hasSpokenWelcome = false;
-                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-                document.getElementById('auth-screen').classList.add('active');
-            }
+        function logout() {
+            // Removes active session without deleting database memory
+            sessionStorage.removeItem('gibb_logged_in');
+            hasSpokenWelcome = false;
+            
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('auth-screen').classList.add('active');
         }
     </script>
 </body>
