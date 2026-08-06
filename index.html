@@ -366,7 +366,7 @@
 
     <div id="home-screen">
         <img src="gibblogo.png" alt="G.I.B.B. Logo">
-        <div class="home-title">MENU</div>
+        <div class="home-title">Menu</div>
         <div class="menu-grid">
             <button class="menu-btn" onclick="openApp('chat')">💬 Terminal Chat</button>
             <button class="menu-btn" onclick="openApp('translate')">🌐 Translation Matrix</button>
@@ -447,17 +447,16 @@
 
         function initVoices() {
             let voices = window.speechSynthesis.getVoices();
-            // Locate an optimal high-grade male artificial intelligence voice profile instantly
             jarvisVoice = voices.find(v => (v.name.includes("Male") || v.name.includes("David") || v.name.includes("UK English Male") || v.name.includes("George") || v.name.includes("Oliver")) && v.lang.startsWith("en")) || voices[0];
         }
         window.speechSynthesis.onvoiceschanged = initVoices;
 
         function speakJarvis(text) {
             if (!text) return;
-            window.speechSynthesis.cancel(); // Clears output instantly to avoid buffering delay
+            window.speechSynthesis.cancel();
             let speech = new SpeechSynthesisUtterance(text);
             speech.rate = 1.05;
-            speech.pitch = 0.8; // Deep resonant masculine timbre matching advanced AI architecture
+            speech.pitch = 0.8;
             if (jarvisVoice) speech.voice = jarvisVoice;
             window.speechSynthesis.speak(speech);
         }
@@ -469,8 +468,6 @@
                 let home = document.getElementById("home-screen");
                 home.style.display = "flex";
                 setTimeout(() => { home.style.opacity = "1"; }, 50);
-                
-                // Immediate audio activation output for JARVIS protocol
                 speakJarvis("SYSTEM ONLINE");
             } else {
                 document.getElementById("error-msg").style.display = "block";
@@ -487,9 +484,7 @@
         }
 
         function goHome() {
-            // Instantly terminates speech synthesis when exiting application views
             window.speechSynthesis.cancel();
-            
             document.getElementById("chat-view").style.display = "none";
             document.getElementById("translate-view").style.display = "none";
             let home = document.getElementById("home-screen");
@@ -520,19 +515,14 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // --- Smart Adaptive AI & Universal Web Database Fetching Engine ---
+        // --- Normal Terminal Chat (Powered by DuckDuckGo API) ---
         async function processJarvisAI(input) {
             let lower = input.toLowerCase();
             let response = "";
 
-            // User Memory Persistence Handling ("remember me" context & key-value storage)
             if (lower.includes("remember me")) {
                 let savedUser = localStorage.getItem("user_profile_name");
-                if (savedUser) {
-                    response = `I have you logged in permanent memory records as ${savedUser}, sir.`;
-                } else {
-                    response = `I have no user identity linked in local records. State your designation using: Remember that my name is [name], sir.`;
-                }
+                response = savedUser ? `I have you logged in records as ${savedUser}, sir.` : `State your designation using: Remember that my name is [name], sir.`;
             }
             else if (lower.includes("remember that") && lower.includes("is")) {
                 try {
@@ -540,32 +530,26 @@
                     let k = parts[0].trim();
                     let v = parts[1].trim();
                     localStorage.setItem(k, v);
-                    if (k.includes("name")) {
-                        localStorage.setItem("user_profile_name", v);
-                    }
-                    response = `Data successfully integrated into persistent core matrix: ${k} is logged as ${v}, sir.`;
+                    if (k.includes("name")) localStorage.setItem("user_profile_name", v);
+                    response = `Data integrated into core records: ${k} is logged as ${v}, sir.`;
                 } catch(e) {
-                    response = "Formatting error detected in memory parameter stream.";
+                    response = "Formatting error in memory stream.";
                 }
             } 
-            // Advanced Mathematical Engine
             else if (lower.startsWith("calculate") || lower.startsWith("solve") || /[0-9]+\s*[\+\-\*\/\^]\s*[0-9]+/.test(lower)) {
                 try {
                     let expr = lower.replace(/calculate/i, "").replace(/solve/i, "").trim();
-                    let res = eval(expr);
-                    response = `${res}`;
+                    response = `${eval(expr)}`;
                 } catch(e) {
                     response = "Mathematical computation query could not be verified.";
                 }
             } 
-            // Check local permanent memory bank first
             else {
                 let foundKey = Object.keys(localStorage).find(k => k !== "user_profile_name" && lower.includes(k));
                 if (foundKey) {
                     response = `${localStorage.getItem(foundKey)}`;
                 } else {
-                    // Deep multi-source web cross-referencing for all subjects (Math, English, Science, etc.)
-                    response = await fetchWebData(input);
+                    response = await fetchDuckDuckGoData(input);
                 }
             }
 
@@ -573,10 +557,11 @@
             speakJarvis(response);
         }
 
-        async function fetchWebData(query) {
+        async function fetchDuckDuckGoData(query) {
             try {
                 let encoded = encodeURIComponent(query);
-                let url = `https://api.duckduckgo.com/?q=${encoded}&format=json`;
+                let url = `https://api.duckduckgo.com/?q=${encoded}&format=json&no_html=1&skip_disambig=1`;
+                
                 let res = await fetch(url);
                 let data = await res.json();
                 
@@ -585,14 +570,14 @@
                 } else if (data.RelatedTopics && data.RelatedTopics.length > 0 && data.RelatedTopics[0].Text) {
                     return data.RelatedTopics[0].Text;
                 } else {
-                    return `Analysis complete for "${query}". Data nodes confirm alignment with standard academic parameters, sir.`;
+                    return `Analysis complete for "${query}". Data nodes confirm alignment with standard parameters, sir.`;
                 }
             } catch (err) {
-                return `Sir, network connection metrics indicate restricted access to external cloud nodes.`;
+                return `Sir, network connection metrics indicate restricted access to external nodes.`;
             }
         }
 
-        // --- Dedicated Translation Matrix Feature ---
+        // --- Separate Translation View (Powered by MyMemory API) ---
         async function performTranslation() {
             let text = document.getElementById("source-text").value.trim();
             let targetLang = document.getElementById("target-language").value;
@@ -605,9 +590,9 @@
 
             outputField.value = "Translating across linguistic nodes...";
             try {
-                // Utilizing MyMemory free public translation API endpoint
                 let res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=autodetect|${targetLang}`);
                 let data = await res.json();
+                
                 if (data && data.responseData && data.responseData.translatedText) {
                     outputField.value = data.responseData.translatedText;
                     speakJarvis("Translation complete, sir.");
