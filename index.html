@@ -323,7 +323,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">UK Male Voice &amp; Groq Vault Rotator Active (GPT-OSS 120B)</p>
+                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">UK Male Instant Voice &amp; Vault Rotator Active</p>
             </div>
 
             <div class="sidebar-panel">
@@ -367,7 +367,7 @@
     <div id="dashboard-screen" class="screen">
         <div class="chat-container">
             <div class="chat-header">
-                <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. NEURAL CONNECT (GPT-OSS 120B)</span>
+                <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. NEURAL CONNECT</span>
                 <div>
                     <button class="btn" style="width: auto; padding: 6px 12px; margin-bottom: 0; display: inline-block; margin-right: 6px; background: rgba(255,0,0,0.2); border-color: var(--danger-color); color: #ff8888; font-size: 0.8rem;" onclick="clearChatMemory()">CLEAR</button>
                     <button class="btn" style="width: auto; padding: 6px 12px; margin-bottom: 0; display: inline-block; font-size: 0.8rem;" onclick="openMenu()">MENU</button>
@@ -411,7 +411,7 @@
         let groqKeys = JSON.parse(localStorage.getItem('gibb_groq_vault_keys')) || [];
         let currentKeyIndex = parseInt(localStorage.getItem('gibb_vault_index')) || 0;
         const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-        const GROQ_MODEL = "openai/gpt-oss-120b";
+        const GROQ_MODEL = "llama-3.3-70b-versatile";
 
         function getActiveKey() {
             if (groqKeys.length === 0) return null;
@@ -470,18 +470,25 @@
             alert("Current active key removed from vault.");
         }
 
-        // --- CORE AI & TTS RUNTIME ---
-        function speakResponse(text) {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            const voices = window.speechSynthesis.getVoices();
-            const ukMaleVoice = voices.find(v => v.lang === 'en-GB' && (v.name.includes('Male') || v.name.includes('George') || v.name.includes('Oliver'))) || voices.find(v => v.lang.startsWith('en'));
-            if (ukMaleVoice) utterance.voice = ukMaleVoice;
-            utterance.pitch = 1.0;
-            utterance.rate = 1.0;
-            utterance.volume = db.volume;
-            window.speechSynthesis.speak(utterance);
+        // --- RESPONSIVEVOICE MALE INSTANT TTS RUNTIME ---
+        function speakVoiceResponse(text) {
+            if (typeof responsiveVoice !== 'undefined') {
+                responsiveVoice.speak(text, "UK English Male", {
+                    pitch: 1.0,
+                    rate: 1.0,
+                    volume: db.volume
+                });
+            } else if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                const voices = window.speechSynthesis.getVoices();
+                const ukMaleVoice = voices.find(v => v.lang === 'en-GB' && (v.name.includes('Male') || v.name.includes('George') || v.name.includes('Oliver'))) || voices.find(v => v.lang.startsWith('en'));
+                if (ukMaleVoice) utterance.voice = ukMaleVoice;
+                utterance.pitch = 1.0;
+                utterance.rate = 1.0;
+                utterance.volume = db.volume;
+                window.speechSynthesis.speak(utterance);
+            }
         }
 
         async function callAI(messagesArray) {
@@ -726,7 +733,7 @@
             switchScreen('auth-screen');
         }
 
-        // --- CHAT MODULE ---
+        // --- CHAT MODULE (NO AUDIO SPEECH) ---
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
@@ -745,7 +752,7 @@
                 appendMessage(reply, 'gibb');
                 db.chatHistory.push({ role: 'assistant', content: reply });
                 saveAccountData();
-                speakResponse(reply);
+                // Chat typing mode will NOT trigger speech per constraints
             } catch (err) {
                 removeMessage(loadingId);
                 
@@ -845,7 +852,7 @@
             }
         }
 
-        // --- VOICE RECOGNITION & PERPETUAL LISTENING ---
+        // --- VOICE RECOGNITION & SPEECH RULES ---
         let recognition = null;
         let isPerpetualListeningActive = false;
 
@@ -906,21 +913,26 @@
             }
         }
 
+        function getTitleGreeting() {
+            const gender = db.profile?.gender || 'Sir';
+            return `All systems online, ${gender}`;
+        }
+
         function handleVoiceCommand(cmd) {
             if (cmd.includes('open menu') || cmd.includes('menu') || cmd.includes('home') || cmd.includes('close chat')) {
                 openMenu();
-                speakResponse("Returning to menu.");
+                speakVoiceResponse(getTitleGreeting());
             } else if (cmd.includes('launch chat') || cmd.includes('open chat') || cmd.includes('chat')) {
                 switchScreen('dashboard-screen');
                 renderChatHistory();
-                speakResponse("Opening neural chat connect.");
+                speakVoiceResponse(getTitleGreeting());
             } else if (cmd.includes('open translation') || cmd.includes('translate')) {
                 switchScreen('translation-screen');
                 initTranslationModule();
-                speakResponse("Opening translation module.");
+                speakVoiceResponse(getTitleGreeting());
             } else if (cmd.includes('open voice') || cmd.includes('voice control')) {
                 switchScreen('voice-screen');
-                speakResponse("Voice control hud active.");
+                speakVoiceResponse(getTitleGreeting());
             } else {
                 if (document.getElementById('voice-screen').classList.contains('active')) {
                     processVoiceAIQuery(cmd);
@@ -930,14 +942,14 @@
 
         async function processVoiceAIQuery(query) {
             const hudMsg = document.getElementById('voice-hud-msg');
-            hudMsg.innerText = "PROCESSING QUERY THROUGH GPT-OSS 120B...";
+            hudMsg.innerText = "PROCESSING QUERY...";
             try {
                 const reply = await callAI([{ role: 'user', content: query }]);
                 hudMsg.innerText = "VOICE CONTROL ACTIVE (SPEAK A COMMAND OR QUERY)";
-                speakResponse(reply);
+                speakVoiceResponse(reply);
             } catch (err) {
                 hudMsg.innerText = "ERROR PROCESSING QUERY";
-                speakResponse("Sorry, I encountered an error with the neural network.");
+                speakVoiceResponse("Sorry, I encountered an error with the neural network.");
             }
         }
 
