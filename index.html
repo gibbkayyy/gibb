@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>G.I.B.B. System - Multi-Key Vault Core</title>
+    <title>G.I.B.B. AI</title>
     <link rel="icon" type="image/png" href="gibbailogo.png">
     <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
     <style>
@@ -78,12 +78,13 @@
 
         .logo-container {
             position: relative;
-            width: clamp(200px, 25vw, 300px);
-            height: clamp(200px, 25vw, 300px);
+            width: clamp(230px, 30vw, 340px);
+            height: clamp(230px, 30vw, 340px);
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
+            margin-top: -20px; /* Moved slightly higher */
             flex-shrink: 0;
             animation: slowHeartPulse 6s ease-in-out infinite;
         }
@@ -95,12 +96,12 @@
         }
 
         .gibb-img-logo {
-            width: 88%;
-            height: 88%;
+            width: 98%; /* Made image slightly bigger */
+            height: 98%;
             object-fit: contain;
             z-index: 10;
             position: absolute;
-            filter: drop-shadow(0 0 30px var(--accent-glow)) drop-shadow(0 0 60px rgba(0, 255, 0, 0.45));
+            filter: drop-shadow(0 0 35px var(--accent-glow)) drop-shadow(0 0 70px rgba(0, 255, 0, 0.5));
         }
 
         .orbit-ring-outer {
@@ -335,7 +336,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">US Male Voice &amp; Multi-Key Vault Active</p>
+                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">US Australian / Deep Male Voice Active</p>
             </div>
 
             <div class="sidebar-panel">
@@ -419,15 +420,15 @@
     </div>
 
     <script>
-        // --- STRICT US MALE VOICE SYNTHESIS ENGINE (NON-ENGLISH MALE ALTERNATIVE) ---
+        // --- ALTERNATIVE MALE VOICE ENGINE (AUSTRALIAN / DEEP MALE PROFILE) ---
         function speakMaleVoice(text, onCompleteCallback) {
             pauseMicForSpeech();
 
             if (typeof responsiveVoice !== 'undefined') {
-                // Switched from UK English Male to US English Male
-                responsiveVoice.speak(text, "US English Male", {
-                    pitch: 0.85,
-                    rate: 1.05,
+                // Changed from UK/US to Australian Male for a distinct new male voice profile
+                responsiveVoice.speak(text, "Australian Male", {
+                    pitch: 0.82,
+                    rate: 1.0,
                     volume: db.volume,
                     onend: () => {
                         resumeMicAfterSpeech();
@@ -442,12 +443,12 @@
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 const voices = window.speechSynthesis.getVoices();
-                let maleVoice = voices.find(v => (v.lang.includes('en-US')) && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('mark') || v.name.toLowerCase().includes('alex')));
+                let maleVoice = voices.find(v => (v.lang.includes('en-AU') || v.lang.includes('en-GB')) && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('james') || v.name.toLowerCase().includes('ryan') || v.name.toLowerCase().includes('lee')));
                 if (!maleVoice) maleVoice = voices.find(v => v.lang.startsWith('en'));
                 if (maleVoice) utterance.voice = maleVoice;
 
-                utterance.pitch = 0.85;
-                utterance.rate = 1.05;
+                utterance.pitch = 0.82;
+                utterance.rate = 1.0;
                 utterance.volume = db.volume;
                 
                 utterance.onend = () => {
@@ -583,6 +584,16 @@
             return null;
         }
 
+        // --- AUTOMATIC KEY ROTATION ON TOKEN ERROR / EXHAUSTION ---
+        function rotateToNextKey() {
+            if (!db.keyVault || db.keyVault.length <= 1) return false;
+            let previousIndex = db.activeKeyIndex;
+            db.activeKeyIndex = (db.activeKeyIndex + 1) % db.keyVault.length;
+            saveAccountData();
+            renderVaultUI();
+            return db.activeKeyIndex !== previousIndex;
+        }
+
         function switchScreen(screenId) {
             if (screenId !== 'voice-screen') {
                 stopAllSpeech();
@@ -615,8 +626,8 @@
             }
         }
 
-        // --- GROQ AI API FETCH ENGINE ---
-        async function queryGroqAI(promptText) {
+        // --- GROQ AI API FETCH ENGINE WITH AUTOMATIC TOKEN FAILOVER ---
+        async function queryGroqAI(promptText, retryCount = 0) {
             const apiKey = getActiveApiKey();
             if (!apiKey) {
                 return "Error: No active API Key found in vault. Please add and select a key in the settings panel.";
@@ -638,12 +649,30 @@
                         temperature: 0.7
                     })
                 });
+
                 const data = await response.json();
+
+                // Check for token limit or rate limit errors (HTTP 429 or explicit token/rate error message)
+                if (!response.ok || (data.error && (response.status === 429 || JSON.stringify(data).toLowerCase().includes('token') || JSON.stringify(data).toLowerCase().includes('rate limit')))) {
+                    if (db.keyVault.length > 1 && retryCount < db.keyVault.length) {
+                        const rotated = rotateToNextKey();
+                        if (rotated) {
+                            return await queryGroqAI(promptText, retryCount + 1);
+                        }
+                    }
+                }
+
                 if (data.choices && data.choices.length > 0) {
                     return data.choices[0].message.content;
                 }
                 return "Neural core encountered an unexpected response format.";
             } catch (err) {
+                if (db.keyVault.length > 1 && retryCount < db.keyVault.length) {
+                    const rotated = rotateToNextKey();
+                    if (rotated) {
+                        return await queryGroqAI(promptText, retryCount + 1);
+                    }
+                }
                 return "Connection error reaching Groq API servers.";
             }
         }
@@ -747,7 +776,6 @@
         }
 
         function handleVoiceCommand(cmd) {
-            // NOTE: "All systems online sir" speech trigger removed here per instructions
             if (cmd.includes('open menu') || cmd.includes('menu') || cmd.includes('home') || cmd.includes('close chat')) {
                 openMenu();
             } else if (cmd.includes('launch chat') || cmd.includes('open chat') || cmd.includes('chat')) {
@@ -794,10 +822,9 @@
         }
 
         function completeInit() {
-            // EXACT REQUIREMENT: Play "All systems online sir" exclusively here right before going to the menu
-            speakMaleVoice("All systems online sir", () => {
-                openMenu();
-            });
+            // Opens menu instantly, and speaks instantly upon menu boot
+            openMenu();
+            speakMaleVoice("All systems online sir");
         }
 
         // --- AUTH SYSTEM ---
