@@ -76,7 +76,6 @@
             opacity: 1;
         }
 
-        /* Entire logo container including outer rings pulses very slowly together */
         .logo-container {
             position: relative;
             width: clamp(220px, 30vw, 340px);
@@ -95,7 +94,6 @@
             100% { transform: scale(0.94); }
         }
 
-        /* Actual logo image made bigger inside container */
         .gibb-img-logo {
             width: 88%;
             height: 88%;
@@ -348,7 +346,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">UK British Deep Voice &amp; Vault Multi-Key Rotator Active</p>
+                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">UK British Chill Voice &amp; Vault Multi-Key Rotator Active</p>
             </div>
 
             <div class="sidebar-panel">
@@ -362,10 +360,10 @@
                     <div class="widget-box">
                         <div class="widget-title">Voice Commands List</div>
                         <ul style="font-size: 0.75rem; padding-left: 15px; color: #88ff88; line-height: 1.4;">
-                            <li>"Launch chat"</li>
-                            <li>"Open translation"</li>
-                            <li>"Open voice control"</li>
-                            <li>"Return to menu"</li>
+                            <li>"Open menu" / "Menu" / "Home"</li>
+                            <li>"Launch chat" / "Open chat" / "Chat"</li>
+                            <li>"Open translation" / "Translate"</li>
+                            <li>"Open voice" / "Voice control"</li>
                         </ul>
                     </div>
                 </div>
@@ -533,7 +531,7 @@
             document.getElementById('volume-slider').value = db.volume;
             updateKeyVaultUI();
             
-            // Check if mic permission was previously saved as always allowed to bypass screen automatically
+            // Auto bypass mic screen if permission was previously allowed
             if (localStorage.getItem('gibb_mic_always_allowed') === 'true') {
                 document.getElementById('mic-permission-screen').classList.remove('active');
                 if (sessionStorage.getItem('gibb_logged_in') === 'true' && db.profile) {
@@ -573,9 +571,7 @@
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 stream.getTracks().forEach(track => track.stop());
                 
-                // Remember that mic permission is granted permanently so user never has to press it again
                 localStorage.setItem('gibb_mic_always_allowed', 'true');
-                
                 document.getElementById('mic-permission-screen').classList.remove('active');
                 
                 if (sessionStorage.getItem('gibb_logged_in') === 'true' && db.profile) {
@@ -704,14 +700,13 @@
             showMenuScreen(); 
             const honorific = (db.profile && db.profile.honorific) ? db.profile.honorific : 'sir';
             
-            // Speaks initialization, mic turns on automatically only after speech finishes
             speak(`All systems online ${honorific}`, () => {
                 isPerpetualListening = true;
                 initPerpetualListeningEngine();
             });
         }
 
-        // --- UK BRITISH DEEP MALE TTS ENGINE ---
+        // --- UK BRITISH CHILL MALE TTS ENGINE ---
         function speak(text, callback) {
             isSpeakingNow = true;
             if (globalRecognition) {
@@ -719,11 +714,11 @@
             }
 
             if (typeof responsiveVoice !== "undefined") {
-                // Using UK English Male voice with deep pitch and slower cinematic rate
+                // Chill British male voice with natural friendly pitch and normal pacing
                 responsiveVoice.speak(text, "UK English Male", {
                     volume: db.volume,
-                    rate: 0.9,
-                    pitch: 0.5, 
+                    rate: 1.0,
+                    pitch: 1.0, 
                     onend: () => {
                         isSpeakingNow = false;
                         resumeListening();
@@ -833,7 +828,7 @@
                 const div = document.createElement('div');
                 div.className = `message ${msg.role}`;
                 if (msg.isTokenError) {
-                    div.innerHTML = msg.content; // Render HTML error box with link
+                    div.innerHTML = msg.content;
                 } else {
                     div.innerText = msg.content;
                 }
@@ -875,7 +870,6 @@
             let aiReply = "";
             let isTokenLimitError = false;
 
-            // Loop through vault keys for rotation (supports 3+ keys)
             while (attempts < groqKeys.length && !success) {
                 try {
                     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -897,7 +891,6 @@
 
                     if (data.error) {
                         if (data.error.message && (data.error.message.includes("Rate limit") || data.error.message.includes("quota") || data.error.message.includes("tokens"))) {
-                            // Rotate to next key in vault and try again
                             const rotated = rotateToNextKey();
                             attempts++;
                             if (!rotated || attempts >= groqKeys.length) {
@@ -927,7 +920,6 @@
             }
             
             if (isTokenLimitError || (!success && groqKeys.length > 0 && attempts >= groqKeys.length)) {
-                // Formatted error message with link to instructions on how to get a Groq key
                 aiReply = `YOU HAVE USED ALL OF YOUR AVAILABLE TOKENS.<br><br>` +
                     `You have used all of your tokens so you can't chat with G.I.B.B.. There are multiple ways to fix this issue:<br>` +
                     `<ol>` +
@@ -1019,19 +1011,22 @@
             }
         }
 
+        // Comprehensive voice command matching with multiple variants and natural phrasing
         function processVoiceCommand(transcript) {
             const clean = transcript.toLowerCase().trim();
             const transcriptEl = document.getElementById('voice-transcript');
             if (transcriptEl) transcriptEl.innerText = `Heard: "${clean}"`;
 
-            if (clean.includes('menu') || clean.includes('home') || clean.includes('main menu')) {
+            // Menu variants (Open menu, Menu, Home, Main menu, Go back, etc.)
+            if (clean.includes('menu') || clean.includes('home') || clean.includes('main menu') || clean.includes('go back') || clean.includes('dashboard menu')) {
                 speak("Returning to system menu.", () => {
                     openMenu();
                 });
                 return true;
             }
 
-            if (clean.includes('chat') || clean.includes('launch chat') || clean.includes('take me to chat') || clean.includes('open chat')) {
+            // Chat variants (Launch chat, Open chat, Chat, Take me to chat, Messages, etc.)
+            if (clean.includes('chat') || clean.includes('launch chat') || clean.includes('take me to chat') || clean.includes('open chat') || clean.includes('messages')) {
                 speak("Launching neural chat.", () => {
                     carouselIndex = 0;
                     updateCarouselUI();
@@ -1040,7 +1035,8 @@
                 return true;
             }
 
-            if (clean.includes('translation') || clean.includes('translate') || clean.includes('open translation') || clean.includes('take me to translation')) {
+            // Translation variants (Translation, Translate, Open translation, Translator, etc.)
+            if (clean.includes('translation') || clean.includes('translate') || clean.includes('open translation') || clean.includes('take me to translation') || clean.includes('translator')) {
                 speak("Opening translation module.", () => {
                     carouselIndex = 2;
                     updateCarouselUI();
@@ -1049,7 +1045,8 @@
                 return true;
             }
 
-            if (clean.includes('voice control') || clean.includes('open voice')) {
+            // Voice control variants
+            if (clean.includes('voice control') || clean.includes('open voice') || clean.includes('voice mode')) {
                 speak("Voice control active.");
                 activateVoiceScreenViaManual();
                 return true;
@@ -1058,22 +1055,27 @@
             return false;
         }
 
+        // Robust microphone recognition engine with immediate continuous auto-restart loop
         function initPerpetualListeningEngine() {
-            if (!SpeechRecognition) return;
+            if (!SpeechRecognition) {
+                console.warn("Speech Recognition API is not supported in this browser.");
+                return;
+            }
 
             if (globalRecognition) {
                 try { globalRecognition.stop(); } catch(e){}
             }
 
             globalRecognition = new SpeechRecognition();
-            globalRecognition.continuous = false;
+            globalRecognition.continuous = true; // Kept true for constant continuous background listening
             globalRecognition.interimResults = false;
             globalRecognition.lang = 'en-US';
 
             globalRecognition.onresult = (event) => {
                 if (isSpeakingNow) return; 
 
-                const transcript = event.results[0][0].transcript;
+                const latestIndex = event.results.length - 1;
+                const transcript = event.results[latestIndex][0].transcript;
                 const matchedCommand = processVoiceCommand(transcript);
 
                 if (!matchedCommand && voiceActiveMode) {
@@ -1081,13 +1083,23 @@
                 }
             };
 
-            globalRecognition.onerror = () => {};
+            globalRecognition.onerror = (event) => {
+                // Safely handle speech recognition errors silently so it never breaks
+                console.log("Mic event note:", event.error);
+            };
 
             globalRecognition.onend = () => {
-                // Restarts automatically unless G.I.B.B. is currently speaking
+                // Instantly re-engage microphone when G.I.B.B. stops speaking
                 if (isPerpetualListening && !isSpeakingNow) {
                     setTimeout(() => {
-                        try { globalRecognition.start(); } catch (e) {}
+                        try { 
+                            globalRecognition.start(); 
+                        } catch (e) {
+                            // If already started or blocked, retry safely after brief delay
+                            setTimeout(() => {
+                                try { globalRecognition.start(); } catch(err){}
+                            }, 300);
+                        }
                     }, 150);
                 }
             };
@@ -1096,7 +1108,9 @@
                 if (!isSpeakingNow) {
                     globalRecognition.start();
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.log("Auto-start mic init notice:", e);
+            }
         }
     </script>
 </body>
