@@ -260,7 +260,7 @@
             transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
         #voice-screen.active .voice-anim-logo {
-            transform: scale(0.95) translateY(0); /* Balanced size, nicely centered */
+            transform: scale(0.95) translateY(0); 
             opacity: 1;
         }
 
@@ -807,6 +807,11 @@
                     })
                 });
 
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error?.message || `HTTP error! Status: ${response.status}`);
+                }
+
                 const data = await response.json();
                 if (data.choices && data.choices.length > 0) {
                     const aiReply = data.choices[0].message.content;
@@ -817,10 +822,11 @@
                         speak(aiReply);
                     }
                 } else {
-                    throw new Error(data.error?.message || "Invalid response format from Groq API");
+                    throw new Error("Invalid response format from Groq API");
                 }
             } catch (err) {
-                const errText = "Neural link network connection error or invalid key response.";
+                console.error("Neural Link Fetch Error:", err);
+                const errText = `Connection Error: ${err.message}`;
                 db.chatHistory.push({ role: 'gibb', content: errText });
                 saveDatabase();
                 renderChatHistory();
@@ -862,6 +868,10 @@
                     })
                 });
 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
                 const data = await response.json();
                 if (data.choices && data.choices.length > 0) {
                     outputEl.innerText = data.choices[0].message.content;
@@ -869,7 +879,7 @@
                     outputEl.innerText = "Translation failed.";
                 }
             } catch (err) {
-                outputEl.innerText = "Translation network error.";
+                outputEl.innerText = "Translation network error: " + err.message;
             }
         }
 
