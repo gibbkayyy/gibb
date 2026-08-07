@@ -326,8 +326,12 @@
                 <div>
                     <h3 style="margin-bottom: 20px; text-shadow: 0 0 10px var(--accent-glow);">CORE SETTINGS</h3>
                     <div class="widget-box">
+                        <div class="widget-title">Groq API Key</div>
+                        <input type="password" id="groq-key-input" placeholder="gsk_..." onchange="saveGroqKey()" style="margin-bottom: 0; font-size: 0.85rem; padding: 8px;">
+                    </div>
+                    <div class="widget-box">
                         <div class="widget-title">AI Engine Status</div>
-                        <p id="key-status" style="font-size: 0.9rem; font-weight: bold; margin-top: 5px; text-shadow: 0 0 5px rgba(0,255,0,0.5); color: #10b981;">⚡ PUTER.JS KEYLESS ACTIVE</p>
+                        <p id="key-status" style="font-size: 0.9rem; font-weight: bold; margin-top: 5px; text-shadow: 0 0 5px rgba(0,255,0,0.5); color: #10b981;">⚡ PUTER.JS VOICE ENGINE</p>
                     </div>
                     <div class="widget-box">
                         <div class="widget-title">System Volume</div>
@@ -389,7 +393,7 @@
     <div id="dashboard-screen" class="screen">
         <div class="chat-container">
             <div class="chat-header">
-                <span style="font-weight: bold; letter-spacing: 2px;">G.I.B.B. NEURAL CONNECT (PUTER AI INTEGRATED)</span>
+                <span style="font-weight: bold; letter-spacing: 2px;">G.I.B.B. NEURAL CONNECT</span>
                 <div>
                     <button class="btn" style="width: auto; padding: 8px 16px; margin-bottom: 0; display: inline-block; margin-right: 10px; background: rgba(255,0,0,0.2); border-color: var(--danger-color); color: #ff8888;" onclick="clearChatMemory()">CLEAR MEMORY</button>
                     <button class="btn" style="width: auto; padding: 8px 16px; margin-bottom: 0; display: inline-block;" onclick="openMenu()">SYSTEM MENU</button>
@@ -455,7 +459,7 @@
         let currentEmail = localStorage.getItem('gibb_current_email') || null;
 
         let db = { 
-            profile: null, chatHistory: [], volume: 1.0
+            profile: null, chatHistory: [], volume: 1.0, groqKey: ""
         };
 
         function loadAccountData(email) {
@@ -463,7 +467,7 @@
                 db = allAccounts[email];
             } else {
                 db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { 
-                    profile: null, chatHistory: [], volume: 1.0
+                    profile: null, chatHistory: [], volume: 1.0, groqKey: ""
                 };
             }
         }
@@ -475,6 +479,9 @@
             window.addEventListener('resize', updateResolution);
             
             document.getElementById('volume-slider').value = db.volume;
+            if(document.getElementById('groq-key-input')) {
+                document.getElementById('groq-key-input').value = db.groqKey || "";
+            }
             
             const langSelect = document.getElementById('target-lang-select');
             if(langSelect) {
@@ -588,7 +595,8 @@
             db = {
                 profile: { name: user, email: email, honorific: honorific, password: pass },
                 chatHistory: [],
-                volume: 1.0
+                volume: 1.0,
+                groqKey: ""
             };
 
             allAccounts[email] = db;
@@ -619,6 +627,11 @@
             saveDatabase(); 
         }
 
+        function saveGroqKey() {
+            db.groqKey = document.getElementById('groq-key-input').value.trim();
+            saveDatabase();
+        }
+
         function showLoadingScreen() {
             switchScreen('loading-screen');
             document.getElementById('loading-bar').style.width = '0%';
@@ -637,12 +650,12 @@
             showMenuScreen(); 
             initPerpetualListeningEngine();
             
-            // Speak required greeting upon opening menu after loading screen
+            // Speak greeting with user's selected title preference
             const honorific = (db.profile && db.profile.honorific) ? db.profile.honorific : 'sir';
             speak(`All systems online, ${honorific}`);
         }
 
-        // --- PUTER.JS KEYLESS THIRD-PARTY AI MALE VOICE PIPELINE ---
+        // --- PUTER.JS KEYLESS MALE VOICE PIPELINE ---
         async function speak(text, callback) {
             if (globalRecognition) {
                 try { globalRecognition.stop(); } catch(e){}
@@ -773,7 +786,7 @@
             if (db.chatHistory.length === 0) {
                 const welcomeMsg = document.createElement('div');
                 welcomeMsg.className = 'message gibb';
-                welcomeMsg.innerText = `G.I.B.B. Neural Core Online (Puter Keyless). How may I assist you today, ${db.profile ? db.profile.name : 'User'}?`;
+                welcomeMsg.innerText = `G.I.B.B. Neural Core Online. How may I assist you today, ${db.profile ? db.profile.name : 'User'}?`;
                 container.appendChild(welcomeMsg);
                 return;
             }
@@ -810,12 +823,39 @@
             }));
 
             try {
-                const response = await puter.ai.chat([
-                    { role: "system", content: "You are G.I.B.B., an advanced futuristic AI core assistant. Keep answers concise, helpful, and precise." },
-                    ...apiFormattedMessages
-                ], { model: "claude-3-5-sonnet" });
+                let aiReply = "Command processed.";
 
-                const aiReply = typeof response === 'string' ? response : (response.message?.content || response.text || "Command processed.");
+                if (db.groqKey && db.groqKey.trim() !== "") {
+                    // Custom Groq API Call if key provided
+                    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${db.groqKey}`
+                        },
+                        body: JSON.stringify({
+                            model: "llama-3.3-70b-versatile",
+                            messages: [
+                                { role: "system", content: "You are G.I.B.B., an advanced futuristic AI core assistant. Keep answers concise, helpful, and precise." },
+                                ...apiFormattedMessages
+                            ]
+                        })
+                    });
+                    const data = await res.json();
+                    if (data.choices && data.choices[0]) {
+                        aiReply = data.choices[0].message.content;
+                    } else if (data.error) {
+                        throw new Error(data.error.message);
+                    }
+                } else {
+                    // Fallback to Puter.js AI
+                    const response = await puter.ai.chat([
+                        { role: "system", content: "You are G.I.B.B., an advanced futuristic AI core assistant. Keep answers concise, helpful, and precise." },
+                        ...apiFormattedMessages
+                    ], { model: "claude-3-5-sonnet" });
+
+                    aiReply = typeof response === 'string' ? response : (response.message?.content || response.text || "Command processed.");
+                }
                 
                 db.chatHistory.push({ role: 'gibb', content: aiReply });
                 saveDatabase();
