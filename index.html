@@ -76,6 +76,7 @@
             opacity: 1;
         }
 
+        /* Entire logo container pulses very slowly together */
         .logo-container {
             position: relative;
             width: clamp(220px, 30vw, 340px);
@@ -85,9 +86,15 @@
             align-items: center;
             margin-bottom: 15px;
             flex-shrink: 0;
+            animation: slowHeartPulse 6s ease-in-out infinite;
         }
 
-        /* Replaced text logo with gibbailogo.png, made big, glowing, and ultra-slow heart pulse */
+        @keyframes slowHeartPulse {
+            0% { transform: scale(0.94); }
+            50% { transform: scale(1.06); }
+            100% { transform: scale(0.94); }
+        }
+
         .gibb-img-logo {
             width: 75%;
             height: 75%;
@@ -95,16 +102,6 @@
             z-index: 10;
             position: absolute;
             filter: drop-shadow(0 0 25px var(--accent-glow)) drop-shadow(0 0 50px rgba(0, 255, 0, 0.4));
-            animation: slowHeartPulse 4s ease-in-out infinite;
-        }
-
-        @keyframes slowHeartPulse {
-            0% { transform: scale(1); filter: drop-shadow(0 0 20px var(--accent-glow)) drop-shadow(0 0 40px rgba(0, 255, 0, 0.3)); }
-            14% { transform: scale(1.08); filter: drop-shadow(0 0 35px var(--accent-glow)) drop-shadow(0 0 70px rgba(0, 255, 0, 0.6)); }
-            28% { transform: scale(1); filter: drop-shadow(0 0 20px var(--accent-glow)) drop-shadow(0 0 40px rgba(0, 255, 0, 0.3)); }
-            42% { transform: scale(1.05); filter: drop-shadow(0 0 30px var(--accent-glow)) drop-shadow(0 0 60px rgba(0, 255, 0, 0.5)); }
-            70% { transform: scale(1); filter: drop-shadow(0 0 20px var(--accent-glow)) drop-shadow(0 0 40px rgba(0, 255, 0, 0.3)); }
-            100% { transform: scale(1); filter: drop-shadow(0 0 20px var(--accent-glow)) drop-shadow(0 0 40px rgba(0, 255, 0, 0.3)); }
         }
 
         .orbit-ring-outer {
@@ -339,7 +336,7 @@
                 </div>
                 <div class="widget-box" style="margin-bottom: 0;">
                     <div class="widget-title">Status</div>
-                    <p style="font-size: 0.8rem; color: #10b981;">PERPETUAL MIC ACTIVE</p>
+                    <p style="font-size: 0.8rem; color: #10b981; display: block !important; visibility: visible !important; opacity: 1 !important;">🟢 PERPETUAL MIC ACTIVE</p>
                 </div>
             </div>
         </div>
@@ -624,7 +621,7 @@
             });
         }
 
-        // --- RESPONSIVEVOICE THIRD-PARTY MALE TTS ENGINE ---
+        // --- RESPONSIVEVOICE ENHANCED MALE TTS ENGINE ("UK English Male" / Google UK English Male) ---
         function speak(text, callback) {
             isSpeakingNow = true;
             if (globalRecognition) {
@@ -634,6 +631,8 @@
             if (typeof responsiveVoice !== "undefined") {
                 responsiveVoice.speak(text, "UK English Male", {
                     volume: db.volume,
+                    rate: 1.0,
+                    pitch: 0.95,
                     onend: () => {
                         isSpeakingNow = false;
                         resumeListening();
