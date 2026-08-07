@@ -335,7 +335,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">Multi-Key Vault &amp; Male Voice Active</p>
+                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">US Male Voice &amp; Multi-Key Vault Active</p>
             </div>
 
             <div class="sidebar-panel">
@@ -419,13 +419,14 @@
     </div>
 
     <script>
-        // --- STRICT MALE VOICE SYNTHESIS ENGINE ---
+        // --- STRICT US MALE VOICE SYNTHESIS ENGINE (NON-ENGLISH MALE ALTERNATIVE) ---
         function speakMaleVoice(text, onCompleteCallback) {
             pauseMicForSpeech();
 
             if (typeof responsiveVoice !== 'undefined') {
-                responsiveVoice.speak(text, "UK English Male", {
-                    pitch: 0.9,
+                // Switched from UK English Male to US English Male
+                responsiveVoice.speak(text, "US English Male", {
+                    pitch: 0.85,
                     rate: 1.05,
                     volume: db.volume,
                     onend: () => {
@@ -441,11 +442,11 @@
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 const voices = window.speechSynthesis.getVoices();
-                let maleVoice = voices.find(v => (v.lang.includes('en') || v.lang.includes('US') || v.lang.includes('GB')) && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('george') || v.name.toLowerCase().includes('oliver') || v.name.toLowerCase().includes('ryan')));
+                let maleVoice = voices.find(v => (v.lang.includes('en-US')) && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('mark') || v.name.toLowerCase().includes('alex')));
                 if (!maleVoice) maleVoice = voices.find(v => v.lang.startsWith('en'));
                 if (maleVoice) utterance.voice = maleVoice;
 
-                utterance.pitch = 0.9;
+                utterance.pitch = 0.85;
                 utterance.rate = 1.05;
                 utterance.volume = db.volume;
                 
@@ -559,7 +560,6 @@
             }
 
             db.keyVault.forEach((item, idx) => {
-                // List item
                 const div = document.createElement('div');
                 div.className = 'key-vault-item';
                 div.innerHTML = `
@@ -568,7 +568,6 @@
                 `;
                 listContainer.appendChild(div);
 
-                // Select option
                 const opt = document.createElement('option');
                 opt.value = idx;
                 opt.innerText = item.name + (idx === db.activeKeyIndex ? ' (Active)' : '');
@@ -748,6 +747,7 @@
         }
 
         function handleVoiceCommand(cmd) {
+            // NOTE: "All systems online sir" speech trigger removed here per instructions
             if (cmd.includes('open menu') || cmd.includes('menu') || cmd.includes('home') || cmd.includes('close chat')) {
                 openMenu();
             } else if (cmd.includes('launch chat') || cmd.includes('open chat') || cmd.includes('chat')) {
@@ -794,8 +794,10 @@
         }
 
         function completeInit() {
-            openMenu();
-            speakMaleVoice("All systems online sir");
+            // EXACT REQUIREMENT: Play "All systems online sir" exclusively here right before going to the menu
+            speakMaleVoice("All systems online sir", () => {
+                openMenu();
+            });
         }
 
         // --- AUTH SYSTEM ---
