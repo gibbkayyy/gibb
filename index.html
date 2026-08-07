@@ -250,6 +250,17 @@
             background: rgba(0, 255, 0, 0.04); border: 1px solid rgba(0, 255, 0, 0.2);
             padding: 6px 10px; border-radius: 4px; margin-bottom: 6px; font-size: 0.8rem;
         }
+
+        /* Modal Confirmation Overlay */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 5, 0, 0.85); backdrop-filter: blur(8px);
+            z-index: 9999; display: none; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            display: flex; opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -319,7 +330,7 @@
                     </div>
                 </div>
                 <div>
-                    <button class="btn" style="border-color: var(--danger-color); color: #ff8888; font-size: 0.85rem; padding: 8px;" onclick="logout()">LOG OUT</button>
+                    <button class="btn" style="border-color: var(--danger-color); color: #ff8888; font-size: 0.85rem; padding: 8px;" onclick="confirmLogout()">LOG OUT</button>
                 </div>
             </div>
 
@@ -336,7 +347,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">British Male Voice Active</p>
+                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">British Male Voice Active (Refined)</p>
             </div>
 
             <div class="sidebar-panel">
@@ -419,8 +430,19 @@
         </div>
     </div>
 
+    <div id="custom-modal" class="modal-overlay">
+        <div class="panel" style="max-width: 380px;">
+            <h3 id="modal-title" style="margin-bottom: 12px; letter-spacing: 1.5px; font-size: 1rem; color: var(--text-color);">CONFIRMATION REQUIRED</h3>
+            <p id="modal-text" style="font-size: 0.85rem; color: #88ff88; margin-bottom: 20px; line-height: 1.4;">Are you sure you want to proceed with this action?</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn" style="background: rgba(255,0,0,0.2); border-color: var(--danger-color); color: #ff8888; margin-bottom: 0;" id="modal-cancel-btn">CANCEL</button>
+                <button class="btn" style="margin-bottom: 0;" id="modal-confirm-btn">CONFIRM</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- BRITISH MALE VOICE ENGINE WITH RIGID SPEECH LOCK ---
+        // --- REFINED BRITISH MALE VOICE ENGINE WITH RIGID SPEECH LOCK ---
         let isSpeakingActive = false;
 
         function speakMaleVoice(text, onCompleteCallback) {
@@ -428,9 +450,10 @@
             pauseMicForSpeech();
 
             if (typeof responsiveVoice !== 'undefined') {
+                // Adjusted pitch and rate slightly for a more polished British male timbre
                 responsiveVoice.speak(text, "UK English Male", {
-                    pitch: 0.85,
-                    rate: 1.0,
+                    pitch: 0.9,
+                    rate: 1.02,
                     volume: db.volume,
                     onend: () => {
                         isSpeakingActive = false;
@@ -451,8 +474,8 @@
                 if (!maleVoice) maleVoice = voices.find(v => v.lang.startsWith('en'));
                 if (maleVoice) utterance.voice = maleVoice;
 
-                utterance.pitch = 0.85;
-                utterance.rate = 1.0;
+                utterance.pitch = 0.9;
+                utterance.rate = 1.02;
                 utterance.volume = db.volume;
                 
                 utterance.onend = () => {
@@ -518,7 +541,35 @@
             }
         }
 
-        // Key Vault Management Functions with Token Reset on New Key Enable
+        // Confirmation Modal Utility
+        function showConfirmationModal(title, text, onConfirmCallback) {
+            const modal = document.getElementById('custom-modal');
+            const titleEl = document.getElementById('modal-title');
+            const textEl = document.getElementById('modal-text');
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            const cancelBtn = document.getElementById('modal-cancel-btn');
+
+            titleEl.innerText = title;
+            textEl.innerText = text;
+            modal.classList.add('active');
+
+            // Clean previous listeners by cloning
+            const newConfirm = confirmBtn.cloneNode(true);
+            const newCancel = cancelBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirm, confirmBtn);
+            cancelBtn.parentNode.replaceChild(newCancel, cancelBtn);
+
+            document.getElementById('modal-confirm-btn').addEventListener('click', () => {
+                modal.classList.remove('active');
+                onConfirmCallback();
+            });
+
+            document.getElementById('modal-cancel-btn').addEventListener('click', () => {
+                modal.classList.remove('active');
+            });
+        }
+
+        // Key Vault Management Functions with Confirmation for Deletion
         function addKeyToVault() {
             const nameInput = document.getElementById('vault-key-name');
             const valInput = document.getElementById('vault-key-value');
@@ -531,13 +582,22 @@
             }
 
             db.keyVault.push({ name: name, key: keyVal });
-            // If this is the first key or added, reset usage tracking tokens counter for this session
             db.activeKeyIndex = db.keyVault.length - 1;
             saveAccountData();
             
             nameInput.value = '';
             valInput.value = '';
             renderVaultUI();
+        }
+
+        function promptDeleteKey(index) {
+            const keyItem = db.keyVault[index];
+            const label = keyItem ? keyItem.name : `Key ${index + 1}`;
+            showConfirmationModal(
+                "DELETE API KEY", 
+                `Are you sure you want to delete "${label}" from your secure vault?`, 
+                () => { deleteKeyFromVault(index); }
+            );
         }
 
         function deleteKeyFromVault(index) {
@@ -552,7 +612,6 @@
         function setActiveVaultKey() {
             const select = document.getElementById('active-key-select');
             db.activeKeyIndex = parseInt(select.value) || 0;
-            // Token count resets whenever a new key is explicitly selected/enabled
             saveAccountData();
         }
 
@@ -576,7 +635,7 @@
                 div.className = 'key-vault-item';
                 div.innerHTML = `
                     <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px;">${item.name}</span>
-                    <button class="btn" style="width: auto; padding: 2px 6px; font-size: 0.7rem; margin-bottom: 0; background: rgba(255,0,0,0.2); border-color: var(--danger-color); color: #ff8888;" onclick="deleteKeyFromVault(${idx})">DEL</button>
+                    <button class="btn" style="width: auto; padding: 2px 6px; font-size: 0.7rem; margin-bottom: 0; background: rgba(255,0,0,0.2); border-color: var(--danger-color); color: #ff8888;" onclick="promptDeleteKey(${idx})">DEL</button>
                 `;
                 listContainer.appendChild(div);
 
@@ -664,7 +723,6 @@
 
                 const data = await response.json();
 
-                // Check for token limit exhaustion, rate limits (429), or bad requests (400)
                 if (!response.ok || data.error) {
                     const errStr = JSON.stringify(data).toLowerCase();
                     if (response.status === 429 || response.status === 400 || errStr.includes('token') || errStr.includes('rate limit') || errStr.includes('quota')) {
@@ -780,7 +838,7 @@
         }
 
         function resumeMicAfterSpeech() {
-            if (isSpeakingActive) return; // Keep muted if AI is still flagged as active
+            if (isSpeakingActive) return;
             isMicPausedForSpeech = false;
             if (recognition && isPerpetualListeningActive) {
                 try { recognition.start(); } catch (e) {}
@@ -944,6 +1002,14 @@
             localStorage.setItem('gibb_current_email', currentEmail);
             sessionStorage.setItem('gibb_logged_in', 'true');
             showLoadingScreen();
+        }
+
+        function confirmLogout() {
+            showConfirmationModal(
+                "SYSTEM LOGOUT",
+                "Are you sure you want to terminate the active session and log out?",
+                () => { logout(); }
+            );
         }
 
         function logout() {
