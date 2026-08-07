@@ -167,7 +167,6 @@
 
         .error-msg { color: var(--danger-color); font-size: 0.85rem; margin-bottom: 12px; display: none; }
 
-        /* Multi-Resolution Scalable Grid Layout */
         .main-menu-layout {
             display: grid; 
             grid-template-columns: 280px 1fr 280px;
@@ -635,13 +634,11 @@
 
         // --- RESPONSIVEVOICE THIRD-PARTY MALE TTS ENGINE ---
         function speak(text, callback) {
+            isSpeakingNow = true;
             if (globalRecognition) {
                 try { globalRecognition.stop(); } catch(e){}
             }
 
-            isSpeakingNow = true;
-
-            // Using ResponsiveVoice UK Male / US Male profile keyless injection
             if (typeof responsiveVoice !== "undefined") {
                 responsiveVoice.speak(text, "UK English Male", {
                     volume: db.volume,
@@ -667,7 +664,7 @@
             if (isPerpetualListening) {
                 setTimeout(() => {
                     try { globalRecognition.start(); } catch(e){}
-                }, 200);
+                }, 150);
             }
         }
 
@@ -876,13 +873,11 @@
             }
         }
 
-        // --- EXPANDED VOICE COMMAND ROUTER ---
         function processVoiceCommand(transcript) {
             const clean = transcript.toLowerCase().trim();
             const transcriptEl = document.getElementById('voice-transcript');
             if (transcriptEl) transcriptEl.innerText = `Heard: "${clean}"`;
 
-            // Menu routing variations
             if (clean.includes('menu') || clean.includes('home') || clean.includes('main menu')) {
                 speak("Returning to system menu.", () => {
                     openMenu();
@@ -890,7 +885,6 @@
                 return true;
             }
 
-            // Chat routing variations
             if (clean.includes('chat') || clean.includes('launch chat') || clean.includes('take me to chat') || clean.includes('open chat')) {
                 speak("Launching neural chat.", () => {
                     carouselIndex = 0;
@@ -900,7 +894,6 @@
                 return true;
             }
 
-            // Translation routing variations
             if (clean.includes('translation') || clean.includes('translate') || clean.includes('open translation') || clean.includes('take me to translation')) {
                 speak("Opening translation module.", () => {
                     carouselIndex = 2;
@@ -910,7 +903,6 @@
                 return true;
             }
 
-            // Voice control activation shortcut
             if (clean.includes('voice control') || clean.includes('open voice')) {
                 speak("Voice control active.");
                 activateVoiceScreenViaManual();
@@ -936,11 +928,8 @@
                 if (isSpeakingNow) return; 
 
                 const transcript = event.results[0][0].transcript;
-                
-                // Check if it's a navigational voice command first
                 const matchedCommand = processVoiceCommand(transcript);
 
-                // If not a menu/nav command and we are inside voice mode or chat, handle as prompt query
                 if (!matchedCommand && voiceActiveMode) {
                     sendMessage(transcript);
                 }
@@ -952,7 +941,7 @@
                 if (isPerpetualListening && !isSpeakingNow) {
                     setTimeout(() => {
                         try { globalRecognition.start(); } catch (e) {}
-                    }, 200);
+                    }, 150);
                 }
             };
 
