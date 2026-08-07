@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>G.I.B.B. System - Local Core</title>
+    <title>G.I.B.B. System - Full Core</title>
     <link rel="icon" type="image/png" href="gibbailogo.png">
+    <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
     <style>
         :root {
             --bg-color: #030803;
@@ -77,12 +78,12 @@
 
         .logo-container {
             position: relative;
-            width: clamp(220px, 30vw, 340px);
-            height: clamp(220px, 30vw, 340px);
+            width: clamp(200px, 25vw, 300px);
+            height: clamp(200px, 25vw, 300px);
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             flex-shrink: 0;
             animation: slowHeartPulse 6s ease-in-out infinite;
         }
@@ -290,8 +291,9 @@
                 <div>
                     <h3 style="margin-bottom: 12px; text-shadow: 0 0 10px var(--accent-glow); font-size: 0.95rem;">SYSTEM CONTROLS</h3>
                     <div class="widget-box">
-                        <div class="widget-title">Operating Mode</div>
-                        <p style="font-size: 0.85rem; color: #88ff88; font-weight: bold;">Local Command Core</p>
+                        <div class="widget-title">Groq API Key Vault</div>
+                        <input type="password" id="api-key-input" placeholder="Enter Groq API Key..." onchange="saveApiKey()" style="margin-bottom: 6px; font-size: 0.8rem;">
+                        <button class="btn" style="padding: 6px; font-size: 0.75rem; margin-bottom: 0;" onclick="saveApiKey()">SAVE KEY</button>
                     </div>
                     <div class="widget-box">
                         <div class="widget-title">System Volume</div>
@@ -316,7 +318,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">Keyless Offline Voice Core Active</p>
+                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">Perpetual Male Voice HUD Active</p>
             </div>
 
             <div class="sidebar-panel">
@@ -360,7 +362,7 @@
     <div id="dashboard-screen" class="screen">
         <div class="chat-container">
             <div class="chat-header">
-                <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. LOCAL INTERFACE</span>
+                <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. CHAT INTERFACE</span>
                 <div>
                     <button class="btn" style="width: auto; padding: 6px 12px; margin-bottom: 0; display: inline-block; margin-right: 6px; background: rgba(255,0,0,0.2); border-color: var(--danger-color); color: #ff8888; font-size: 0.8rem;" onclick="clearChatMemory()">CLEAR</button>
                     <button class="btn" style="width: auto; padding: 6px 12px; margin-bottom: 0; display: inline-block; font-size: 0.8rem;" onclick="openMenu()">MENU</button>
@@ -377,7 +379,7 @@
     <div id="translation-screen" class="screen">
         <div class="chat-container">
             <div class="chat-header">
-                <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. LOCAL TRANSLATOR</span>
+                <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. TRANSLATOR</span>
                 <button class="btn" style="width: auto; padding: 6px 12px; margin-bottom: 0; font-size: 0.8rem;" onclick="openMenu()">MENU</button>
             </div>
             <div style="flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 15px; background: rgba(0, 10, 0, 0.7); backdrop-filter: blur(5px); overflow-y: auto;">
@@ -400,22 +402,32 @@
     </div>
 
     <script>
-        // --- NATIVE BROWSER MALE TEXT-TO-SPEECH WITH MIC GATING ---
-        function speakVoiceResponse(text, onCompleteCallback) {
+        // --- STRICT MALE TEXT-TO-SPEECH WITH EMERGENCY STOP ---
+        function speakMaleVoice(text, onCompleteCallback) {
             pauseMicForSpeech();
 
-            if ('speechSynthesis' in window) {
+            // Use ResponsiveVoice forced to strict male profile if available, else native male fallback
+            if (typeof responsiveVoice !== 'undefined') {
+                responsiveVoice.speak(text, "UK English Male", {
+                    pitch: 0.9,
+                    rate: 1.05,
+                    volume: db.volume,
+                    onend: () => {
+                        resumeMicAfterSpeech();
+                        if (onCompleteCallback) onCompleteCallback();
+                    },
+                    onerror: () => {
+                        resumeMicAfterSpeech();
+                        if (onCompleteCallback) onCompleteCallback();
+                    }
+                });
+            } else if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
-                
                 const voices = window.speechSynthesis.getVoices();
-                let selectedVoice = voices.find(v => (v.lang === 'en-GB' || v.lang === 'en-US') && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('george') || v.name.toLowerCase().includes('oliver') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('ryan')));
-                if (!selectedVoice) {
-                    selectedVoice = voices.find(v => v.lang.startsWith('en'));
-                }
-                if (selectedVoice) {
-                    utterance.voice = selectedVoice;
-                }
+                let maleVoice = voices.find(v => (v.lang.includes('en') || v.lang.includes('US') || v.lang.includes('GB')) && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('george') || v.name.toLowerCase().includes('oliver') || v.name.toLowerCase().includes('ryan')));
+                if (!maleVoice) maleVoice = voices.find(v => v.lang.startsWith('en'));
+                if (maleVoice) utterance.voice = maleVoice;
 
                 utterance.pitch = 0.9;
                 utterance.rate = 1.05;
@@ -425,12 +437,10 @@
                     resumeMicAfterSpeech();
                     if (onCompleteCallback) onCompleteCallback();
                 };
-                
                 utterance.onerror = () => {
                     resumeMicAfterSpeech();
                     if (onCompleteCallback) onCompleteCallback();
                 };
-
                 window.speechSynthesis.speak(utterance);
             } else {
                 resumeMicAfterSpeech();
@@ -438,31 +448,30 @@
             }
         }
 
+        // KILL SPEECH INSTANTLY WHEN NAVIGATING AWAY FROM VOICE CONTROL
+        function stopAllSpeech() {
+            if (typeof responsiveVoice !== 'undefined' && responsiveVoice.isPlaying()) {
+                responsiveVoice.cancel();
+            }
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
         if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = () => {
-                window.speechSynthesis.getVoices();
-            };
+            window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
         }
 
-        // Keyless Local Fallback Response Engine
-        function getLocalAIResponse(query) {
-            const q = query.toLowerCase();
-            if (q.includes('hello') || q.includes('hi')) return "Greetings. Local neural protocols are standing by.";
-            if (q.includes('status') || q.includes('system')) return "All systems are operating at peak efficiency, running locally without external server dependencies.";
-            if (q.includes('help')) return "You can use voice commands like open menu, launch chat, or open translation.";
-            return `Acknowledged your query regarding: "${query}". Operating in keyless local mode.`;
-        }
-
-        // --- APP STATE & NAVIGATION ---
+        // --- APP STATE & STORAGE ---
         let allAccounts = JSON.parse(localStorage.getItem('gibb_multi_accounts')) || {};
         let currentEmail = localStorage.getItem('gibb_current_email') || null;
-        let db = { profile: null, chatHistory: [], volume: 1.0 };
+        let db = { profile: null, chatHistory: [], volume: 1.0, apiKey: '' };
 
         function loadAccountData(email) {
             if (email && allAccounts[email]) {
                 db = allAccounts[email];
             } else {
-                db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { profile: null, chatHistory: [], volume: 1.0 };
+                db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { profile: null, chatHistory: [], volume: 1.0, apiKey: '' };
             }
         }
         loadAccountData(currentEmail);
@@ -476,13 +485,29 @@
             }
         }
 
+        function saveApiKey() {
+            const input = document.getElementById('api-key-input');
+            if (input) {
+                db.apiKey = input.value.trim();
+                saveAccountData();
+                alert("Groq API Key saved successfully.");
+            }
+        }
+
         function switchScreen(screenId) {
+            // Cut off any ongoing voice playback if leaving voice control
+            if (!document.getElementById('voice-screen').classList.contains('active') === false && screenId !== 'voice-screen') {
+                stopAllSpeech();
+            }
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             const target = document.getElementById(screenId);
             if (target) target.classList.add('active');
         }
 
-        function openMenu() { switchScreen('menu-screen'); }
+        function openMenu() { 
+            stopAllSpeech();
+            switchScreen('menu-screen'); 
+        }
 
         function updateResolution() {
             const el = document.getElementById('res-display');
@@ -497,7 +522,39 @@
             }
         }
 
-        // --- MICROPHONE PERMISSIONS & PERPETUAL GLOBAL LISTENING ---
+        // --- GROQ AI API FETCH ENGINE ---
+        async function queryGroqAI(promptText) {
+            if (!db.apiKey) {
+                return "Error: No Groq API Key found in vault. Please enter your API key in the settings panel.";
+            }
+            try {
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${db.apiKey}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "llama3-70b-8192",
+                        messages: [
+                            { role: "system", content: "You are G.I.B.B., an advanced tactical male AI assistant. Keep responses sharp, precise, and professional." },
+                            ...db.chatHistory.slice(-6),
+                            { role: "user", content: promptText }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+                const data = await response.json();
+                if (data.choices && data.choices.length > 0) {
+                    return data.choices[0].message.content;
+                }
+                return "Neural core encountered an unexpected response format.";
+            } catch (err) {
+                return "Connection error reaching Groq API servers.";
+            }
+        }
+
+        // --- MICROPHONE PERMISSIONS & CONTINUOUS VOICE RECOGNITION ---
         let recognition = null;
         let isPerpetualListeningActive = false;
         let isMicPausedForSpeech = false;
@@ -518,7 +575,7 @@
                     switchScreen('auth-screen');
                 }
             } catch (err) {
-                alert("Microphone permission was blocked. Please allow mic access in your browser settings.");
+                alert("Microphone permission was blocked. Please allow mic access in browser settings.");
             }
         }
 
@@ -555,10 +612,7 @@
                 }
             };
 
-            recognition.onerror = (event) => {
-                console.warn("Speech recognition error:", event.error);
-            };
-
+            recognition.onerror = () => {};
             recognition.onend = () => {
                 if (isPerpetualListeningActive && !isMicPausedForSpeech) {
                     try { recognition.start(); } catch (e) {}
@@ -598,26 +652,22 @@
             }
         }
 
-        function getTitleGreeting() {
-            const gender = db.profile?.gender || 'Sir';
-            return `All systems online, ${gender}`;
-        }
-
+        // FULL VOICE COMMAND PARSER TO OPEN ANY MODULE
         function handleVoiceCommand(cmd) {
             if (cmd.includes('open menu') || cmd.includes('menu') || cmd.includes('home') || cmd.includes('close chat')) {
                 openMenu();
-                speakVoiceResponse(getTitleGreeting());
+                speakMaleVoice("All systems online sir");
             } else if (cmd.includes('launch chat') || cmd.includes('open chat') || cmd.includes('chat')) {
                 switchScreen('dashboard-screen');
                 renderChatHistory();
-                speakVoiceResponse(getTitleGreeting());
+                speakMaleVoice("All systems online sir");
             } else if (cmd.includes('open translation') || cmd.includes('translate')) {
                 switchScreen('translation-screen');
                 initTranslationModule();
-                speakVoiceResponse(getTitleGreeting());
+                speakMaleVoice("All systems online sir");
             } else if (cmd.includes('open voice') || cmd.includes('voice control')) {
                 switchScreen('voice-screen');
-                speakVoiceResponse(getTitleGreeting());
+                speakMaleVoice("All systems online sir");
             } else {
                 if (document.getElementById('voice-screen').classList.contains('active')) {
                     processVoiceAIQuery(cmd);
@@ -625,39 +675,41 @@
             }
         }
 
-        function processVoiceAIQuery(query) {
+        async function processVoiceAIQuery(query) {
             const hudMsg = document.getElementById('voice-hud-msg');
             hudMsg.innerText = "PROCESSING QUERY...";
             
-            const reply = getLocalAIResponse(query);
+            const reply = await queryGroqAI(query);
             db.chatHistory.push({ role: 'user', content: query });
             db.chatHistory.push({ role: 'assistant', content: reply });
             saveAccountData();
 
             hudMsg.innerText = "VOICE CONTROL ACTIVE (SPEAK A COMMAND)";
-            speakVoiceResponse(reply);
+            speakMaleVoice(reply);
         }
 
-        // --- BOOT & AUTH ---
+        // --- BOOT & INITIALISATION ---
         function showLoadingScreen() {
             switchScreen('loading-screen');
             const bar = document.getElementById('loading-bar');
             const text = document.getElementById('loading-text');
             const btn = document.getElementById('init-btn');
             
-            setTimeout(() => { if(bar) bar.style.width = '60%'; if(text) text.innerText = "LINKING LOCAL CORES..."; }, 800);
+            setTimeout(() => { if(bar) bar.style.width = '60%'; if(text) text.innerText = "LINKING NEURAL CORES..."; }, 800);
             setTimeout(() => { 
                 if(bar) bar.style.width = '100%'; 
                 if(text) text.innerText = "SYSTEM FULLY OPTIMISED."; 
                 if(btn) btn.style.display = 'block';
-                speakVoiceResponse(getTitleGreeting());
             }, 1800);
         }
 
         function completeInit() {
             openMenu();
+            // EXACT REQUIREMENT: Make G.I.B.B. say "All systems online sir" when clicking Initialise
+            speakMaleVoice("All systems online sir");
         }
 
+        // --- AUTH SYSTEM ---
         function renderLoginScreen() {
             const panel = document.getElementById('auth-panel');
             panel.innerHTML = `
@@ -745,7 +797,8 @@
             db = {
                 profile: { username, email, gender, password: pass },
                 chatHistory: [],
-                volume: 1.0
+                volume: 1.0,
+                apiKey: ''
             };
             
             allAccounts[email] = db;
@@ -757,6 +810,7 @@
         }
 
         function logout() {
+            stopAllSpeech();
             sessionStorage.removeItem('gibb_logged_in');
             currentEmail = null;
             localStorage.removeItem('gibb_current_email');
@@ -764,8 +818,8 @@
             switchScreen('auth-screen');
         }
 
-        // --- CHAT MODULE ---
-        function sendMessage() {
+        // --- CHAT MODULE (TEXT TO SPEECH COMPLETELY REMOVED FROM CHAT) ---
+        async function sendMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if (!text) return;
@@ -775,11 +829,16 @@
             db.chatHistory.push({ role: 'user', content: text });
             saveAccountData();
 
-            const reply = getLocalAIResponse(text);
+            const loadingId = appendMessage("Thinking...", 'gibb', true);
+            const reply = await queryGroqAI(text);
+            
+            const loadingElem = document.getElementById(loadingId);
+            if (loadingElem) loadingElem.remove();
+
             appendMessage(reply, 'gibb');
             db.chatHistory.push({ role: 'assistant', content: reply });
             saveAccountData();
-            speakVoiceResponse(reply);
+            // NOTE: Text to speech is completely omitted here per instructions.
         }
 
         function checkEnter(e) {
@@ -793,6 +852,7 @@
             msgDiv.id = msgId;
             msgDiv.className = `message ${sender}`;
             msgDiv.innerText = text;
+            if (isLoading) msgDiv.style.opacity = '0.6';
             
             container.appendChild(msgDiv);
             container.scrollTop = container.scrollHeight;
@@ -833,7 +893,7 @@
             }
         }
 
-        function executeTranslation() {
+        async function executeTranslation() {
             const text = document.getElementById('source-text').value.trim();
             const lang = document.getElementById('target-lang-select').value;
             const outputEl = document.getElementById('translation-output');
@@ -843,7 +903,15 @@
                 return;
             }
 
-            outputEl.innerText = `[Local simulated translation to ${lang}]: ${text}`;
+            if (!db.apiKey) {
+                outputEl.innerText = "Error: API Key required in vault.";
+                return;
+            }
+
+            outputEl.innerText = "Translating...";
+            const translationPrompt = `Translate the following text accurately to ${lang}. Return only the translated text output without commentary: "${text}"`;
+            const result = await queryGroqAI(translationPrompt);
+            outputEl.innerText = result;
         }
 
         // --- CAROUSEL NAVIGATION ---
@@ -880,6 +948,9 @@
             
             const savedVol = document.getElementById('volume-slider');
             if (savedVol) savedVol.value = db.volume;
+
+            const apiKeyInput = document.getElementById('api-key-input');
+            if (apiKeyInput) apiKeyInput.value = db.apiKey || '';
 
             window.addEventListener('resize', updateResolution);
 
