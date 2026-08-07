@@ -346,7 +346,7 @@
                 </div>
                 <div class="widget-box" style="margin-bottom: 0;">
                     <div class="widget-title">Status</div>
-                    <p style="font-size: 0.8rem; color: #10b981;">🟢 PERPETUAL MIC ACTIVE</p>
+                    <p id="mic-status-badge" style="font-size: 0.8rem; color: #10b981;">🟢 MIC LISTENING</p>
                 </div>
             </div>
         </div>
@@ -470,13 +470,19 @@
             alert("Current active key removed from vault.");
         }
 
-        // --- RESPONSIVEVOICE MALE INSTANT TTS RUNTIME ---
-        function speakVoiceResponse(text) {
+        // --- DYNAMIC MIC TOGGLING TTS WITH RESPONSIVEVOICE ---
+        function speakVoiceResponse(text, onCompleteCallback) {
+            pauseMicForSpeech();
+
             if (typeof responsiveVoice !== 'undefined') {
                 responsiveVoice.speak(text, "UK English Male", {
                     pitch: 1.0,
                     rate: 1.0,
-                    volume: db.volume
+                    volume: db.volume,
+                    onend: () => {
+                        resumeMicAfterSpeech();
+                        if (onCompleteCallback) onCompleteCallback();
+                    }
                 });
             } else if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -487,7 +493,15 @@
                 utterance.pitch = 1.0;
                 utterance.rate = 1.0;
                 utterance.volume = db.volume;
+                
+                utterance.onend = () => {
+                    resumeMicAfterSpeech();
+                    if (onCompleteCallback) onCompleteCallback();
+                };
                 window.speechSynthesis.speak(utterance);
+            } else {
+                resumeMicAfterSpeech();
+                if (onCompleteCallback) onCompleteCallback();
             }
         }
 
@@ -733,7 +747,7 @@
             switchScreen('auth-screen');
         }
 
-        // --- CHAT MODULE (NO AUDIO SPEECH) ---
+        // --- CHAT MODULE ---
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
@@ -747,12 +761,12 @@
             const loadingId = appendMessage("G.I.B.B. is synthesizing response...", 'gibb', true);
 
             try {
-                const reply = await callAI(db.chatHistory);
+                const recentHistory = db.chatHistory.slice(-6);
+                const reply = await callAI(recentHistory);
                 removeMessage(loadingId);
                 appendMessage(reply, 'gibb');
                 db.chatHistory.push({ role: 'assistant', content: reply });
                 saveAccountData();
-                // Chat typing mode will NOT trigger speech per constraints
             } catch (err) {
                 removeMessage(loadingId);
                 
@@ -852,9 +866,10 @@
             }
         }
 
-        // --- VOICE RECOGNITION & SPEECH RULES ---
+        // --- VOICE RECOGNITION & DYNAMIC MIC GATING ---
         let recognition = null;
         let isPerpetualListeningActive = false;
+        let isMicPausedForSpeech = false;
 
         function initSpeechRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -866,6 +881,8 @@
             recognition.lang = 'en-US';
 
             recognition.onresult = (event) => {
+                if (isMicPausedForSpeech) return; // Ignore user input while G.I.B.B. is talking
+
                 let interim = '';
                 let final = '';
 
@@ -892,7 +909,7 @@
             };
 
             recognition.onend = () => {
-                if (isPerpetualListeningActive) {
+                if (isPerpetualListeningActive && !isMicPausedForSpeech) {
                     try { recognition.start(); } catch (e) {}
                 }
             };
@@ -910,6 +927,30 @@
             isPerpetualListeningActive = false;
             if (recognition) {
                 try { recognition.stop(); } catch (e) {}
+            }
+        }
+
+        function pauseMicForSpeech() {
+            isMicPausedForSpeech = true;
+            if (recognition && isPerpetualListeningActive) {
+                try { recognition.stop(); } catch (e) {}
+            }
+            const badge = document.getElementById('mic-status-badge');
+            if (badge) {
+                badge.innerText = "🔴 MIC MUTED (AI SPEAKING)";
+                badge.style.color = "#ff4444";
+            }
+        }
+
+        function resumeMicAfterSpeech() {
+            isMicPausedForSpeech = false;
+            if (recognition && isPerpetualListeningActive) {
+                try { recognition.start(); } catch (e) {}
+            }
+            const badge = document.getElementById('mic-status-badge');
+            if (badge) {
+                badge.innerText = "🟢 MIC LISTENING";
+                badge.style.color = "#10b981";
             }
         }
 
@@ -944,7 +985,12 @@
             const hudMsg = document.getElementById('voice-hud-msg');
             hudMsg.innerText = "PROCESSING QUERY...";
             try {
-                const reply = await callAI([{ role: 'user', content: query }]);
+                const recentHistory = db.chatHistory.slice(-6);
+                const reply = await callAI([...recentHistory, { role: 'user', content: query }]);
+                db.chatHistory.push({ role: 'user', content: query });
+                db.chatHistory.push({ role: 'assistant', content: reply });
+                saveAccountData();
+
                 hudMsg.innerText = "VOICE CONTROL ACTIVE (SPEAK A COMMAND OR QUERY)";
                 speakVoiceResponse(reply);
             } catch (err) {
