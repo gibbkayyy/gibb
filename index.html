@@ -256,16 +256,6 @@
             text-align: left;
             box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
         }
-        .token-error-box ol {
-            margin-left: 20px;
-            margin-top: 8px;
-            margin-bottom: 8px;
-        }
-        .token-error-box a {
-            color: #00ff00;
-            font-weight: bold;
-            text-decoration: underline;
-        }
     </style>
 </head>
 <body>
@@ -277,9 +267,9 @@
             <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
         </div>
         <div class="panel" style="max-width: 420px;">
-            <h2 style="margin-bottom: 12px; letter-spacing: 2px; font-size: 1.2rem;">ACTIVATE MIC</h2>
-            <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 20px; line-height: 1.4;">Activate the mic so you can unlock all the features of G.I.B.B.</p>
-            <button class="btn" onclick="requestMicrophoneAccess()" style="padding: 14px; font-size: 1rem; box-shadow: 0 0 20px var(--accent-glow);">CONNECT MIC &amp; START</button>
+            <h2 style="margin-bottom: 12px; letter-spacing: 2px; font-size: 1.2rem;">MIC &amp; AUDIO PERMISSION</h2>
+            <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 20px; line-height: 1.4;">Click below to grant microphone access so G.I.B.B. can hear your voice commands instantly.</p>
+            <button class="btn" onclick="requestMicrophoneAccess()" style="padding: 14px; font-size: 1rem; box-shadow: 0 0 20px var(--accent-glow);">ENABLE MICROPHONE &amp; ENTER</button>
         </div>
     </div>
 
@@ -346,7 +336,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">UK British Chill Voice &amp; Vault Multi-Key Rotator Active</p>
+                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">Original UK Male Voice &amp; Vault Multi-Key Rotator Active</p>
             </div>
 
             <div class="sidebar-panel">
@@ -360,9 +350,9 @@
                     <div class="widget-box">
                         <div class="widget-title">Voice Commands List</div>
                         <ul style="font-size: 0.75rem; padding-left: 15px; color: #88ff88; line-height: 1.4;">
-                            <li>"Open menu" / "Menu" / "Home"</li>
-                            <li>"Launch chat" / "Open chat" / "Chat"</li>
-                            <li>"Open translation" / "Translate"</li>
+                            <li>"Open menu" / "Menu" / "Home" / "Close chat"</li>
+                            <li>"Launch chat" / "Open chat" / "Chat" / "Open menu"</li>
+                            <li>"Open translation" / "Translate" / "Close translation"</li>
                             <li>"Open voice" / "Voice control"</li>
                         </ul>
                     </div>
@@ -706,7 +696,7 @@
             });
         }
 
-        // --- UK BRITISH CHILL MALE TTS ENGINE ---
+        // --- ORIGINAL UK MALE VOICE RESTORED ---
         function speak(text, callback) {
             isSpeakingNow = true;
             if (globalRecognition) {
@@ -714,11 +704,8 @@
             }
 
             if (typeof responsiveVoice !== "undefined") {
-                // Chill British male voice with natural friendly pitch and normal pacing
                 responsiveVoice.speak(text, "UK English Male", {
                     volume: db.volume,
-                    rate: 1.0,
-                    pitch: 1.0, 
                     onend: () => {
                         isSpeakingNow = false;
                         resumeListening();
@@ -921,19 +908,15 @@
             
             if (isTokenLimitError || (!success && groqKeys.length > 0 && attempts >= groqKeys.length)) {
                 aiReply = `YOU HAVE USED ALL OF YOUR AVAILABLE TOKENS.<br><br>` +
-                    `You have used all of your tokens so you can't chat with G.I.B.B.. There are multiple ways to fix this issue:<br>` +
-                    `<ol>` +
-                    `<li>Wait 24 hours for your tokens to fully regenerate.</li>` +
-                    `<li>Get a new key from GroqCloud and add it to your key vault. You can do this as many times as you want, meaning you can basically have infinite tokens to chat with G.I.B.B.</li>` +
-                    `</ol>` +
-                    `If you do not know how to get a key, please <a href="https://console.groq.com/keys" target="_blank">click here</a> to learn exactly how to get a key from Groq.`;
+                    `All keys currently in your vault have exceeded their daily rate limit/token allocation.<br>` +
+                    `You can generate another free API key on Groq and add it to your key vault to instantly restore messaging capabilities.`;
                 
                 db.chatHistory.push({ role: 'gibb', content: aiReply, isTokenError: true });
                 saveDatabase();
                 renderChatHistory();
                 
                 if (voiceActiveMode) {
-                    speak("You have used all of your available tokens. Please check the chat interface for instructions on how to add a new key.");
+                    speak("You have used all of your available tokens across your vault keys.");
                 }
                 return;
             }
@@ -1011,21 +994,21 @@
             }
         }
 
-        // Comprehensive voice command matching with multiple variants and natural phrasing
+        // Comprehensive voice command matching with open/close variants for all screens
         function processVoiceCommand(transcript) {
             const clean = transcript.toLowerCase().trim();
             const transcriptEl = document.getElementById('voice-transcript');
             if (transcriptEl) transcriptEl.innerText = `Heard: "${clean}"`;
 
-            // Menu variants (Open menu, Menu, Home, Main menu, Go back, etc.)
-            if (clean.includes('menu') || clean.includes('home') || clean.includes('main menu') || clean.includes('go back') || clean.includes('dashboard menu')) {
+            // Menu / Home / Close screen variants
+            if (clean.includes('menu') || clean.includes('home') || clean.includes('main menu') || clean.includes('go back') || clean.includes('close chat') || clean.includes('close translation') || clean.includes('exit')) {
                 speak("Returning to system menu.", () => {
                     openMenu();
                 });
                 return true;
             }
 
-            // Chat variants (Launch chat, Open chat, Chat, Take me to chat, Messages, etc.)
+            // Chat variants (Launch chat, Open chat, Chat, Messages, etc.)
             if (clean.includes('chat') || clean.includes('launch chat') || clean.includes('take me to chat') || clean.includes('open chat') || clean.includes('messages')) {
                 speak("Launching neural chat.", () => {
                     carouselIndex = 0;
@@ -1067,7 +1050,7 @@
             }
 
             globalRecognition = new SpeechRecognition();
-            globalRecognition.continuous = true; // Kept true for constant continuous background listening
+            globalRecognition.continuous = true;
             globalRecognition.interimResults = false;
             globalRecognition.lang = 'en-US';
 
@@ -1084,18 +1067,15 @@
             };
 
             globalRecognition.onerror = (event) => {
-                // Safely handle speech recognition errors silently so it never breaks
                 console.log("Mic event note:", event.error);
             };
 
             globalRecognition.onend = () => {
-                // Instantly re-engage microphone when G.I.B.B. stops speaking
                 if (isPerpetualListening && !isSpeakingNow) {
                     setTimeout(() => {
                         try { 
                             globalRecognition.start(); 
                         } catch (e) {
-                            // If already started or blocked, retry safely after brief delay
                             setTimeout(() => {
                                 try { globalRecognition.start(); } catch(err){}
                             }, 300);
