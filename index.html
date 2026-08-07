@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>G.I.B.B. System - AI Core</title>
     <link rel="icon" type="image/png" href="gibbailogo.png">
-    <script src="https://code.responsivevoice.org/responsivevoice.js"></script>
     <style>
         :root {
             --bg-color: #030803;
@@ -323,7 +322,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">UK Male Instant Voice &amp; Vault Rotator Active</p>
+                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">Native AI Male Voice Core Active</p>
             </div>
 
             <div class="sidebar-panel">
@@ -470,39 +469,50 @@
             alert("Current active key removed from vault.");
         }
 
-        // --- DYNAMIC MIC TOGGLING TTS WITH RESPONSIVEVOICE ---
+        // --- NATIVE BROWSER MALE TEXT-TO-SPEECH WITH MIC GATING ---
         function speakVoiceResponse(text, onCompleteCallback) {
             pauseMicForSpeech();
 
-            if (typeof responsiveVoice !== 'undefined') {
-                responsiveVoice.speak(text, "UK English Male", {
-                    pitch: 1.0,
-                    rate: 1.0,
-                    volume: db.volume,
-                    onend: () => {
-                        resumeMicAfterSpeech();
-                        if (onCompleteCallback) onCompleteCallback();
-                    }
-                });
-            } else if ('speechSynthesis' in window) {
+            if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
+                
+                // Select an authoritative male English voice
                 const voices = window.speechSynthesis.getVoices();
-                const ukMaleVoice = voices.find(v => v.lang === 'en-GB' && (v.name.includes('Male') || v.name.includes('George') || v.name.includes('Oliver'))) || voices.find(v => v.lang.startsWith('en'));
-                if (ukMaleVoice) utterance.voice = ukMaleVoice;
-                utterance.pitch = 1.0;
-                utterance.rate = 1.0;
+                let selectedVoice = voices.find(v => (v.lang === 'en-GB' || v.lang === 'en-US') && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('george') || v.name.toLowerCase().includes('oliver') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('ryan')));
+                if (!selectedVoice) {
+                    selectedVoice = voices.find(v => v.lang.startsWith('en'));
+                }
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                }
+
+                utterance.pitch = 0.9; // Lower pitch for a robust male tone
+                utterance.rate = 1.05;
                 utterance.volume = db.volume;
                 
                 utterance.onend = () => {
                     resumeMicAfterSpeech();
                     if (onCompleteCallback) onCompleteCallback();
                 };
+                
+                utterance.onerror = () => {
+                    resumeMicAfterSpeech();
+                    if (onCompleteCallback) onCompleteCallback();
+                };
+
                 window.speechSynthesis.speak(utterance);
             } else {
                 resumeMicAfterSpeech();
                 if (onCompleteCallback) onCompleteCallback();
             }
+        }
+
+        // Preload voices for browsers that load them asynchronously
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
         }
 
         async function callAI(messagesArray) {
@@ -756,7 +766,7 @@
                 if(bar) bar.style.width = '100%'; 
                 if(text) text.innerText = "SYSTEM FULLY OPTIMISED."; 
                 if(btn) btn.style.display = 'block';
-                // Automatically welcome the user once fully booted up
+                // Trigger voice greeting once fully booted up
                 speakVoiceResponse(getTitleGreeting());
             }, 1800);
         }
