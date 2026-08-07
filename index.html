@@ -243,19 +243,6 @@
             text-shadow: 0 0 12px var(--accent-glow); animation: pulseText 2s infinite; text-align: center;
         }
         @keyframes pulseText { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-
-        .token-error-box {
-            background: rgba(255, 0, 0, 0.12);
-            border: 2px solid var(--danger-color);
-            border-radius: 8px;
-            padding: 16px;
-            margin: 10px 0;
-            color: #ff8888;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            text-align: left;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
-        }
     </style>
 </head>
 <body>
@@ -336,7 +323,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">UK Male Voice &amp; Groq Vault Rotator Active (Groq Compound)</p>
+                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">UK Male Voice &amp; Groq Vault Rotator Active (LLaMA Instant)</p>
             </div>
 
             <div class="sidebar-panel">
@@ -380,7 +367,7 @@
     <div id="dashboard-screen" class="screen">
         <div class="chat-container">
             <div class="chat-header">
-                <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. NEURAL CONNECT (COMPOUND)</span>
+                <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. NEURAL CONNECT (LLaMA INSTANT)</span>
                 <div>
                     <button class="btn" style="width: auto; padding: 6px 12px; margin-bottom: 0; display: inline-block; margin-right: 6px; background: rgba(255,0,0,0.2); border-color: var(--danger-color); color: #ff8888; font-size: 0.8rem;" onclick="clearChatMemory()">CLEAR</button>
                     <button class="btn" style="width: auto; padding: 6px 12px; margin-bottom: 0; display: inline-block; font-size: 0.8rem;" onclick="openMenu()">MENU</button>
@@ -424,7 +411,7 @@
         let groqKeys = JSON.parse(localStorage.getItem('gibb_groq_vault_keys')) || [];
         let currentKeyIndex = parseInt(localStorage.getItem('gibb_vault_index')) || 0;
         const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-        const GROQ_MODEL = "groq/compound";
+        const GROQ_MODEL = "llama-3.1-8b-instant";
 
         function getActiveKey() {
             if (groqKeys.length === 0) return null;
@@ -654,45 +641,46 @@
                 <input type="email" id="reg-email" placeholder="Email Address">
                 <select id="reg-gender">
                     <option value="" disabled selected>Select Title Preference</option>
-                    <option value="sir">Male (Sir)</option>
-                    <option value="madam">Female (Madam)</option>
+                    <option value="Sir">Sir</option>
+                    <option value="Madam">Madam</option>
+                    <option value="Operator">Operator</option>
                 </select>
-                <input type="password" id="reg-password" placeholder="Password">
-                <button class="btn" onclick="registerAccount()">REGISTER &amp; INITIALISE</button>
+                <input type="password" id="reg-password" placeholder="Create Password">
+                <button class="btn" onclick="registerAccount()">INITIALISE PROFILE</button>
                 <button class="btn" style="background: transparent; border-color: rgba(0,255,0,0.2); font-size: 0.8rem;" onclick="renderLoginScreen()">BACK TO LOGIN</button>
             `;
         }
 
         function verifyLogin() {
             const email = document.getElementById('login-email').value.trim();
-            const pass = document.getElementById('login-password').value;
+            const pass = document.getElementById('login-password').value.trim();
             const errEl = document.getElementById('auth-error');
 
             if (!email || !pass) {
+                errEl.innerText = "All fields are required.";
                 errEl.style.display = 'block';
-                errEl.innerText = "Please fill in all fields.";
                 return;
             }
 
-            if (allAccounts[email] && allAccounts[email].password === pass) {
+            if (allAccounts[email] && allAccounts[email].profile.password === pass) {
                 currentEmail = email;
                 localStorage.setItem('gibb_current_email', currentEmail);
                 loadAccountData(currentEmail);
                 sessionStorage.setItem('gibb_logged_in', 'true');
                 showLoadingScreen();
             } else {
-                let legacy = JSON.parse(localStorage.getItem('gibb_permanent_db'));
-                if (legacy && legacy.profile && legacy.profile.email === email && legacy.profile.password === pass) {
+                let legacyDb = JSON.parse(localStorage.getItem('gibb_permanent_db'));
+                if (legacyDb && legacyDb.profile && legacyDb.profile.email === email && legacyDb.profile.password === pass) {
                     currentEmail = email;
-                    allAccounts[email] = legacy;
+                    allAccounts[currentEmail] = legacyDb;
                     localStorage.setItem('gibb_multi_accounts', JSON.stringify(allAccounts));
                     localStorage.setItem('gibb_current_email', currentEmail);
                     loadAccountData(currentEmail);
                     sessionStorage.setItem('gibb_logged_in', 'true');
                     showLoadingScreen();
                 } else {
-                    errEl.style.display = 'block';
                     errEl.innerText = "Invalid email or password.";
+                    errEl.style.display = 'block';
                 }
             }
         }
@@ -701,18 +689,18 @@
             const username = document.getElementById('reg-username').value.trim();
             const email = document.getElementById('reg-email').value.trim();
             const gender = document.getElementById('reg-gender').value;
-            const pass = document.getElementById('reg-password').value;
+            const pass = document.getElementById('reg-password').value.trim();
             const errEl = document.getElementById('auth-error');
 
             if (!username || !email || !gender || !pass) {
+                errEl.innerText = "Please fill out all registration fields.";
                 errEl.style.display = 'block';
-                errEl.innerText = "Please complete all registration fields.";
                 return;
             }
 
             if (allAccounts[email]) {
-                errEl.style.display = 'block';
                 errEl.innerText = "An account with this email already exists.";
+                errEl.style.display = 'block';
                 return;
             }
 
@@ -721,13 +709,12 @@
                 chatHistory: [],
                 volume: 1.0
             };
-
-            currentEmail = email;
+            
             allAccounts[email] = db;
             localStorage.setItem('gibb_multi_accounts', JSON.stringify(allAccounts));
+            currentEmail = email;
             localStorage.setItem('gibb_current_email', currentEmail);
             sessionStorage.setItem('gibb_logged_in', 'true');
-            saveAccountData();
             showLoadingScreen();
         }
 
@@ -739,111 +726,128 @@
             switchScreen('auth-screen');
         }
 
-        // --- CHAT INTERACTION & CHAT MEMORY ---
-        function renderChatMessages() {
-            const container = document.getElementById('chat-messages');
-            if (!container) return;
-            container.innerHTML = '';
-
-            if (db.chatHistory.length === 0) {
-                container.innerHTML = `<div class="message gibb">Greetings, ${db.profile?.username || 'User'}. G.I.B.B. Neural Connect (Compound) is online. How may I assist you?</div>`;
-                return;
-            }
-
-            db.chatHistory.forEach(msg => {
-                const div = document.createElement('div');
-                div.className = `message ${msg.role === 'user' ? 'user' : 'gibb'}`;
-                div.innerText = msg.content;
-                container.appendChild(div);
-            });
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function clearChatMemory() {
-            db.chatHistory = [];
-            saveAccountData();
-            renderChatMessages();
-        }
-
+        // --- CHAT MODULE ---
         async function sendMessage() {
             const input = document.getElementById('chat-input');
-            const text = input ? input.value.trim() : '';
+            const text = input.value.trim();
             if (!text) return;
 
             input.value = '';
+            appendMessage(text, 'user');
             db.chatHistory.push({ role: 'user', content: text });
             saveAccountData();
-            renderChatMessages();
 
-            const container = document.getElementById('chat-messages');
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'message gibb';
-            loadingDiv.id = 'temp-loading';
-            loadingDiv.innerText = 'G.I.B.B. is processing via Compound...';
-            container.appendChild(loadingDiv);
-            container.scrollTop = container.scrollHeight;
+            const loadingId = appendMessage("G.I.B.B. is synthesizing response...", 'gibb', true);
 
             try {
-                const aiReply = await callAI(db.chatHistory);
-                const tempLoad = document.getElementById('temp-loading');
-                if (tempLoad) tempLoad.remove();
-
-                db.chatHistory.push({ role: 'assistant', content: aiReply });
+                const reply = await callAI(db.chatHistory);
+                removeMessage(loadingId);
+                appendMessage(reply, 'gibb');
+                db.chatHistory.push({ role: 'assistant', content: reply });
                 saveAccountData();
-                renderChatMessages();
-                speakResponse(aiReply);
+                speakResponse(reply);
             } catch (err) {
-                const tempLoad = document.getElementById('temp-loading');
-                if (tempLoad) tempLoad.remove();
-
-                const errDiv = document.createElement('div');
-                errDiv.className = 'token-error-box';
-                errDiv.innerHTML = `<strong>Neural Processing Alert:</strong><br>${err.message}`;
-                container.appendChild(errDiv);
-                container.scrollTop = container.scrollHeight;
+                removeMessage(loadingId);
+                
+                let errorHtml = `
+                    <div class="token-error-box">
+                        <strong>⚠️ CRITICAL AI RUNTIME ERROR</strong><br>
+                        ${err.message}<br><br>
+                        <em>Troubleshooting Tips:</em>
+                        <ul style="margin-left: 15px; margin-top: 5px;">
+                            <li>Check if your Groq API key is valid and has remaining rate-limit quota.</li>
+                            <li>Add backup API keys using the Vault Rotator in the sidebar menu.</li>
+                        </ul>
+                    </div>
+                `;
+                appendMessage(errorHtml, 'gibb', false, true);
             }
         }
 
-        function checkEnter(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
+        function checkEnter(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        function appendMessage(text, sender, isLoading = false, isHtml = false) {
+            const container = document.getElementById('chat-messages');
+            const msgDiv = document.createElement('div');
+            const msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+            msgDiv.id = msgId;
+            msgDiv.className = `message ${sender}`;
+            
+            if (isHtml) {
+                msgDiv.innerHTML = text;
+            } else {
+                msgDiv.innerText = text;
+            }
+            
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+            return msgId;
+        }
+
+        function removeMessage(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function clearChatMemory() {
+            if (confirm("Purge all conversation history?")) {
+                db.chatHistory = [];
+                saveAccountData();
+                document.getElementById('chat-messages').innerHTML = '';
             }
         }
 
-        // --- CAROUSEL NAVIGATION ---
-        let currentCarouselIndex = 1;
-        const screensList = ['dashboard-screen', 'voice-screen', 'translation-screen'];
-        const carouselLabels = ['Launch Chat', 'Voice Control', 'Translation'];
+        function renderChatHistory() {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = '';
+            db.chatHistory.forEach(msg => {
+                appendMessage(msg.content, msg.role === 'user' ? 'user' : 'gibb');
+            });
+        }
 
-        function selectCarouselOption(index) {
-            currentCarouselIndex = index;
-            updateCarouselUI();
-            if (index === 0) {
-                renderChatMessages();
-                switchScreen('dashboard-screen');
-            } else if (index === 1) {
-                switchScreen('voice-screen');
-            } else if (index === 2) {
-                populateLanguages();
-                switchScreen('translation-screen');
+        // --- TRANSLATION MODULE ---
+        const languages = [
+            "Spanish", "French", "German", "Mandarin Chinese", "Japanese", 
+            "Russian", "Italian", "Portuguese", "Arabic", "Hindi", "Korean", "Dutch"
+        ];
+
+        function initTranslationModule() {
+            const select = document.getElementById('target-lang-select');
+            if (select && select.children.length === 0) {
+                languages.forEach(lang => {
+                    const opt = document.createElement('option');
+                    opt.value = lang;
+                    opt.innerText = lang;
+                    select.appendChild(opt);
+                });
             }
         }
 
-        function updateCarouselUI() {
-            for (let i = 0; i < 3; i++) {
-                const btn = document.getElementById(`c-btn-${i}`);
-                if (!btn) continue;
-                if (i === currentCarouselIndex) {
-                    btn.className = 'carousel-btn big';
-                } else {
-                    btn.className = 'carousel-btn small';
-                }
+        async function executeTranslation() {
+            const text = document.getElementById('source-text').value.trim();
+            const lang = document.getElementById('target-lang-select').value;
+            const outputEl = document.getElementById('translation-output');
+
+            if (!text) {
+                outputEl.innerText = "";
+                return;
+            }
+
+            outputEl.innerText = "Translating...";
+            try {
+                const prompt = `Translate the following text accurately into ${lang}. Provide ONLY the translated text without extra explanation:\n\n${text}`;
+                const translation = await callAI([{ role: 'user', content: prompt }]);
+                outputEl.innerText = translation.trim();
+            } catch (err) {
+                outputEl.innerText = `Translation Error: ${err.message}`;
             }
         }
 
-        // --- SPEECH RECOGNITION (PERPETUAL VOICE) ---
+        // --- VOICE RECOGNITION & PERPETUAL LISTENING ---
         let recognition = null;
-        let isListeningActive = false;
+        let isPerpetualListeningActive = false;
 
         function initSpeechRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -852,14 +856,15 @@
             recognition = new SpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
-            recognition.lang = 'en-GB';
+            recognition.lang = 'en-US';
 
             recognition.onresult = (event) => {
                 let interim = '';
-                let finalStr = '';
+                let final = '';
+
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
-                        finalStr += event.results[i][0].transcript;
+                        final += event.results[i][0].transcript;
                     } else {
                         interim += event.results[i][0].transcript;
                     }
@@ -867,134 +872,126 @@
 
                 const transcriptEl = document.getElementById('voice-transcript');
                 if (transcriptEl) {
-                    transcriptEl.innerText = finalStr || `[Interim: ${interim}]`;
+                    transcriptEl.innerText = final || interim;
                 }
 
-                if (finalStr.trim()) {
-                    handleVoiceCommandOrQuery(finalStr.trim().toLowerCase());
+                if (final) {
+                    handleVoiceCommand(final.trim().toLowerCase());
                 }
             };
 
-            recognition.onerror = () => {};
+            recognition.onerror = (event) => {
+                console.warn("Speech recognition error:", event.error);
+            };
+
             recognition.onend = () => {
-                if (isListeningActive) {
-                    try { recognition.start(); } catch(e){}
+                if (isPerpetualListeningActive) {
+                    try { recognition.start(); } catch (e) {}
                 }
             };
         }
 
         function startPerpetualListening() {
             if (!recognition) initSpeechRecognition();
-            if (recognition && !isListeningActive) {
-                isListeningActive = true;
-                try { recognition.start(); } catch(e){}
+            if (recognition && !isPerpetualListeningActive) {
+                isPerpetualListeningActive = true;
+                try { recognition.start(); } catch (e) {}
             }
         }
 
         function stopPerpetualListening() {
-            isListeningActive = false;
+            isPerpetualListeningActive = false;
             if (recognition) {
-                try { recognition.stop(); } catch(e){}
+                try { recognition.stop(); } catch (e) {}
             }
         }
 
-        async function handleVoiceCommandOrQuery(text) {
-            const msgEl = document.getElementById('voice-hud-msg');
-            if (text.includes('open menu') || text.includes('menu') || text.includes('home') || text.includes('close chat')) {
-                if (msgEl) msgEl.innerText = "COMMAND RECOGNIZED: RETURNING TO MENU";
+        function handleVoiceCommand(cmd) {
+            if (cmd.includes('open menu') || cmd.includes('menu') || cmd.includes('home') || cmd.includes('close chat')) {
                 openMenu();
-                speakResponse("Returning to main menu.");
-                return;
-            }
-            if (text.includes('launch chat') || text.includes('open chat') || text.includes('chat')) {
-                if (msgEl) msgEl.innerText = "COMMAND RECOGNIZED: LAUNCHING CHAT";
-                selectCarouselOption(0);
-                speakResponse("Launching neural chat.");
-                return;
-            }
-            if (text.includes('open translation') || text.includes('translate')) {
-                if (msgEl) msgEl.innerText = "COMMAND RECOGNIZED: OPENING TRANSLATOR";
-                selectCarouselOption(2);
+                speakResponse("Returning to menu.");
+            } else if (cmd.includes('launch chat') || cmd.includes('open chat') || cmd.includes('chat')) {
+                switchScreen('dashboard-screen');
+                renderChatHistory();
+                speakResponse("Opening neural chat connect.");
+            } else if (cmd.includes('open translation') || cmd.includes('translate')) {
+                switchScreen('translation-screen');
+                initTranslationModule();
                 speakResponse("Opening translation module.");
-                return;
-            }
-            if (text.includes('open voice') || text.includes('voice control')) {
-                if (msgEl) msgEl.innerText = "VOICE HUD ACTIVE";
-                speakResponse("Voice control is active.");
-                return;
-            }
-
-            // General Voice query handling via Compound
-            if (msgEl) msgEl.innerText = "PROCESSING VOICE QUERY...";
-            db.chatHistory.push({ role: 'user', content: text });
-            saveAccountData();
-
-            try {
-                const reply = await callAI(db.chatHistory);
-                db.chatHistory.push({ role: 'assistant', content: reply });
-                saveAccountData();
-                if (msgEl) msgEl.innerText = "RESPONSE READY";
-                speakResponse(reply);
-            } catch(err) {
-                if (msgEl) msgEl.innerText = "ERROR PROCESSING QUERY";
+            } else if (cmd.includes('open voice') || cmd.includes('voice control')) {
+                switchScreen('voice-screen');
+                speakResponse("Voice control hud active.");
+            } else {
+                if (document.getElementById('voice-screen').classList.contains('active')) {
+                    processVoiceAIQuery(cmd);
+                }
             }
         }
 
-        // --- TRANSLATOR MODULE ---
-        const languagesList = [
-            { code: "es", name: "Spanish" },
-            { code: "fr", name: "French" },
-            { code: "de", name: "German" },
-            { code: "it", name: "Italian" },
-            { code: "ja", name: "Japanese" },
-            { code: "zh", name: "Chinese (Mandarin)" },
-            { code: "ru", name: "Russian" },
-            { code: "ar", name: "Arabic" },
-            { code: "pt", name: "Portuguese" }
-        ];
+        async function processVoiceAIQuery(query) {
+            const hudMsg = document.getElementById('voice-hud-msg');
+            hudMsg.innerText = "PROCESSING QUERY THROUGH LLaMA INSTANT...";
+            try {
+                const reply = await callAI([{ role: 'user', content: query }]);
+                hudMsg.innerText = "VOICE CONTROL ACTIVE (SPEAK A COMMAND OR QUERY)";
+                speakResponse(reply);
+            } catch (err) {
+                hudMsg.innerText = "ERROR PROCESSING QUERY";
+                speakResponse("Sorry, I encountered an error with the neural network.");
+            }
+        }
 
-        function populateLanguages() {
-            const select = document.getElementById('target-lang-select');
-            if (!select || select.children.length > 0) return;
-            languagesList.forEach(lang => {
-                const opt = document.createElement('option');
-                opt.value = lang.code;
-                opt.innerText = lang.name;
-                select.appendChild(opt);
+        // --- CAROUSEL NAVIGATION ---
+        let currentCarouselIndex = 1;
+
+        function selectCarouselOption(index) {
+            currentCarouselIndex = index;
+            updateCarouselUI();
+            
+            if (index === 0) {
+                switchScreen('dashboard-screen');
+                renderChatHistory();
+            } else if (index === 1) {
+                switchScreen('voice-screen');
+            } else if (index === 2) {
+                switchScreen('translation-screen');
+                initTranslationModule();
+            }
+        }
+
+        function updateCarouselUI() {
+            const b0 = document.getElementById('c-btn-0');
+            const b1 = document.getElementById('c-btn-1');
+            const b2 = document.getElementById('c-btn-2');
+
+            [b0, b1, b2].forEach((btn, idx) => {
+                btn.className = "carousel-btn " + (idx === currentCarouselIndex ? "big" : "small");
             });
         }
 
-        let translationTimeout = null;
-        function executeTranslation() {
-            clearTimeout(translationTimeout);
-            const srcText = document.getElementById('source-text').value.trim();
-            const langSelect = document.getElementById('target-lang-select');
-            const outputDiv = document.getElementById('translation-output');
-
-            if (!srcText) {
-                outputDiv.innerText = '';
-                return;
-            }
-
-            const targetLang = langSelect.options[langSelect.selectedIndex]?.text || "Spanish";
-            outputDiv.innerText = "Translating...";
-
-            translationTimeout = setTimeout(async () => {
-                try {
-                    const prompt = `Translate the following text accurately into ${targetLang}. Return only the translated text without extra conversational filler:\n\n"${srcText}"`;
-                    const translated = await callAI([{ role: 'user', content: prompt }]);
-                    outputDiv.innerText = translated;
-                } catch (err) {
-                    outputDiv.innerText = `Translation Error: ${err.message}`;
-                }
-            }, 700);
-        }
-
-        // --- APP BOOTSTRAP INITIALIZATION ---
+        // --- GLOBAL INITIALISATION ---
         window.addEventListener('load', () => {
             updateResolution();
-            window.addEventListener('resize', updateResolution);
             updateKeyVaultUI();
+            
+            const savedVol = document.getElementById('volume-slider');
+            if (savedVol) savedVol.value = db.volume;
+
+            window.addEventListener('resize', updateResolution);
+
+            let fpsFrames = 0;
+            let lastFpsCheck = performance.now();
+            function trackFPS(now) {
+                fpsFrames++;
+                if (now - lastFpsCheck >= 1000) {
+                    const fpsEl = document.getElementById('fps-counter');
+                    if (fpsEl) fpsEl.innerText = fpsFrames;
+                    fpsFrames = 0;
+                    lastFpsCheck = now;
+                }
+                requestAnimationFrame(trackFPS);
+            }
+            requestAnimationFrame(trackFPS);
 
             if (localStorage.getItem('gibb_mic_always_allowed') === 'true') {
                 document.getElementById('mic-permission-screen').classList.remove('active');
