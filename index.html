@@ -256,8 +256,8 @@
             <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
         </div>
         <div class="panel" style="max-width: 420px;">
-            <h2 style="margin-bottom: 12px; letter-spacing: 2px; font-size: 1.2rem;">CHROMEBOOK AUDIO &amp; MIC</h2>
-            <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 20px; line-height: 1.4;">Click below to initialize hardware drivers and grant microphone permissions permanently for this browser.</p>
+            <h2 style="margin-bottom: 12px; letter-spacing: 2px; font-size: 1.2rem;">ACTIVATE MIC</h2>
+            <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 20px; line-height: 1.4;">Activate the mic so you can unlock all the features of G.I.B.B.</p>
             <button class="btn" onclick="requestMicrophoneAccess()" style="padding: 14px; font-size: 1rem; box-shadow: 0 0 20px var(--accent-glow);">CONNECT MIC &amp; START</button>
         </div>
     </div>
@@ -325,7 +325,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 10px; font-size: 0.75rem; color: #88ff88; text-align: center;">Deep Sci-Fi Male Voice &amp; Secure Key Vault Active</p>
+                <p style="margin-top: 10px; font-size: 0.75rem; color: #88ff88; text-align: center;">Ultra-Deep Sci-Fi Male Voice &amp; Secure Key Vault Active</p>
             </div>
 
             <div class="sidebar-panel">
@@ -500,6 +500,17 @@
             document.getElementById('volume-slider').value = db.volume;
             updateKeyVaultUI();
             
+            // Check if microphone was previously allowed/connected so we can skip the manual screen automatically
+            if (localStorage.getItem('gibb_mic_always_allowed') === 'true') {
+                document.getElementById('mic-permission-screen').classList.remove('active');
+                if (sessionStorage.getItem('gibb_logged_in') === 'true' && db.profile) {
+                    showLoadingScreen();
+                } else {
+                    renderLoginScreen();
+                    switchScreen('auth-screen');
+                }
+            }
+
             const langSelect = document.getElementById('target-lang-select');
             if(langSelect) {
                 langSelect.innerHTML = '';
@@ -528,6 +539,10 @@
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 stream.getTracks().forEach(track => track.stop());
+                
+                // Remember permanently that mic permission is granted so user won't press it again
+                localStorage.setItem('gibb_mic_always_allowed', 'true');
+                
                 document.getElementById('mic-permission-screen').classList.remove('active');
                 
                 if (sessionStorage.getItem('gibb_logged_in') === 'true' && db.profile) {
@@ -656,16 +671,17 @@
             showMenuScreen(); 
             const honorific = (db.profile && db.profile.honorific) ? db.profile.honorific : 'sir';
             
-            // Deep Sci-Fi Voice Configuration (pitch set lower at 0.65 for deep tone)
+            // Speak phrase, mic starts ONLY AFTER speech finishes
             speak(`All systems online ${honorific}`, () => {
                 isPerpetualListening = true;
                 initPerpetualListeningEngine();
             });
         }
 
-        // --- RESPONSIVEVOICE DEEP SCI-FI MALE TTS ENGINE ---
+        // --- RESPONSIVEVOICE ULTRA-DEEP SCI-FI MALE TTS ENGINE ---
         function speak(text, callback) {
             isSpeakingNow = true;
+            // Instantly turn off/stop mic listening when G.I.B.B. speaks
             if (globalRecognition) {
                 try { globalRecognition.stop(); } catch(e){}
             }
@@ -673,11 +689,11 @@
             if (typeof responsiveVoice !== "undefined") {
                 responsiveVoice.speak(text, "US English Male", {
                     volume: db.volume,
-                    rate: 0.95,
-                    pitch: 0.65, // Much deeper robotic/sci-fi tone
+                    rate: 0.9,
+                    pitch: 0.45, // Much deeper cinematic sci-fi tone
                     onend: () => {
                         isSpeakingNow = false;
-                        resumeListening();
+                        resumeListening(); // Turn mic back on when speaking finishes
                         if (callback) callback();
                     },
                     onerror: () => {
@@ -694,7 +710,7 @@
         }
 
         function resumeListening() {
-            if (isPerpetualListening) {
+            if (isPerpetualListening && !isSpeakingNow) {
                 setTimeout(() => {
                     try { globalRecognition.start(); } catch(e){}
                 }, 150);
@@ -819,7 +835,7 @@
 
             let attempts = 0;
             let success = false;
-            let aiReply = "Command processed.";
+            let aiReply = "Error processing request.";
 
             while (attempts < groqKeys.length && !success) {
                 try {
@@ -1004,6 +1020,7 @@
             globalRecognition.onerror = () => {};
 
             globalRecognition.onend = () => {
+                // Instantly turn mic back on when perpetual listening is active and G.I.B.B. is not speaking
                 if (isPerpetualListening && !isSpeakingNow) {
                     setTimeout(() => {
                         try { globalRecognition.start(); } catch (e) {}
@@ -1012,7 +1029,9 @@
             };
 
             try {
-                globalRecognition.start();
+                if (!isSpeakingNow) {
+                    globalRecognition.start();
+                }
             } catch (e) {}
         }
     </script>
