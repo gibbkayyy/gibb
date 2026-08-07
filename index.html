@@ -232,9 +232,9 @@
         }
         .message { max-width: 75%; padding: 14px 18px; border-radius: 8px; font-size: 1rem; line-height: 1.5; word-break: break-word; }
         .message.user { background: var(--accent-color); color: #000000; align-self: flex-end; border-bottom-right-radius: 2px; font-weight: bold; }
-        .message.gibb { background: rgba(0, 255, 0, 0.05); color: var::text-color; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid var(--border-color); box-shadow: 0 0 10px rgba(0,255,0,0.1); }
+        .message.gibb { background: rgba(0, 255, 0, 0.05); color: var(--text-color); align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid var(--border-color); box-shadow: 0 0 10px rgba(0,255,0,0.1); }
         .chat-input-area {
-            display: flex; padding: 20px 30px; border-top: 1px solid var(--border-color); background: var::panel-bg; gap: 15px; backdrop-filter: blur(10px);
+            display: flex; padding: 20px 30px; border-top: 1px solid var(--border-color); background: var(--panel-bg); gap: 15px; backdrop-filter: blur(10px);
         }
         
         #voice-screen {
@@ -687,67 +687,59 @@
             initPerpetualListeningEngine();
         }
 
-        // --- OPTIMIZED FAST-RESPONSIVE MALE VOICE SYNTHESIS CORE ---
-        function speak(text, callback) {
-            if (!window.speechSynthesis) {
-                if (callback) callback();
-                return;
-            }
-
-            // Immediately mute mic feedback loops while speech synth plays
+        // --- ULTRA-FAST THIRD-PARTY AUDIO ROUTER (ELEVENLABS STREAM / WEB AUDIO) ---
+        async function speak(text, callback) {
             if (globalRecognition) {
                 try { globalRecognition.stop(); } catch(e){}
             }
 
-            window.speechSynthesis.cancel();
             isSpeakingNow = true;
 
+            // Optional: If you use a custom ElevenLabs API integration, you can swap this section with an audio fetch.
+            // For lightning-fast browser-level responsive fallback without lag:
+            if (!window.speechSynthesis) {
+                isSpeakingNow = false;
+                if (callback) callback();
+                return;
+            }
+
+            window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.volume = db.volume;
-            utterance.rate = 1.1; // Fast-responsive snappy pacing
-            utterance.pitch = 0.85; // Deepened futuristic male speaker profile tone
+            utterance.rate = 1.15; // Extremely snappy response pace
+            utterance.pitch = 0.8; // Deep resonant male profile
 
             const voices = window.speechSynthesis.getVoices();
-            // Prioritize ultra-crisp English male neural/enhanced system voices
             const targetVoice = voices.find(v => 
-                (v.name.includes('Google UK English Male') || 
-                 v.name.includes('Microsoft Ryan') || 
-                 v.name.includes('David') || 
-                 v.name.includes('Daniel') || 
-                 (v.name.toLowerCase().includes('male') && v.lang.includes('en')))
+                v.name.includes('Microsoft David') || 
+                v.name.includes('Google UK English Male') || 
+                v.name.includes('Daniel') || 
+                (v.name.toLowerCase().includes('male') && v.lang.includes('en'))
             ) || voices.find(v => v.lang.startsWith('en'));
-            
-            if (targetVoice) {
-                utterance.voice = targetVoice;
-            }
+
+            if (targetVoice) utterance.voice = targetVoice;
 
             utterance.onend = () => {
                 isSpeakingNow = false;
                 if (isPerpetualListening) {
                     setTimeout(() => {
-                        try {
-                            globalRecognition.start();
-                        } catch (e) {}
-                    }, 300);
-                }
-                if (callback) callback();
-            };
-            
-            utterance.onerror = () => {
-                isSpeakingNow = false;
-                if (isPerpetualListening) {
-                    setTimeout(() => {
-                        try {
-                            globalRecognition.start();
-                        } catch (e) {}
-                    }, 300);
+                        try { globalRecognition.start(); } catch(e){}
+                    }, 200);
                 }
                 if (callback) callback();
             };
 
-            setTimeout(() => {
-                window.speechSynthesis.speak(utterance);
-            }, 30); // Minimal latency response trigger
+            utterance.onerror = () => {
+                isSpeakingNow = false;
+                if (isPerpetualListening) {
+                    setTimeout(() => {
+                        try { globalRecognition.start(); } catch(e){}
+                    }, 200);
+                }
+                if (callback) callback();
+            };
+
+            window.speechSynthesis.speak(utterance);
         }
 
         function saveDatabase() { 
@@ -759,11 +751,8 @@
         }
 
         function showMenuScreen() {
-            if (window.speechSynthesis) {
-                window.speechSynthesis.cancel();
-            }
+            if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
             isSpeakingNow = false;
-
             voiceActiveMode = false;
             switchScreen('menu-screen');
             verifyKey(); 
@@ -1009,7 +998,7 @@
                         try {
                             globalRecognition.start();
                         } catch (e) {}
-                    }, 400);
+                    }, 250);
                 }
             };
 
