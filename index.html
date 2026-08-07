@@ -291,14 +291,16 @@
         <div class="main-menu-layout">
             <div class="sidebar-panel">
                 <div>
-                    <h3 style="margin-bottom: 15px; text-shadow: 0 0 10px var(--accent-glow); font-size: 1rem;">CORE SETTINGS</h3>
+                    <h3 style="margin-bottom: 15px; text-shadow: 0 0 10px var(--accent-glow); font-size: 1rem;">API KEY MANAGER</h3>
                     <div class="widget-box">
-                        <div class="widget-title">Multi-Key Load Balancer</div>
-                        <p id="active-key-label" style="font-size: 0.8rem; color: #88ff88; word-break: break-all;">Key 1 Active</p>
+                        <div class="widget-title">Active Keys Count</div>
+                        <p id="active-key-count" style="font-size: 0.9rem; color: #88ff88; font-weight: bold;">0 Loaded</p>
                     </div>
                     <div class="widget-box">
-                        <div class="widget-title">AI Engine Status</div>
-                        <p id="key-status" style="font-size: 0.85rem; font-weight: bold; margin-top: 4px; color: #10b981;">🟢 5 MULTI-KEYS LOADED</p>
+                        <div class="widget-title">Add / Remove Keys</div>
+                        <input type="password" id="new-key-input" placeholder="gsk_..." style="font-size: 0.8rem; margin-bottom: 6px;">
+                        <button class="btn" style="padding: 8px; font-size: 0.8rem; margin-bottom: 6px;" onclick="addNewKey()">ADD KEY</button>
+                        <button class="btn" style="padding: 8px; font-size: 0.8rem; background: rgba(255,0,0,0.2); border-color: var(--danger-color); color: #ff8888; margin-bottom: 0;" onclick="removeCurrentKey()">REMOVE CURRENT KEY</button>
                     </div>
                     <div class="widget-box">
                         <div class="widget-title">System Volume</div>
@@ -323,7 +325,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 10px; font-size: 0.75rem; color: #88ff88; text-align: center;">ResponsiveVoice US English Male &amp; 5-Key Failover Active</p>
+                <p style="margin-top: 10px; font-size: 0.75rem; color: #88ff88; text-align: center;">ResponsiveVoice US English Male &amp; Secure Key Vault Active</p>
             </div>
 
             <div class="sidebar-panel">
@@ -398,26 +400,64 @@
     </div>
 
     <script>
-        // 5 Multi-Keys provided by user with automatic fallback rotation
-        const groqKeys = [
-            "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",
-            "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",
-            "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",
-            "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",
-            "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"
-        ];
-        let currentKeyIndex = parseInt(localStorage.getItem('gibb_key_index')) || 0;
+        // Secure local key vault to prevent automated repository scanners from capturing keys
+        let groqKeys = JSON.parse(localStorage.getItem('gibb_secure_vault_keys')) || [];
+        let currentKeyIndex = parseInt(localStorage.getItem('gibb_vault_index')) || 0;
 
         function getActiveKey() {
+            if (groqKeys.length === 0) return null;
+            if (currentKeyIndex >= groqKeys.length) currentKeyIndex = 0;
             return groqKeys[currentKeyIndex];
         }
 
         function rotateToNextKey() {
+            if (groqKeys.length === 0) return;
             currentKeyIndex = (currentKeyIndex + 1) % groqKeys.length;
-            localStorage.setItem('gibb_key_index', currentKeyIndex);
-            const label = document.getElementById('active-key-label');
-            if(label) label.innerText = `Key ${currentKeyIndex + 1} Active`;
-            console.warn(`Rate limit reached on Key ${currentKeyIndex}. Rotating automatically to Key ${currentKeyIndex + 1}...`);
+            localStorage.setItem('gibb_vault_index', currentKeyIndex);
+        }
+
+        function updateKeyVaultUI() {
+            const countEl = document.getElementById('active-key-count');
+            if (countEl) {
+                countEl.innerText = `${groqKeys.length} Key(s) in Vault`;
+            }
+        }
+
+        function addNewKey() {
+            const input = document.getElementById('new-key-input');
+            const val = input ? input.value.trim() : '';
+            
+            if (!val.startsWith('gsk_') || val.length < 20) {
+                alert("Invalid Groq API key format. Must start with 'gsk_'.");
+                return;
+            }
+
+            if (groqKeys.includes(val)) {
+                alert("This key is already saved in your vault.");
+                return;
+            }
+
+            groqKeys.push(val);
+            localStorage.setItem('gibb_secure_vault_keys', JSON.stringify(groqKeys));
+            input.value = '';
+            updateKeyVaultUI();
+            alert("Key successfully added to your secure vault!");
+        }
+
+        function removeCurrentKey() {
+            if (groqKeys.length === 0) {
+                alert("No keys currently in vault to remove.");
+                return;
+            }
+
+            const removed = groqKeys.splice(currentKeyIndex, 1);
+            if (currentKeyIndex >= groqKeys.length) {
+                currentKeyIndex = 0;
+            }
+            localStorage.setItem('gibb_secure_vault_keys', JSON.stringify(groqKeys));
+            localStorage.setItem('gibb_vault_index', currentKeyIndex);
+            updateKeyVaultUI();
+            alert("Current active key removed from vault.");
         }
 
         const languages50 = [
@@ -440,7 +480,6 @@
         let voiceActiveMode = false;
         let isSpeakingNow = false;
 
-        // Permanent storage persistence logic specifically engineered for Chromebook browser local profiles
         let allAccounts = JSON.parse(localStorage.getItem('gibb_multi_accounts')) || {};
         let currentEmail = localStorage.getItem('gibb_current_email') || null;
         let db = { profile: null, chatHistory: [], volume: 1.0 };
@@ -459,8 +498,7 @@
             window.addEventListener('resize', updateResolution);
             
             document.getElementById('volume-slider').value = db.volume;
-            const label = document.getElementById('active-key-label');
-            if(label) label.innerText = `Key ${currentKeyIndex + 1} Active`;
+            updateKeyVaultUI();
             
             const langSelect = document.getElementById('target-lang-select');
             if(langSelect) {
@@ -662,7 +700,6 @@
             }
         }
 
-        // Permanent local persistence safe for Chromebook sessions
         function saveDatabase() { 
             if (currentEmail) {
                 allAccounts[currentEmail] = db;
@@ -757,8 +794,13 @@
             renderChatHistory();
         }
 
-        // Automated multi-key fetch with rate-limit failure detection & instant failover rotation
         async function sendMessage(customText) {
+            const activeKey = getActiveKey();
+            if (!activeKey) {
+                alert("No Groq API keys found in your vault! Please add one using the API Key Manager sidebar widget.");
+                return;
+            }
+
             const input = document.getElementById('chat-input');
             const text = customText || (input ? input.value.trim() : '');
             if (!text) return;
@@ -798,7 +840,6 @@
                     const data = await res.json();
 
                     if (data.error) {
-                        // Check if rate limit reached or token quota exhausted
                         if (data.error.message && (data.error.message.includes("Rate limit") || data.error.message.includes("quota") || data.error.message.includes("tokens"))) {
                             rotateToNextKey();
                             attempts++;
@@ -817,7 +858,7 @@
                 } catch (err) {
                     attempts++;
                     if (attempts >= groqKeys.length) {
-                        aiReply = `Connection Error across all keys: ${err.message}`;
+                        aiReply = `Connection Error: ${err.message}`;
                     } else {
                         rotateToNextKey();
                     }
@@ -834,12 +875,18 @@
         }
 
         async function executeTranslation() {
+            const activeKey = getActiveKey();
             const source = document.getElementById('source-text').value.trim();
             const targetLang = document.getElementById('target-lang-select').value;
             const outputEl = document.getElementById('translation-output');
             
             if (!source) {
                 outputEl.innerText = "";
+                return;
+            }
+
+            if (!activeKey) {
+                outputEl.innerText = "Error: No API key added in vault.";
                 return;
             }
 
