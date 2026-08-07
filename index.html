@@ -79,12 +79,12 @@
         /* Entire logo container including outer rings pulses very slowly together */
         .logo-container {
             position: relative;
-            width: clamp(240px, 34vw, 380px);
-            height: clamp(240px, 34vw, 380px);
+            width: clamp(220px, 30vw, 340px);
+            height: clamp(220px, 30vw, 340px);
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             flex-shrink: 0;
             animation: slowHeartPulse 6s ease-in-out infinite;
         }
@@ -95,7 +95,7 @@
             100% { transform: scale(0.94); }
         }
 
-        /* Actual logo image made even bigger inside container */
+        /* Actual logo image made bigger inside container */
         .gibb-img-logo {
             width: 88%;
             height: 88%;
@@ -181,21 +181,21 @@
         .sidebar-panel {
             background: linear-gradient(135deg, rgba(0,255,0,0.05) 0%, rgba(0,15,0,0.85) 100%);
             border: 1px solid rgba(0, 255, 0, 0.5);
-            border-radius: 12px; padding: 20px; height: 85vh; display: flex;
+            border-radius: 12px; padding: 15px; height: 85vh; display: flex;
             flex-direction: column; justify-content: space-between; 
             backdrop-filter: blur(15px);
             box-shadow: 0 0 25px rgba(0, 255, 0, 0.15), inset 0 0 20px rgba(0, 255, 0, 0.1);
-            position: relative; overflow: hidden;
+            position: relative; overflow-y: auto;
         }
 
         .widget-box {
             background: rgba(0, 255, 0, 0.05); border: 1px solid rgba(0, 255, 0, 0.3);
-            border-radius: 8px; padding: 12px; margin-bottom: 12px;
+            border-radius: 8px; padding: 10px; margin-bottom: 10px;
             box-shadow: inset 0 0 10px rgba(0,255,0,0.05);
         }
         .widget-title {
-            font-size: 0.8rem; color: #88ff88; text-transform: uppercase;
-            margin-bottom: 6px; letter-spacing: 1px; font-weight: bold;
+            font-size: 0.75rem; color: #88ff88; text-transform: uppercase;
+            margin-bottom: 4px; letter-spacing: 1px; font-weight: bold;
         }
 
         .center-menu-panel {
@@ -205,7 +205,7 @@
 
         .carousel-container {
             display: flex; align-items: center; justify-content: center;
-            gap: 12px; height: 100px; margin-top: 10px; width: 100%; flex-wrap: wrap;
+            gap: 12px; height: 90px; margin-top: 5px; width: 100%; flex-wrap: wrap;
         }
 
         .carousel-btn {
@@ -245,6 +245,29 @@
             text-shadow: 0 0 12px var(--accent-glow); animation: pulseText 2s infinite; text-align: center;
         }
         @keyframes pulseText { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+        .token-error-box {
+            background: rgba(255, 0, 0, 0.12);
+            border: 2px solid var(--danger-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 10px 0;
+            color: #ff8888;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            text-align: left;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+        }
+        .token-error-box ol {
+            margin-left: 20px;
+            margin-top: 8px;
+            margin-bottom: 8px;
+        }
+        .token-error-box a {
+            color: #00ff00;
+            font-weight: bold;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -272,7 +295,7 @@
     </div>
 
     <div id="loading-screen" class="screen">
-        <div class="logo-container" style="margin-bottom: 25px;">
+        <div class="logo-container" style="margin-bottom: 20px;">
             <img src="gibbailogo.png" alt="G.I.B.B. Logo" class="gibb-img-logo">
             <div class="orbit-ring-outer"><div class="dot-outer"></div></div>
             <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
@@ -291,10 +314,10 @@
         <div class="main-menu-layout">
             <div class="sidebar-panel">
                 <div>
-                    <h3 style="margin-bottom: 15px; text-shadow: 0 0 10px var(--accent-glow); font-size: 1rem;">API KEY MANAGER</h3>
+                    <h3 style="margin-bottom: 12px; text-shadow: 0 0 10px var(--accent-glow); font-size: 0.95rem;">API KEY MANAGER</h3>
                     <div class="widget-box">
                         <div class="widget-title">Active Keys Count</div>
-                        <p id="active-key-count" style="font-size: 0.9rem; color: #88ff88; font-weight: bold;">0 Loaded</p>
+                        <p id="active-key-count" style="font-size: 0.85rem; color: #88ff88; font-weight: bold;">0 Loaded</p>
                     </div>
                     <div class="widget-box">
                         <div class="widget-title">Add / Remove Keys</div>
@@ -325,21 +348,30 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 10px; font-size: 0.75rem; color: #88ff88; text-align: center;">Ultra-Deep Sci-Fi Male Voice &amp; Secure Key Vault Active</p>
+                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">UK British Deep Voice &amp; Vault Multi-Key Rotator Active</p>
             </div>
 
             <div class="sidebar-panel">
                 <div>
-                    <h3 style="margin-bottom: 15px; text-shadow: 0 0 10px var(--accent-glow); font-size: 1rem;">HUD MODULE</h3>
+                    <h3 style="margin-bottom: 12px; text-shadow: 0 0 10px var(--accent-glow); font-size: 0.95rem;">HUD MODULE</h3>
                     <div class="widget-box">
                         <div class="widget-title">Metrics</div>
-                        <p style="font-size: 0.9rem;">FPS: <span id="fps-counter" style="font-weight: bold;">60</span></p>
-                        <p style="font-size: 0.9rem; margin-top: 6px;">RES: <span id="res-display" style="font-weight: bold;">--</span></p>
+                        <p style="font-size: 0.85rem;">FPS: <span id="fps-counter" style="font-weight: bold;">60</span></p>
+                        <p style="font-size: 0.85rem; margin-top: 4px;">RES: <span id="res-display" style="font-weight: bold;">--</span></p>
+                    </div>
+                    <div class="widget-box">
+                        <div class="widget-title">Voice Commands List</div>
+                        <ul style="font-size: 0.75rem; padding-left: 15px; color: #88ff88; line-height: 1.4;">
+                            <li>"Launch chat"</li>
+                            <li>"Open translation"</li>
+                            <li>"Open voice control"</li>
+                            <li>"Return to menu"</li>
+                        </ul>
                     </div>
                 </div>
                 <div class="widget-box" style="margin-bottom: 0;">
                     <div class="widget-title">Status</div>
-                    <p style="font-size: 0.8rem; color: #10b981; display: block !important; visibility: visible !important; opacity: 1 !important;">🟢 PERPETUAL MIC ACTIVE</p>
+                    <p style="font-size: 0.8rem; color: #10b981;">🟢 PERPETUAL MIC ACTIVE</p>
                 </div>
             </div>
         </div>
@@ -400,7 +432,7 @@
     </div>
 
     <script>
-        // Secure local key vault to prevent automated repository scanners from capturing keys
+        // Vault Key Rotator Support for up to 3+ keys
         let groqKeys = JSON.parse(localStorage.getItem('gibb_secure_vault_keys')) || [];
         let currentKeyIndex = parseInt(localStorage.getItem('gibb_vault_index')) || 0;
 
@@ -411,9 +443,10 @@
         }
 
         function rotateToNextKey() {
-            if (groqKeys.length === 0) return;
+            if (groqKeys.length <= 1) return false;
             currentKeyIndex = (currentKeyIndex + 1) % groqKeys.length;
             localStorage.setItem('gibb_vault_index', currentKeyIndex);
+            return true;
         }
 
         function updateKeyVaultUI() {
@@ -450,7 +483,7 @@
                 return;
             }
 
-            const removed = groqKeys.splice(currentKeyIndex, 1);
+            groqKeys.splice(currentKeyIndex, 1);
             if (currentKeyIndex >= groqKeys.length) {
                 currentKeyIndex = 0;
             }
@@ -500,7 +533,7 @@
             document.getElementById('volume-slider').value = db.volume;
             updateKeyVaultUI();
             
-            // Check if microphone was previously allowed/connected so we can skip the manual screen automatically
+            // Check if mic permission was previously saved as always allowed to bypass screen automatically
             if (localStorage.getItem('gibb_mic_always_allowed') === 'true') {
                 document.getElementById('mic-permission-screen').classList.remove('active');
                 if (sessionStorage.getItem('gibb_logged_in') === 'true' && db.profile) {
@@ -540,7 +573,7 @@
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 stream.getTracks().forEach(track => track.stop());
                 
-                // Remember permanently that mic permission is granted so user won't press it again
+                // Remember that mic permission is granted permanently so user never has to press it again
                 localStorage.setItem('gibb_mic_always_allowed', 'true');
                 
                 document.getElementById('mic-permission-screen').classList.remove('active');
@@ -552,7 +585,7 @@
                     switchScreen('auth-screen');
                 }
             } catch (err) {
-                alert("Microphone permission was blocked. Please click the camera/mic icon in your Chromebook address bar to allow microphone access.");
+                alert("Microphone permission was blocked. Please click the camera/mic icon in your browser address bar to allow microphone access.");
             }
         }
 
@@ -671,29 +704,29 @@
             showMenuScreen(); 
             const honorific = (db.profile && db.profile.honorific) ? db.profile.honorific : 'sir';
             
-            // Speak phrase, mic starts ONLY AFTER speech finishes
+            // Speaks initialization, mic turns on automatically only after speech finishes
             speak(`All systems online ${honorific}`, () => {
                 isPerpetualListening = true;
                 initPerpetualListeningEngine();
             });
         }
 
-        // --- RESPONSIVEVOICE ULTRA-DEEP SCI-FI MALE TTS ENGINE ---
+        // --- UK BRITISH DEEP MALE TTS ENGINE ---
         function speak(text, callback) {
             isSpeakingNow = true;
-            // Instantly turn off/stop mic listening when G.I.B.B. speaks
             if (globalRecognition) {
                 try { globalRecognition.stop(); } catch(e){}
             }
 
             if (typeof responsiveVoice !== "undefined") {
-                responsiveVoice.speak(text, "US English Male", {
+                // Using UK English Male voice with deep pitch and slower cinematic rate
+                responsiveVoice.speak(text, "UK English Male", {
                     volume: db.volume,
                     rate: 0.9,
-                    pitch: 0.45, // Much deeper cinematic sci-fi tone
+                    pitch: 0.5, 
                     onend: () => {
                         isSpeakingNow = false;
-                        resumeListening(); // Turn mic back on when speaking finishes
+                        resumeListening();
                         if (callback) callback();
                     },
                     onerror: () => {
@@ -799,7 +832,11 @@
             db.chatHistory.forEach(msg => {
                 const div = document.createElement('div');
                 div.className = `message ${msg.role}`;
-                div.innerText = msg.content;
+                if (msg.isTokenError) {
+                    div.innerHTML = msg.content; // Render HTML error box with link
+                } else {
+                    div.innerText = msg.content;
+                }
                 container.appendChild(div);
             });
             container.scrollTop = container.scrollHeight;
@@ -828,15 +865,17 @@
             saveDatabase();
             renderChatHistory();
 
-            const apiFormattedMessages = db.chatHistory.map(m => ({
+            const apiFormattedMessages = db.chatHistory.filter(m => !m.isTokenError).map(m => ({
                 role: m.role === 'gibb' ? 'assistant' : m.role,
                 content: m.content
             }));
 
             let attempts = 0;
             let success = false;
-            let aiReply = "Error processing request.";
+            let aiReply = "";
+            let isTokenLimitError = false;
 
+            // Loop through vault keys for rotation (supports 3+ keys)
             while (attempts < groqKeys.length && !success) {
                 try {
                     const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -858,8 +897,13 @@
 
                     if (data.error) {
                         if (data.error.message && (data.error.message.includes("Rate limit") || data.error.message.includes("quota") || data.error.message.includes("tokens"))) {
-                            rotateToNextKey();
+                            // Rotate to next key in vault and try again
+                            const rotated = rotateToNextKey();
                             attempts++;
+                            if (!rotated || attempts >= groqKeys.length) {
+                                isTokenLimitError = true;
+                                break;
+                            }
                             continue;
                         } else {
                             throw new Error(data.error.message);
@@ -882,7 +926,27 @@
                 }
             }
             
-            db.chatHistory.push({ role: 'gibb', content: aiReply });
+            if (isTokenLimitError || (!success && groqKeys.length > 0 && attempts >= groqKeys.length)) {
+                // Formatted error message with link to instructions on how to get a Groq key
+                aiReply = `YOU HAVE USED ALL OF YOUR AVAILABLE TOKENS.<br><br>` +
+                    `You have used all of your tokens so you can't chat with G.I.B.B.. There are multiple ways to fix this issue:<br>` +
+                    `<ol>` +
+                    `<li>Wait 24 hours for your tokens to fully regenerate.</li>` +
+                    `<li>Get a new key from GroqCloud and add it to your key vault. You can do this as many times as you want, meaning you can basically have infinite tokens to chat with G.I.B.B.</li>` +
+                    `</ol>` +
+                    `If you do not know how to get a key, please <a href="https://console.groq.com/keys" target="_blank">click here</a> to learn exactly how to get a key from Groq.`;
+                
+                db.chatHistory.push({ role: 'gibb', content: aiReply, isTokenError: true });
+                saveDatabase();
+                renderChatHistory();
+                
+                if (voiceActiveMode) {
+                    speak("You have used all of your available tokens. Please check the chat interface for instructions on how to add a new key.");
+                }
+                return;
+            }
+
+            db.chatHistory.push({ role: 'gibb', content: aiReply, isTokenError: false });
             saveDatabase();
             renderChatHistory();
             
@@ -1020,7 +1084,7 @@
             globalRecognition.onerror = () => {};
 
             globalRecognition.onend = () => {
-                // Instantly turn mic back on when perpetual listening is active and G.I.B.B. is not speaking
+                // Restarts automatically unless G.I.B.B. is currently speaking
                 if (isPerpetualListening && !isSpeakingNow) {
                     setTimeout(() => {
                         try { globalRecognition.start(); } catch (e) {}
