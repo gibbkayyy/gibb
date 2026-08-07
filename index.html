@@ -580,12 +580,6 @@
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             const target = document.getElementById(screenId);
             if (target) target.classList.add('active');
-            
-            if (screenId === 'voice-screen') {
-                startPerpetualListening();
-            } else {
-                stopPerpetualListening();
-            }
         }
 
         function openMenu() { switchScreen('menu-screen'); }
@@ -603,7 +597,11 @@
             }
         }
 
-        // --- MICROPHONE PERMISSIONS ---
+        // --- MICROPHONE PERMISSIONS & PERPETUAL GLOBAL LISTENING ---
+        let recognition = null;
+        let isPerpetualListeningActive = false;
+        let isMicPausedForSpeech = false;
+
         async function requestMicrophoneAccess() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -611,6 +609,9 @@
                 localStorage.setItem('gibb_mic_always_allowed', 'true');
                 document.getElementById('mic-permission-screen').classList.remove('active');
                 
+                // Initialize background voice listener
+                startPerpetualListening();
+
                 if (sessionStorage.getItem('gibb_logged_in') === 'true' && db.profile) {
                     showLoadingScreen();
                 } else {
@@ -619,6 +620,127 @@
                 }
             } catch (err) {
                 alert("Microphone permission was blocked. Please allow mic access in your browser settings.");
+            }
+        }
+
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) return;
+
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onresult = (event) => {
+                if (isMicPausedForSpeech) return; // Ignore user input while G.I.B.B. is talking
+
+                let interim = '';
+                let final = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        final += event.results[i][0].transcript;
+                    } else {
+                        interim += event.results[i][0].transcript;
+                    }
+                }
+
+                const transcriptEl = document.getElementById('voice-transcript');
+                if (transcriptEl) {
+                    transcriptEl.innerText = final || interim;
+                }
+
+                if (final) {
+                    handleVoiceCommand(final.trim().toLowerCase());
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.warn("Speech recognition error:", event.error);
+            };
+
+            recognition.onend = () => {
+                if (isPerpetualListeningActive && !isMicPausedForSpeech) {
+                    try { recognition.start(); } catch (e) {}
+                }
+            };
+        }
+
+        function startPerpetualListening() {
+            if (!recognition) initSpeechRecognition();
+            if (recognition && !isPerpetualListeningActive) {
+                isPerpetualListeningActive = true;
+                try { recognition.start(); } catch (e) {}
+            }
+        }
+
+        function pauseMicForSpeech() {
+            isMicPausedForSpeech = true;
+            if (recognition) {
+                try { recognition.stop(); } catch (e) {}
+            }
+            const badge = document.getElementById('mic-status-badge');
+            if (badge) {
+                badge.innerText = "🔴 MIC MUTED (AI SPEAKING)";
+                badge.style.color = "#ff4444";
+            }
+        }
+
+        function resumeMicAfterSpeech() {
+            isMicPausedForSpeech = false;
+            if (recognition && isPerpetualListeningActive) {
+                try { recognition.start(); } catch (e) {}
+            }
+            const badge = document.getElementById('mic-status-badge');
+            if (badge) {
+                badge.innerText = "🟢 MIC LISTENING";
+                badge.style.color = "#10b981";
+            }
+        }
+
+        function getTitleGreeting() {
+            const gender = db.profile?.gender || 'Sir';
+            return `All systems online, ${gender}`;
+        }
+
+        function handleVoiceCommand(cmd) {
+            if (cmd.includes('open menu') || cmd.includes('menu') || cmd.includes('home') || cmd.includes('close chat')) {
+                openMenu();
+                speakVoiceResponse(getTitleGreeting());
+            } else if (cmd.includes('launch chat') || cmd.includes('open chat') || cmd.includes('chat')) {
+                switchScreen('dashboard-screen');
+                renderChatHistory();
+                speakVoiceResponse(getTitleGreeting());
+            } else if (cmd.includes('open translation') || cmd.includes('translate')) {
+                switchScreen('translation-screen');
+                initTranslationModule();
+                speakVoiceResponse(getTitleGreeting());
+            } else if (cmd.includes('open voice') || cmd.includes('voice control')) {
+                switchScreen('voice-screen');
+                speakVoiceResponse(getTitleGreeting());
+            } else {
+                if (document.getElementById('voice-screen').classList.contains('active')) {
+                    processVoiceAIQuery(cmd);
+                }
+            }
+        }
+
+        async function processVoiceAIQuery(query) {
+            const hudMsg = document.getElementById('voice-hud-msg');
+            hudMsg.innerText = "PROCESSING QUERY...";
+            try {
+                const recentHistory = db.chatHistory.slice(-6);
+                const reply = await callAI([...recentHistory, { role: 'user', content: query }]);
+                db.chatHistory.push({ role: 'user', content: query });
+                db.chatHistory.push({ role: 'assistant', content: reply });
+                saveAccountData();
+
+                hudMsg.innerText = "VOICE CONTROL ACTIVE (SPEAK A COMMAND OR QUERY)";
+                speakVoiceResponse(reply);
+            } catch (err) {
+                hudMsg.innerText = "ERROR PROCESSING QUERY";
+                speakVoiceResponse("Sorry, I encountered an error with the neural network.");
             }
         }
 
@@ -634,6 +756,8 @@
                 if(bar) bar.style.width = '100%'; 
                 if(text) text.innerText = "SYSTEM FULLY OPTIMISED."; 
                 if(btn) btn.style.display = 'block';
+                // Automatically welcome the user once fully booted up
+                speakVoiceResponse(getTitleGreeting());
             }, 1800);
         }
 
@@ -767,6 +891,7 @@
                 appendMessage(reply, 'gibb');
                 db.chatHistory.push({ role: 'assistant', content: reply });
                 saveAccountData();
+                speakVoiceResponse(reply);
             } catch (err) {
                 removeMessage(loadingId);
                 
@@ -782,6 +907,7 @@
                     </div>
                 `;
                 appendMessage(errorHtml, 'gibb', false, true);
+                speakVoiceResponse("Sorry, I encountered an error with the neural network.");
             }
         }
 
@@ -866,139 +992,6 @@
             }
         }
 
-        // --- VOICE RECOGNITION & DYNAMIC MIC GATING ---
-        let recognition = null;
-        let isPerpetualListeningActive = false;
-        let isMicPausedForSpeech = false;
-
-        function initSpeechRecognition() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return;
-
-            recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = 'en-US';
-
-            recognition.onresult = (event) => {
-                if (isMicPausedForSpeech) return; // Ignore user input while G.I.B.B. is talking
-
-                let interim = '';
-                let final = '';
-
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        final += event.results[i][0].transcript;
-                    } else {
-                        interim += event.results[i][0].transcript;
-                    }
-                }
-
-                const transcriptEl = document.getElementById('voice-transcript');
-                if (transcriptEl) {
-                    transcriptEl.innerText = final || interim;
-                }
-
-                if (final) {
-                    handleVoiceCommand(final.trim().toLowerCase());
-                }
-            };
-
-            recognition.onerror = (event) => {
-                console.warn("Speech recognition error:", event.error);
-            };
-
-            recognition.onend = () => {
-                if (isPerpetualListeningActive && !isMicPausedForSpeech) {
-                    try { recognition.start(); } catch (e) {}
-                }
-            };
-        }
-
-        function startPerpetualListening() {
-            if (!recognition) initSpeechRecognition();
-            if (recognition && !isPerpetualListeningActive) {
-                isPerpetualListeningActive = true;
-                try { recognition.start(); } catch (e) {}
-            }
-        }
-
-        function stopPerpetualListening() {
-            isPerpetualListeningActive = false;
-            if (recognition) {
-                try { recognition.stop(); } catch (e) {}
-            }
-        }
-
-        function pauseMicForSpeech() {
-            isMicPausedForSpeech = true;
-            if (recognition && isPerpetualListeningActive) {
-                try { recognition.stop(); } catch (e) {}
-            }
-            const badge = document.getElementById('mic-status-badge');
-            if (badge) {
-                badge.innerText = "🔴 MIC MUTED (AI SPEAKING)";
-                badge.style.color = "#ff4444";
-            }
-        }
-
-        function resumeMicAfterSpeech() {
-            isMicPausedForSpeech = false;
-            if (recognition && isPerpetualListeningActive) {
-                try { recognition.start(); } catch (e) {}
-            }
-            const badge = document.getElementById('mic-status-badge');
-            if (badge) {
-                badge.innerText = "🟢 MIC LISTENING";
-                badge.style.color = "#10b981";
-            }
-        }
-
-        function getTitleGreeting() {
-            const gender = db.profile?.gender || 'Sir';
-            return `All systems online, ${gender}`;
-        }
-
-        function handleVoiceCommand(cmd) {
-            if (cmd.includes('open menu') || cmd.includes('menu') || cmd.includes('home') || cmd.includes('close chat')) {
-                openMenu();
-                speakVoiceResponse(getTitleGreeting());
-            } else if (cmd.includes('launch chat') || cmd.includes('open chat') || cmd.includes('chat')) {
-                switchScreen('dashboard-screen');
-                renderChatHistory();
-                speakVoiceResponse(getTitleGreeting());
-            } else if (cmd.includes('open translation') || cmd.includes('translate')) {
-                switchScreen('translation-screen');
-                initTranslationModule();
-                speakVoiceResponse(getTitleGreeting());
-            } else if (cmd.includes('open voice') || cmd.includes('voice control')) {
-                switchScreen('voice-screen');
-                speakVoiceResponse(getTitleGreeting());
-            } else {
-                if (document.getElementById('voice-screen').classList.contains('active')) {
-                    processVoiceAIQuery(cmd);
-                }
-            }
-        }
-
-        async function processVoiceAIQuery(query) {
-            const hudMsg = document.getElementById('voice-hud-msg');
-            hudMsg.innerText = "PROCESSING QUERY...";
-            try {
-                const recentHistory = db.chatHistory.slice(-6);
-                const reply = await callAI([...recentHistory, { role: 'user', content: query }]);
-                db.chatHistory.push({ role: 'user', content: query });
-                db.chatHistory.push({ role: 'assistant', content: reply });
-                saveAccountData();
-
-                hudMsg.innerText = "VOICE CONTROL ACTIVE (SPEAK A COMMAND OR QUERY)";
-                speakVoiceResponse(reply);
-            } catch (err) {
-                hudMsg.innerText = "ERROR PROCESSING QUERY";
-                speakVoiceResponse("Sorry, I encountered an error with the neural network.");
-            }
-        }
-
         // --- CAROUSEL NAVIGATION ---
         let currentCarouselIndex = 1;
 
@@ -1053,6 +1046,7 @@
 
             if (localStorage.getItem('gibb_mic_always_allowed') === 'true') {
                 document.getElementById('mic-permission-screen').classList.remove('active');
+                startPerpetualListening();
                 if (sessionStorage.getItem('gibb_logged_in') === 'true' && db.profile) {
                     showLoadingScreen();
                 } else {
