@@ -325,7 +325,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 10px; font-size: 0.75rem; color: #88ff88; text-align: center;">ResponsiveVoice US English Male &amp; Secure Key Vault Active</p>
+                <p style="margin-top: 10px; font-size: 0.75rem; color: #88ff88; text-align: center;">Deep Sci-Fi Male Voice &amp; Secure Key Vault Active</p>
             </div>
 
             <div class="sidebar-panel">
@@ -656,13 +656,14 @@
             showMenuScreen(); 
             const honorific = (db.profile && db.profile.honorific) ? db.profile.honorific : 'sir';
             
+            // Deep Sci-Fi Voice Configuration (pitch set lower at 0.65 for deep tone)
             speak(`All systems online ${honorific}`, () => {
                 isPerpetualListening = true;
                 initPerpetualListeningEngine();
             });
         }
 
-        // --- RESPONSIVEVOICE HIGH-QUALITY MALE TTS ENGINE ---
+        // --- RESPONSIVEVOICE DEEP SCI-FI MALE TTS ENGINE ---
         function speak(text, callback) {
             isSpeakingNow = true;
             if (globalRecognition) {
@@ -672,8 +673,8 @@
             if (typeof responsiveVoice !== "undefined") {
                 responsiveVoice.speak(text, "US English Male", {
                     volume: db.volume,
-                    rate: 1.0,
-                    pitch: 0.9,
+                    rate: 0.95,
+                    pitch: 0.65, // Much deeper robotic/sci-fi tone
                     onend: () => {
                         isSpeakingNow = false;
                         resumeListening();
