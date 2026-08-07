@@ -422,7 +422,7 @@
                 </div>
                 <div>
                     <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #88ff88;">TRANSLATED OUTPUT</label>
-                    <div id="translation-output" style="padding: 15px; background: rgba(0,255,0,0.05); border: 1px solid var(--border-color); border-radius: 4px; min-height: 100px; color: var::text-color; word-break: break-word;"></div>
+                    <div id="translation-output" style="padding: 15px; background: rgba(0,255,0,0.05); border: 1px solid var(--border-color); border-radius: 4px; min-height: 100px; color: var(--text-color); word-break: break-word;"></div>
                 </div>
             </div>
         </div>
@@ -693,6 +693,11 @@
                 return;
             }
 
+            // Immediately stop listening while G.I.B.B. speaks
+            if (globalRecognition) {
+                try { globalRecognition.stop(); } catch(e){}
+            }
+
             window.speechSynthesis.cancel();
             isSpeakingNow = true;
 
@@ -709,11 +714,26 @@
 
             utterance.onend = () => {
                 isSpeakingNow = false;
+                // Re-activate mic when speech finishes (if still in voice mode or perpetual state)
+                if (isPerpetualListening) {
+                    setTimeout(() => {
+                        try {
+                            globalRecognition.start();
+                        } catch (e) {}
+                    }, 300);
+                }
                 if (callback) callback();
             };
             
             utterance.onerror = () => {
                 isSpeakingNow = false;
+                if (isPerpetualListening) {
+                    setTimeout(() => {
+                        try {
+                            globalRecognition.start();
+                        } catch (e) {}
+                    }, 300);
+                }
                 if (callback) callback();
             };
 
@@ -731,6 +751,12 @@
         }
 
         function showMenuScreen() {
+            // Stop speech immediately when opening menu
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+            isSpeakingNow = false;
+
             voiceActiveMode = false;
             switchScreen('menu-screen');
             verifyKey(); 
@@ -759,11 +785,15 @@
         }
 
         function showDashboard() {
+            if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
+            isSpeakingNow = false;
             switchScreen('dashboard-screen');
             renderChatHistory();
         }
 
         function showTranslation() {
+            if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
+            isSpeakingNow = false;
             switchScreen('translation-screen');
         }
 
@@ -774,11 +804,11 @@
         }
 
         function deactivateVoiceScreen() {
-            voiceActiveMode = false;
             showMenuScreen();
         }
 
         function logout() {
+            if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
             sessionStorage.removeItem('gibb_logged_in');
             renderLoginScreen();
             switchScreen('auth-screen');
@@ -838,7 +868,6 @@
                 return;
             }
 
-            // Map internal roles ('gibb') to valid API roles ('assistant') so Groq accepts it
             const apiFormattedMessages = db.chatHistory.map(m => ({
                 role: m.role === 'gibb' ? 'assistant' : m.role,
                 content: m.content
