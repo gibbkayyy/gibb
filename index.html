@@ -232,9 +232,9 @@
         }
         .message { max-width: 75%; padding: 14px 18px; border-radius: 8px; font-size: 1rem; line-height: 1.5; word-break: break-word; }
         .message.user { background: var(--accent-color); color: #000000; align-self: flex-end; border-bottom-right-radius: 2px; font-weight: bold; }
-        .message.gibb { background: rgba(0, 255, 0, 0.05); color: var(--text-color); align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid var(--border-color); box-shadow: 0 0 10px rgba(0,255,0,0.1); }
+        .message.gibb { background: rgba(0, 255, 0, 0.05); color: var::text-color; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid var(--border-color); box-shadow: 0 0 10px rgba(0,255,0,0.1); }
         .chat-input-area {
-            display: flex; padding: 20px 30px; border-top: 1px solid var(--border-color); background: var(--panel-bg); gap: 15px; backdrop-filter: blur(10px);
+            display: flex; padding: 20px 30px; border-top: 1px solid var(--border-color); background: var::panel-bg; gap: 15px; backdrop-filter: blur(10px);
         }
         
         #voice-screen {
@@ -687,13 +687,14 @@
             initPerpetualListeningEngine();
         }
 
+        // --- OPTIMIZED FAST-RESPONSIVE MALE VOICE SYNTHESIS CORE ---
         function speak(text, callback) {
             if (!window.speechSynthesis) {
                 if (callback) callback();
                 return;
             }
 
-            // Immediately stop listening while G.I.B.B. speaks
+            // Immediately mute mic feedback loops while speech synth plays
             if (globalRecognition) {
                 try { globalRecognition.stop(); } catch(e){}
             }
@@ -703,10 +704,18 @@
 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.volume = db.volume;
-            utterance.rate = 1.05;
+            utterance.rate = 1.1; // Fast-responsive snappy pacing
+            utterance.pitch = 0.85; // Deepened futuristic male speaker profile tone
 
             const voices = window.speechSynthesis.getVoices();
-            const targetVoice = voices.find(v => v.name.includes('Google UK English Male') || (v.name.includes('Male') && v.lang.includes('en')));
+            // Prioritize ultra-crisp English male neural/enhanced system voices
+            const targetVoice = voices.find(v => 
+                (v.name.includes('Google UK English Male') || 
+                 v.name.includes('Microsoft Ryan') || 
+                 v.name.includes('David') || 
+                 v.name.includes('Daniel') || 
+                 (v.name.toLowerCase().includes('male') && v.lang.includes('en')))
+            ) || voices.find(v => v.lang.startsWith('en'));
             
             if (targetVoice) {
                 utterance.voice = targetVoice;
@@ -714,7 +723,6 @@
 
             utterance.onend = () => {
                 isSpeakingNow = false;
-                // Re-activate mic when speech finishes (if still in voice mode or perpetual state)
                 if (isPerpetualListening) {
                     setTimeout(() => {
                         try {
@@ -739,7 +747,7 @@
 
             setTimeout(() => {
                 window.speechSynthesis.speak(utterance);
-            }, 50);
+            }, 30); // Minimal latency response trigger
         }
 
         function saveDatabase() { 
@@ -751,7 +759,6 @@
         }
 
         function showMenuScreen() {
-            // Stop speech immediately when opening menu
             if (window.speechSynthesis) {
                 window.speechSynthesis.cancel();
             }
