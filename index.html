@@ -611,7 +611,10 @@
 
         function verifyKey() {
             const inputField = document.getElementById('access-key-input');
-            const inputVal = inputField ? inputField.value.trim() : '';
+            let inputVal = inputField ? inputField.value.trim() : '';
+            // Sanitize hidden non-ascii characters out of the key string
+            inputVal = inputVal.replace(/[^\x20-\x7E]/g, '');
+            
             const statusEl = document.getElementById('key-status');
             db.savedKey = inputVal;
             saveDatabase();
@@ -781,7 +784,9 @@
             saveDatabase();
             renderChatHistory();
 
-            const apiKey = db.savedKey;
+            // Strictly sanitize key to guarantee no non-ISO characters break the HTTP request header
+            let apiKey = (db.savedKey || "").trim().replace(/[^\x20-\x7E]/g, '');
+
             if (!apiKey || !apiKey.startsWith('gsk_')) {
                 const errText = "Error: Groq API Key missing or invalid in System Settings.";
                 db.chatHistory.push({ role: 'gibb', content: errText });
@@ -844,7 +849,7 @@
                 return;
             }
 
-            const apiKey = db.savedKey;
+            let apiKey = (db.savedKey || "").trim().replace(/[^\x20-\x7E]/g, '');
             if (!apiKey || !apiKey.startsWith('gsk_')) {
                 outputEl.innerText = "Error: Groq API Key required.";
                 return;
