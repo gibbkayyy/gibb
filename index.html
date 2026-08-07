@@ -84,7 +84,7 @@
             justify-content: center;
             align-items: center;
             margin-bottom: 5px;
-            margin-top: -20px; /* Moved slightly higher */
+            margin-top: -20px;
             flex-shrink: 0;
             animation: slowHeartPulse 6s ease-in-out infinite;
         }
@@ -96,7 +96,7 @@
         }
 
         .gibb-img-logo {
-            width: 98%; /* Made image slightly bigger */
+            width: 98%;
             height: 98%;
             object-fit: contain;
             z-index: 10;
@@ -336,7 +336,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">US Australian / Deep Male Voice Active</p>
+                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">US Male (Fallback / Deep) Voice Active</p>
             </div>
 
             <div class="sidebar-panel">
@@ -389,7 +389,7 @@
             <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-area">
                 <input type="text" id="chat-input" placeholder="Type a message to G.I.B.B...." onkeypress="checkEnter(event)" style="margin-bottom: 0;">
-                <button class="btn" style="width: 100px; margin-bottom: 0;" onclick="sendMessage()">SEND</button>
+                <button class="btn" style="width: 100px; margin-bottom: 0;" onclick="sendMessage()">SEND: WAITING CONFIRMATION</button>
             </div>
         </div>
     </div>
@@ -420,14 +420,14 @@
     </div>
 
     <script>
-        // --- ALTERNATIVE MALE VOICE ENGINE (AUSTRALIAN / DEEP MALE PROFILE) ---
+        // --- NEW MALE VOICE ENGINE (US MALE / DEEP ALTERNATIVE PROFILE) ---
         function speakMaleVoice(text, onCompleteCallback) {
             pauseMicForSpeech();
 
             if (typeof responsiveVoice !== 'undefined') {
-                // Changed from UK/US to Australian Male for a distinct new male voice profile
-                responsiveVoice.speak(text, "Australian Male", {
-                    pitch: 0.82,
+                // Changed to US English Male with optimized deep pitch parameters
+                responsiveVoice.speak(text, "US English Male", {
+                    pitch: 0.8,
                     rate: 1.0,
                     volume: db.volume,
                     onend: () => {
@@ -443,11 +443,11 @@
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 const voices = window.speechSynthesis.getVoices();
-                let maleVoice = voices.find(v => (v.lang.includes('en-AU') || v.lang.includes('en-GB')) && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('james') || v.name.toLowerCase().includes('ryan') || v.name.toLowerCase().includes('lee')));
+                let maleVoice = voices.find(v => v.lang.includes('en-US') && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('mark') || v.name.toLowerCase().includes('zira') === false));
                 if (!maleVoice) maleVoice = voices.find(v => v.lang.startsWith('en'));
                 if (maleVoice) utterance.voice = maleVoice;
 
-                utterance.pitch = 0.82;
+                utterance.pitch = 0.8;
                 utterance.rate = 1.0;
                 utterance.volume = db.volume;
                 
@@ -584,7 +584,7 @@
             return null;
         }
 
-        // --- AUTOMATIC KEY ROTATION ON TOKEN ERROR / EXHAUSTION ---
+        // --- AUTOMATIC KEY ROTATION ON TOKEN / 400 ERROR FIX ---
         function rotateToNextKey() {
             if (!db.keyVault || db.keyVault.length <= 1) return false;
             let previousIndex = db.activeKeyIndex;
@@ -626,40 +626,43 @@
             }
         }
 
-        // --- GROQ AI API FETCH ENGINE WITH AUTOMATIC TOKEN FAILOVER ---
+        // --- GROQ AI API FETCH ENGINE WITH AUTOMATIC FAILOVER & CORRECT PAYLOAD ---
         async function queryGroqAI(promptText, retryCount = 0) {
             const apiKey = getActiveApiKey();
             if (!apiKey) {
                 return "Error: No active API Key found in vault. Please add and select a key in the settings panel.";
             }
             try {
+                // Fixed request payload format to avoid HTTP 400 status errors
                 const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
                     headers: {
-                        "Authorization": `Bearer ${apiKey}`,
+                        "Authorization": `Bearer ${apiKey.trim()}`,
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        model: "llama3-70b-8192",
+                        model: "llama-3.3-70b-versatile",
                         messages: [
                             { role: "system", content: "You are G.I.B.B., an advanced tactical male AI assistant. Keep responses sharp, precise, and professional." },
-                            ...db.chatHistory.slice(-6),
+                            ...db.chatHistory.slice(-6).map(m => ({ role: m.role, content: m.content })),
                             { role: "user", content: promptText }
                         ],
-                        temperature: 0.7
+                        temperature: 0.7,
+                        max_tokens: 1024
                     })
                 });
 
                 const data = await response.json();
 
-                // Check for token limit or rate limit errors (HTTP 429 or explicit token/rate error message)
-                if (!response.ok || (data.error && (response.status === 429 || JSON.stringify(data).toLowerCase().includes('token') || JSON.stringify(data).toLowerCase().includes('rate limit')))) {
+                // If token quota exhausted, rate-limited, or HTTP status error (like 400/429), automatically rotate key
+                if (!response.ok || data.error) {
                     if (db.keyVault.length > 1 && retryCount < db.keyVault.length) {
                         const rotated = rotateToNextKey();
                         if (rotated) {
                             return await queryGroqAI(promptText, retryCount + 1);
                         }
                     }
+                    return `API Error: ${data.error ? data.error.message : response.statusText}`;
                 }
 
                 if (data.choices && data.choices.length > 0) {
