@@ -33,7 +33,6 @@
             position: relative;
         }
 
-        /* Animated Tech Grid Background */
         body::before {
             content: "";
             position: absolute;
@@ -73,7 +72,6 @@
             opacity: 1;
         }
 
-        /* Logo Design */
         .logo-container {
             position: relative;
             width: 260px;
@@ -133,7 +131,6 @@
         @keyframes spinClockwise { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes spinCounterClockwise { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
 
-        /* Panels & Forms */
         .panel {
             background: var(--panel-bg); border: 2px solid var(--border-color);
             padding: 30px; border-radius: 12px; width: 100%; max-width: 420px;
@@ -166,15 +163,12 @@
         .btn:hover { background: rgba(0, 255, 0, 0.4); box-shadow: 0 0 15px var(--accent-glow); }
 
         .error-msg { color: var(--danger-color); font-size: 0.85rem; margin-bottom: 15px; display: none; }
-        .success-msg { color: #10b981; font-size: 0.85rem; margin-bottom: 15px; display: none; }
 
-        /* Main Menu Layout */
         .main-menu-layout {
             display: grid; grid-template-columns: 320px 1fr 320px;
             width: 100vw; height: 100vh; padding: 30px; gap: 30px; align-items: center;
         }
 
-        /* HOLOGRAPHIC SIDEBARS */
         .sidebar-panel {
             background: linear-gradient(135deg, rgba(0,255,0,0.05) 0%, rgba(0,15,0,0.85) 100%);
             border: 1px solid rgba(0, 255, 0, 0.5);
@@ -225,7 +219,6 @@
         .carousel-btn.small { transform: scale(0.8); opacity: 0.4; font-size: 0.8rem; }
         .carousel-btn.big { transform: scale(1.1); opacity: 1; font-size: 1.1rem; border-color: var(--accent-color); box-shadow: 0 0 20px var(--accent-glow); }
 
-        /* Chat Interface */
         .chat-container {
             width: 100%; height: 100%; display: flex; flex-direction: column; background: transparent; overflow: hidden;
         }
@@ -429,7 +422,7 @@
                 </div>
                 <div>
                     <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #88ff88;">TRANSLATED OUTPUT</label>
-                    <div id="translation-output" style="padding: 15px; background: rgba(0,255,0,0.05); border: 1px solid var(--border-color); border-radius: 4px; min-height: 100px; color: var(--text-color); word-break: break-word;"></div>
+                    <div id="translation-output" style="padding: 15px; background: rgba(0,255,0,0.05); border: 1px solid var(--border-color); border-radius: 4px; min-height: 100px; color: var::text-color; word-break: break-word;"></div>
                 </div>
             </div>
         </div>
@@ -457,7 +450,6 @@
         let voiceActiveMode = false;
         let isSpeakingNow = false;
 
-        // Global DB across multiple accounts
         let allAccounts = JSON.parse(localStorage.getItem('gibb_multi_accounts')) || {};
         let currentEmail = localStorage.getItem('gibb_current_email') || null;
 
@@ -846,6 +838,12 @@
                 return;
             }
 
+            // Map internal roles ('gibb') to valid API roles ('assistant') so Groq accepts it
+            const apiFormattedMessages = db.chatHistory.map(m => ({
+                role: m.role === 'gibb' ? 'assistant' : m.role,
+                content: m.content
+            }));
+
             try {
                 const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
@@ -857,7 +855,7 @@
                         model: "llama-3.3-70b-versatile",
                         messages: [
                             { role: "system", content: "You are G.I.B.B., an advanced futuristic AI core assistant. Keep answers concise, helpful, and precise." },
-                            ...db.chatHistory
+                            ...apiFormattedMessages
                         ]
                     })
                 });
