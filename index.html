@@ -636,6 +636,10 @@
         function completeInit() { 
             showMenuScreen(); 
             initPerpetualListeningEngine();
+            
+            // Speak required greeting upon opening menu after loading screen
+            const honorific = (db.profile && db.profile.honorific) ? db.profile.honorific : 'sir';
+            speak(`All systems online, ${honorific}`);
         }
 
         // --- PUTER.JS KEYLESS THIRD-PARTY AI MALE VOICE PIPELINE ---
@@ -652,7 +656,6 @@
             }
 
             try {
-                // Generates audio using Puter.js third-party keyless AI (OpenAI provider model with deep male voice "onyx")
                 const audio = await puter.ai.txt2speech(text, {
                     provider: "openai",
                     model: "gpt-4o-mini-tts",
@@ -807,7 +810,6 @@
             }));
 
             try {
-                // Keyless chat completion request via Puter.js AI
                 const response = await puter.ai.chat([
                     { role: "system", content: "You are G.I.B.B., an advanced futuristic AI core assistant. Keep answers concise, helpful, and precise." },
                     ...apiFormattedMessages
