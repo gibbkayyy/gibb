@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>G.I.B.B. System - AI Core</title>
+    <title>G.I.B.B. System - Local Core</title>
     <link rel="icon" type="image/png" href="gibbailogo.png">
     <style>
         :root {
@@ -254,7 +254,7 @@
         </div>
         <div class="panel" style="max-width: 420px;">
             <h2 style="margin-bottom: 12px; letter-spacing: 2px; font-size: 1.2rem;">MIC &amp; AUDIO PERMISSION</h2>
-            <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 20px; line-height: 1.4;">Click below to grant microphone access so G.I.B.B. can hear your voice commands instantly.</p>
+            <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 20px; line-height: 1.4;">Click below to grant microphone access for continuous voice command tracking.</p>
             <button class="btn" onclick="requestMicrophoneAccess()" style="padding: 14px; font-size: 1rem; box-shadow: 0 0 20px var(--accent-glow);">ENABLE MICROPHONE &amp; ENTER</button>
         </div>
     </div>
@@ -288,16 +288,10 @@
         <div class="main-menu-layout">
             <div class="sidebar-panel">
                 <div>
-                    <h3 style="margin-bottom: 12px; text-shadow: 0 0 10px var(--accent-glow); font-size: 0.95rem;">API KEY MANAGER</h3>
+                    <h3 style="margin-bottom: 12px; text-shadow: 0 0 10px var(--accent-glow); font-size: 0.95rem;">SYSTEM CONTROLS</h3>
                     <div class="widget-box">
-                        <div class="widget-title">Active Keys Count</div>
-                        <p id="active-key-count" style="font-size: 0.85rem; color: #88ff88; font-weight: bold;">0 Loaded</p>
-                    </div>
-                    <div class="widget-box">
-                        <div class="widget-title">Add / Remove Keys</div>
-                        <input type="password" id="new-key-input" placeholder="Groq API Key (gsk_...)" style="font-size: 0.8rem; margin-bottom: 6px;">
-                        <button class="btn" style="padding: 8px; font-size: 0.8rem; margin-bottom: 6px;" onclick="addNewKey()">ADD KEY</button>
-                        <button class="btn" style="padding: 8px; font-size: 0.8rem; background: rgba(255,0,0,0.2); border-color: var(--danger-color); color: #ff8888; margin-bottom: 0;" onclick="removeCurrentKey()">REMOVE CURRENT KEY</button>
+                        <div class="widget-title">Operating Mode</div>
+                        <p style="font-size: 0.85rem; color: #88ff88; font-weight: bold;">Local Command Core</p>
                     </div>
                     <div class="widget-box">
                         <div class="widget-title">System Volume</div>
@@ -322,7 +316,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">Native AI Male Voice Core Active</p>
+                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">Keyless Offline Voice Core Active</p>
             </div>
 
             <div class="sidebar-panel">
@@ -336,8 +330,8 @@
                     <div class="widget-box">
                         <div class="widget-title">Voice Commands List</div>
                         <ul style="font-size: 0.75rem; padding-left: 15px; color: #88ff88; line-height: 1.4;">
-                            <li>"Open menu" / "Menu" / "Home" / "Close chat"</li>
-                            <li>"Launch chat" / "Open chat" / "Chat"</li>
+                            <li>"Open menu" / "Menu" / "Home"</li>
+                            <li>"Launch chat" / "Open chat"</li>
                             <li>"Open translation" / "Translate"</li>
                             <li>"Open voice" / "Voice control"</li>
                         </ul>
@@ -357,7 +351,7 @@
             <div class="orbit-ring-outer" style="border-color: #00ff00; box-shadow: 0 0 20px #00ff00;"><div class="dot-outer"></div></div>
             <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
         </div>
-        <div class="voice-status-text" id="voice-hud-msg">VOICE CONTROL ACTIVE (SPEAK A COMMAND OR QUERY)</div>
+        <div class="voice-status-text" id="voice-hud-msg">VOICE CONTROL ACTIVE (SPEAK A COMMAND)</div>
         <div id="voice-transcript" style="margin-top: 12px; font-size: 0.9rem; font-style: italic; color: #88ff88; max-width: 500px; text-align: center; height: 25px;">[Listening continuously...]</div>
         
         <button class="btn" style="margin-top: 25px; width: auto; padding: 10px 25px; font-size: 0.85rem;" onclick="openMenu()">RETURN TO MENU</button>
@@ -366,7 +360,7 @@
     <div id="dashboard-screen" class="screen">
         <div class="chat-container">
             <div class="chat-header">
-                <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. NEURAL CONNECT</span>
+                <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. LOCAL INTERFACE</span>
                 <div>
                     <button class="btn" style="width: auto; padding: 6px 12px; margin-bottom: 0; display: inline-block; margin-right: 6px; background: rgba(255,0,0,0.2); border-color: var(--danger-color); color: #ff8888; font-size: 0.8rem;" onclick="clearChatMemory()">CLEAR</button>
                     <button class="btn" style="width: auto; padding: 6px 12px; margin-bottom: 0; display: inline-block; font-size: 0.8rem;" onclick="openMenu()">MENU</button>
@@ -383,14 +377,14 @@
     <div id="translation-screen" class="screen">
         <div class="chat-container">
             <div class="chat-header">
-                <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. TRANSLATOR</span>
+                <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. LOCAL TRANSLATOR</span>
                 <button class="btn" style="width: auto; padding: 6px 12px; margin-bottom: 0; font-size: 0.8rem;" onclick="openMenu()">MENU</button>
             </div>
             <div style="flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 15px; background: rgba(0, 10, 0, 0.7); backdrop-filter: blur(5px); overflow-y: auto;">
                 <div style="display: flex; gap: 15px; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 240px;">
                         <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #88ff88; font-size: 0.85rem;">SOURCE TEXT</label>
-                        <textarea id="source-text" rows="4" placeholder="Type text to translate..." oninput="executeTranslation()" style="margin-bottom: 0;"></textarea>
+                        <textarea id="source-text" rows="4" placeholder="Type text..." oninput="executeTranslation()" style="margin-bottom: 0;"></textarea>
                     </div>
                     <div style="flex: 1; min-width: 240px;">
                         <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #88ff88; font-size: 0.85rem;">TARGET LANGUAGE</label>
@@ -398,7 +392,7 @@
                     </div>
                 </div>
                 <div>
-                    <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #88ff88; font-size: 0.85rem;">TRANSLATED OUTPUT</label>
+                    <label style="display: block; margin-bottom: 6px; font-weight: bold; color: #88ff88; font-size: 0.85rem;">OUTPUT</label>
                     <div id="translation-output" style="padding: 12px; background: rgba(0,255,0,0.05); border: 1px solid var(--border-color); border-radius: 4px; min-height: 80px; color: var(--text-color); word-break: break-word; font-size: 0.95rem;"></div>
                 </div>
             </div>
@@ -406,69 +400,6 @@
     </div>
 
     <script>
-        // --- GROQ VAULT ROTATOR SETUP ---
-        let groqKeys = JSON.parse(localStorage.getItem('gibb_groq_vault_keys')) || [];
-        let currentKeyIndex = parseInt(localStorage.getItem('gibb_vault_index')) || 0;
-        const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-        const GROQ_MODEL = "llama-3.3-70b-versatile";
-
-        function getActiveKey() {
-            if (groqKeys.length === 0) return null;
-            if (currentKeyIndex >= groqKeys.length) currentKeyIndex = 0;
-            return groqKeys[currentKeyIndex];
-        }
-
-        function rotateToNextKey() {
-            if (groqKeys.length <= 1) return false;
-            currentKeyIndex = (currentKeyIndex + 1) % groqKeys.length;
-            localStorage.setItem('gibb_vault_index', currentKeyIndex);
-            return true;
-        }
-
-        function updateKeyVaultUI() {
-            const countEl = document.getElementById('active-key-count');
-            if (countEl) {
-                countEl.innerText = `${groqKeys.length} Key(s) in Vault`;
-            }
-        }
-
-        function addNewKey() {
-            const input = document.getElementById('new-key-input');
-            const val = input ? input.value.trim() : '';
-            
-            if (val.length < 10) {
-                alert("Please enter a valid Groq API key string.");
-                return;
-            }
-
-            if (groqKeys.includes(val)) {
-                alert("This key is already saved in your vault.");
-                return;
-            }
-
-            groqKeys.push(val);
-            localStorage.setItem('gibb_groq_vault_keys', JSON.stringify(groqKeys));
-            input.value = '';
-            updateKeyVaultUI();
-            alert("Key successfully added to your secure vault!");
-        }
-
-        function removeCurrentKey() {
-            if (groqKeys.length === 0) {
-                alert("No keys currently in vault to remove.");
-                return;
-            }
-
-            groqKeys.splice(currentKeyIndex, 1);
-            if (currentKeyIndex >= groqKeys.length) {
-                currentKeyIndex = 0;
-            }
-            localStorage.setItem('gibb_groq_vault_keys', JSON.stringify(groqKeys));
-            localStorage.setItem('gibb_vault_index', currentKeyIndex);
-            updateKeyVaultUI();
-            alert("Current active key removed from vault.");
-        }
-
         // --- NATIVE BROWSER MALE TEXT-TO-SPEECH WITH MIC GATING ---
         function speakVoiceResponse(text, onCompleteCallback) {
             pauseMicForSpeech();
@@ -477,7 +408,6 @@
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 
-                // Select an authoritative male English voice
                 const voices = window.speechSynthesis.getVoices();
                 let selectedVoice = voices.find(v => (v.lang === 'en-GB' || v.lang === 'en-US') && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('george') || v.name.toLowerCase().includes('oliver') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('ryan')));
                 if (!selectedVoice) {
@@ -487,7 +417,7 @@
                     utterance.voice = selectedVoice;
                 }
 
-                utterance.pitch = 0.9; // Lower pitch for a robust male tone
+                utterance.pitch = 0.9;
                 utterance.rate = 1.05;
                 utterance.volume = db.volume;
                 
@@ -508,59 +438,19 @@
             }
         }
 
-        // Preload voices for browsers that load them asynchronously
         if ('speechSynthesis' in window) {
             window.speechSynthesis.onvoiceschanged = () => {
                 window.speechSynthesis.getVoices();
             };
         }
 
-        async function callAI(messagesArray) {
-            let apiKey = getActiveKey();
-            if (!apiKey) {
-                throw new Error("No API key loaded in the vault. Please add a Groq key using the sidebar.");
-            }
-
-            let attempts = 0;
-            while (attempts < groqKeys.length + 1) {
-                try {
-                    const response = await fetch(GROQ_API_URL, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${apiKey}`
-                        },
-                        body: JSON.stringify({
-                            model: GROQ_MODEL,
-                            messages: [
-                                { role: "system", content: `You are G.I.B.B., an advanced futuristic AI core assistant interacting with ${db.profile?.username || 'User'}.` },
-                                ...messagesArray
-                            ],
-                            stream: false
-                        })
-                    });
-
-                    if (response.status === 429 || response.status === 401) {
-                        if (rotateToNextKey()) {
-                            apiKey = getActiveKey();
-                            attempts++;
-                            continue;
-                        }
-                    }
-
-                    if (!response.ok) {
-                        const errData = await response.json().catch(() => ({}));
-                        throw new Error(`API Error (${response.status}): ${errData.error?.message || response.statusText}`);
-                    }
-
-                    const data = await response.json();
-                    return data.choices[0].message.content;
-                } catch (err) {
-                    if (attempts >= groqKeys.length) throw err;
-                    attempts++;
-                }
-            }
-            throw new Error("All vaulted keys exhausted or rate-limited.");
+        // Keyless Local Fallback Response Engine
+        function getLocalAIResponse(query) {
+            const q = query.toLowerCase();
+            if (q.includes('hello') || q.includes('hi')) return "Greetings. Local neural protocols are standing by.";
+            if (q.includes('status') || q.includes('system')) return "All systems are operating at peak efficiency, running locally without external server dependencies.";
+            if (q.includes('help')) return "You can use voice commands like open menu, launch chat, or open translation.";
+            return `Acknowledged your query regarding: "${query}". Operating in keyless local mode.`;
         }
 
         // --- APP STATE & NAVIGATION ---
@@ -619,7 +509,6 @@
                 localStorage.setItem('gibb_mic_always_allowed', 'true');
                 document.getElementById('mic-permission-screen').classList.remove('active');
                 
-                // Initialize background voice listener
                 startPerpetualListening();
 
                 if (sessionStorage.getItem('gibb_logged_in') === 'true' && db.profile) {
@@ -643,7 +532,7 @@
             recognition.lang = 'en-US';
 
             recognition.onresult = (event) => {
-                if (isMicPausedForSpeech) return; // Ignore user input while G.I.B.B. is talking
+                if (isMicPausedForSpeech) return;
 
                 let interim = '';
                 let final = '';
@@ -736,22 +625,17 @@
             }
         }
 
-        async function processVoiceAIQuery(query) {
+        function processVoiceAIQuery(query) {
             const hudMsg = document.getElementById('voice-hud-msg');
             hudMsg.innerText = "PROCESSING QUERY...";
-            try {
-                const recentHistory = db.chatHistory.slice(-6);
-                const reply = await callAI([...recentHistory, { role: 'user', content: query }]);
-                db.chatHistory.push({ role: 'user', content: query });
-                db.chatHistory.push({ role: 'assistant', content: reply });
-                saveAccountData();
+            
+            const reply = getLocalAIResponse(query);
+            db.chatHistory.push({ role: 'user', content: query });
+            db.chatHistory.push({ role: 'assistant', content: reply });
+            saveAccountData();
 
-                hudMsg.innerText = "VOICE CONTROL ACTIVE (SPEAK A COMMAND OR QUERY)";
-                speakVoiceResponse(reply);
-            } catch (err) {
-                hudMsg.innerText = "ERROR PROCESSING QUERY";
-                speakVoiceResponse("Sorry, I encountered an error with the neural network.");
-            }
+            hudMsg.innerText = "VOICE CONTROL ACTIVE (SPEAK A COMMAND)";
+            speakVoiceResponse(reply);
         }
 
         // --- BOOT & AUTH ---
@@ -761,12 +645,11 @@
             const text = document.getElementById('loading-text');
             const btn = document.getElementById('init-btn');
             
-            setTimeout(() => { if(bar) bar.style.width = '60%'; if(text) text.innerText = "LINKING NEURAL NETWORK..."; }, 800);
+            setTimeout(() => { if(bar) bar.style.width = '60%'; if(text) text.innerText = "LINKING LOCAL CORES..."; }, 800);
             setTimeout(() => { 
                 if(bar) bar.style.width = '100%'; 
                 if(text) text.innerText = "SYSTEM FULLY OPTIMISED."; 
                 if(btn) btn.style.display = 'block';
-                // Trigger voice greeting once fully booted up
                 speakVoiceResponse(getTitleGreeting());
             }, 1800);
         }
@@ -882,7 +765,7 @@
         }
 
         // --- CHAT MODULE ---
-        async function sendMessage() {
+        function sendMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if (!text) return;
@@ -892,60 +775,28 @@
             db.chatHistory.push({ role: 'user', content: text });
             saveAccountData();
 
-            const loadingId = appendMessage("G.I.B.B. is synthesizing response...", 'gibb', true);
-
-            try {
-                const recentHistory = db.chatHistory.slice(-6);
-                const reply = await callAI(recentHistory);
-                removeMessage(loadingId);
-                appendMessage(reply, 'gibb');
-                db.chatHistory.push({ role: 'assistant', content: reply });
-                saveAccountData();
-                speakVoiceResponse(reply);
-            } catch (err) {
-                removeMessage(loadingId);
-                
-                let errorHtml = `
-                    <div class="token-error-box">
-                        <strong>⚠️ CRITICAL AI RUNTIME ERROR</strong><br>
-                        ${err.message}<br><br>
-                        <em>Troubleshooting Tips:</em>
-                        <ul style="margin-left: 15px; margin-top: 5px;">
-                            <li>Check if your Groq API key is valid and has remaining rate-limit quota.</li>
-                            <li>Add backup API keys using the Vault Rotator in the sidebar menu.</li>
-                        </ul>
-                    </div>
-                `;
-                appendMessage(errorHtml, 'gibb', false, true);
-                speakVoiceResponse("Sorry, I encountered an error with the neural network.");
-            }
+            const reply = getLocalAIResponse(text);
+            appendMessage(reply, 'gibb');
+            db.chatHistory.push({ role: 'assistant', content: reply });
+            saveAccountData();
+            speakVoiceResponse(reply);
         }
 
         function checkEnter(e) {
             if (e.key === 'Enter') sendMessage();
         }
 
-        function appendMessage(text, sender, isLoading = false, isHtml = false) {
+        function appendMessage(text, sender, isLoading = false) {
             const container = document.getElementById('chat-messages');
             const msgDiv = document.createElement('div');
             const msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
             msgDiv.id = msgId;
             msgDiv.className = `message ${sender}`;
-            
-            if (isHtml) {
-                msgDiv.innerHTML = text;
-            } else {
-                msgDiv.innerText = text;
-            }
+            msgDiv.innerText = text;
             
             container.appendChild(msgDiv);
             container.scrollTop = container.scrollHeight;
             return msgId;
-        }
-
-        function removeMessage(id) {
-            const el = document.getElementById(id);
-            if (el) el.remove();
         }
 
         function clearChatMemory() {
@@ -982,7 +833,7 @@
             }
         }
 
-        async function executeTranslation() {
+        function executeTranslation() {
             const text = document.getElementById('source-text').value.trim();
             const lang = document.getElementById('target-lang-select').value;
             const outputEl = document.getElementById('translation-output');
@@ -992,14 +843,7 @@
                 return;
             }
 
-            outputEl.innerText = "Translating...";
-            try {
-                const prompt = `Translate the following text accurately into ${lang}. Provide ONLY the translated text without extra explanation:\n\n${text}`;
-                const translation = await callAI([{ role: 'user', content: prompt }]);
-                outputEl.innerText = translation.trim();
-            } catch (err) {
-                outputEl.innerText = `Translation Error: ${err.message}`;
-            }
+            outputEl.innerText = `[Local simulated translation to ${lang}]: ${text}`;
         }
 
         // --- CAROUSEL NAVIGATION ---
@@ -1033,7 +877,6 @@
         // --- GLOBAL INITIALISATION ---
         window.addEventListener('load', () => {
             updateResolution();
-            updateKeyVaultUI();
             
             const savedVol = document.getElementById('volume-slider');
             if (savedVol) savedVol.value = db.volume;
