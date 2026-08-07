@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>G.I.B.B. System - Secure Core</title>
+    <title>G.I.B.B. System - Keyless AI Core</title>
+    <script src="https://js.puter.com/v2/puter.js"></script>
     <style>
         :root {
             --bg-color: #030803;
@@ -325,9 +326,8 @@
                 <div>
                     <h3 style="margin-bottom: 20px; text-shadow: 0 0 10px var(--accent-glow);">CORE SETTINGS</h3>
                     <div class="widget-box">
-                        <div class="widget-title">Groq API Key Input</div>
-                        <input type="password" id="access-key-input" placeholder="Paste Groq key (gsk_...)" style="margin-bottom: 8px; font-size: 0.85rem; padding: 8px;" oninput="verifyKey()">
-                        <p id="key-status" style="font-size: 0.9rem; font-weight: bold; margin-top: 5px; text-shadow: 0 0 5px rgba(255,0,0,0.5);">🔑 NO KEY</p>
+                        <div class="widget-title">AI Engine Status</div>
+                        <p id="key-status" style="font-size: 0.9rem; font-weight: bold; margin-top: 5px; text-shadow: 0 0 5px rgba(0,255,0,0.5); color: #10b981;">⚡ PUTER.JS KEYLESS ACTIVE</p>
                     </div>
                     <div class="widget-box">
                         <div class="widget-title">System Volume</div>
@@ -353,7 +353,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 15px; font-size: 0.8rem; color: #88ff88; text-align: center;">Perpetual Wake Engine Enabled</p>
+                <p style="margin-top: 15px; font-size: 0.8rem; color: #88ff88; text-align: center;">Third-Party Puter.js AI Voice Engine Active</p>
             </div>
 
             <div class="sidebar-panel">
@@ -389,7 +389,7 @@
     <div id="dashboard-screen" class="screen">
         <div class="chat-container">
             <div class="chat-header">
-                <span style="font-weight: bold; letter-spacing: 2px;">G.I.B.B. NEURAL CONNECT (MEMORY & GROQ INTEGRATED)</span>
+                <span style="font-weight: bold; letter-spacing: 2px;">G.I.B.B. NEURAL CONNECT (PUTER AI INTEGRATED)</span>
                 <div>
                     <button class="btn" style="width: auto; padding: 8px 16px; margin-bottom: 0; display: inline-block; margin-right: 10px; background: rgba(255,0,0,0.2); border-color: var(--danger-color); color: #ff8888;" onclick="clearChatMemory()">CLEAR MEMORY</button>
                     <button class="btn" style="width: auto; padding: 8px 16px; margin-bottom: 0; display: inline-block;" onclick="openMenu()">SYSTEM MENU</button>
@@ -449,12 +449,13 @@
         let isPerpetualListening = true;
         let voiceActiveMode = false;
         let isSpeakingNow = false;
+        let currentAudioElement = null;
 
         let allAccounts = JSON.parse(localStorage.getItem('gibb_multi_accounts')) || {};
         let currentEmail = localStorage.getItem('gibb_current_email') || null;
 
         let db = { 
-            profile: null, chatHistory: [], volume: 1.0, savedKey: ''
+            profile: null, chatHistory: [], volume: 1.0
         };
 
         function loadAccountData(email) {
@@ -462,7 +463,7 @@
                 db = allAccounts[email];
             } else {
                 db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { 
-                    profile: null, chatHistory: [], volume: 1.0, savedKey: ''
+                    profile: null, chatHistory: [], volume: 1.0
                 };
             }
         }
@@ -474,10 +475,6 @@
             window.addEventListener('resize', updateResolution);
             
             document.getElementById('volume-slider').value = db.volume;
-            if(db.savedKey) {
-                document.getElementById('access-key-input').value = db.savedKey;
-                verifyKey();
-            }
             
             const langSelect = document.getElementById('target-lang-select');
             if(langSelect) {
@@ -503,17 +500,10 @@
             requestAnimationFrame(countFPS);
         });
 
-        if (window.speechSynthesis) {
-            window.speechSynthesis.onvoiceschanged = () => {
-                window.speechSynthesis.getVoices();
-            };
-        }
-
         async function requestMicrophoneAccess() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 stream.getTracks().forEach(track => track.stop());
-                
                 document.getElementById('mic-permission-screen').classList.remove('active');
                 
                 if (sessionStorage.getItem('gibb_logged_in') === 'true' && db.profile) {
@@ -545,13 +535,13 @@
                 <h2 style="margin-bottom: 15px; letter-spacing: 2px;">CREATE ACCOUNT</h2>
                 <div id="auth-error" class="error-msg"></div>
                 <input type="text" id="reg-username" placeholder="Choose Username">
-                <input type="email" id="reg-email" placeholder="Email Address (for multi-device sync)">
+                <input type="email" id="reg-email" placeholder="Email Address">
                 <select id="reg-gender">
                     <option value="" disabled selected>Select Title Preference</option>
                     <option value="sir">Male (Sir)</option>
                     <option value="miss">Female (Miss)</option>
                 </select>
-                <input type="password" id="reg-password" placeholder="Create Password (Secure)">
+                <input type="password" id="reg-password" placeholder="Create Password">
                 <button class="btn" onclick="registerAccount()">REGISTER ACCOUNT</button>
                 <button class="btn" style="background: transparent; border-color: rgba(0,255,0,0.2); font-size: 0.85rem;" onclick="renderLoginScreen()">BACK TO LOGIN</button>
             `;
@@ -563,14 +553,14 @@
             const errorBox = document.getElementById('auth-error');
 
             if (!email || !allAccounts[email]) {
-                errorBox.innerText = "Email account not found. Please create an account.";
+                errorBox.innerText = "Email account not found.";
                 errorBox.style.display = 'block';
                 return;
             }
 
             const targetAccount = allAccounts[email];
             if (targetAccount.profile.password !== pass) {
-                errorBox.innerText = "Incorrect password! Access denied.";
+                errorBox.innerText = "Incorrect password.";
                 errorBox.style.display = 'block';
                 return;
             }
@@ -578,7 +568,6 @@
             currentEmail = email;
             localStorage.setItem('gibb_current_email', email);
             loadAccountData(email);
-
             sessionStorage.setItem('gibb_logged_in', 'true');
             showLoadingScreen();
         }
@@ -590,29 +579,8 @@
             const pass = document.getElementById('reg-password').value;
             const errorBox = document.getElementById('auth-error');
 
-            if (!user) {
-                errorBox.innerText = "Please enter a valid username.";
-                errorBox.style.display = 'block';
-                return;
-            }
-            if (!email || !email.includes('@')) {
-                errorBox.innerText = "Please enter a valid email address.";
-                errorBox.style.display = 'block';
-                return;
-            }
-            if (!honorific) {
-                errorBox.innerText = "Please select your title preference.";
-                errorBox.style.display = 'block';
-                return;
-            }
-            if (!pass || pass.length < 4) {
-                errorBox.innerText = "Password must be at least 4 characters.";
-                errorBox.style.display = 'block';
-                return;
-            }
-
-            if (allAccounts[email]) {
-                errorBox.innerText = "An account with this email already exists. Log in instead.";
+            if (!user || !email || !honorific || !pass) {
+                errorBox.innerText = "Please complete all fields.";
                 errorBox.style.display = 'block';
                 return;
             }
@@ -620,15 +588,13 @@
             db = {
                 profile: { name: user, email: email, honorific: honorific, password: pass },
                 chatHistory: [],
-                volume: 1.0,
-                savedKey: ''
+                volume: 1.0
             };
 
             allAccounts[email] = db;
             currentEmail = email;
             localStorage.setItem('gibb_current_email', email);
             saveDatabase();
-
             sessionStorage.setItem('gibb_logged_in', 'true');
             showLoadingScreen();
         }
@@ -645,26 +611,11 @@
             if(display) display.innerText = `${window.innerWidth}x${window.innerHeight}`;
         }
 
-        function verifyKey() {
-            const inputField = document.getElementById('access-key-input');
-            let inputVal = inputField ? inputField.value.trim() : '';
-            inputVal = inputVal.replace(/[^\x20-\x7E]/g, '');
-            
-            const statusEl = document.getElementById('key-status');
-            db.savedKey = inputVal;
-            saveDatabase();
-            
-            if (inputVal.startsWith('gsk_') && inputVal.length > 20) {
-                statusEl.innerHTML = '🔑 GROQ KEY ACTIVE';
-                statusEl.style.color = '#10b981';
-            } else {
-                statusEl.innerHTML = '🔑 INVALID KEY';
-                statusEl.style.color = '#ff4444';
-            }
-        }
-
         function updateVolume() { 
             db.volume = parseFloat(document.getElementById('volume-slider').value); 
+            if (currentAudioElement) {
+                currentAudioElement.volume = db.volume;
+            }
             saveDatabase(); 
         }
 
@@ -687,7 +638,7 @@
             initPerpetualListeningEngine();
         }
 
-        // --- ULTRA-FAST THIRD-PARTY AUDIO ROUTER (ELEVENLABS STREAM / WEB AUDIO) ---
+        // --- PUTER.JS KEYLESS THIRD-PARTY AI MALE VOICE PIPELINE ---
         async function speak(text, callback) {
             if (globalRecognition) {
                 try { globalRecognition.stop(); } catch(e){}
@@ -695,51 +646,50 @@
 
             isSpeakingNow = true;
 
-            // Optional: If you use a custom ElevenLabs API integration, you can swap this section with an audio fetch.
-            // For lightning-fast browser-level responsive fallback without lag:
-            if (!window.speechSynthesis) {
-                isSpeakingNow = false;
-                if (callback) callback();
-                return;
+            if (currentAudioElement) {
+                currentAudioElement.pause();
+                currentAudioElement = null;
             }
 
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.volume = db.volume;
-            utterance.rate = 1.15; // Extremely snappy response pace
-            utterance.pitch = 0.8; // Deep resonant male profile
+            try {
+                // Generates audio using Puter.js third-party keyless AI (OpenAI provider model with deep male voice "onyx")
+                const audio = await puter.ai.txt2speech(text, {
+                    provider: "openai",
+                    model: "gpt-4o-mini-tts",
+                    voice: "onyx",
+                    instructions: "Speak in a deep, authoritative, crisp futuristic male tone."
+                });
 
-            const voices = window.speechSynthesis.getVoices();
-            const targetVoice = voices.find(v => 
-                v.name.includes('Microsoft David') || 
-                v.name.includes('Google UK English Male') || 
-                v.name.includes('Daniel') || 
-                (v.name.toLowerCase().includes('male') && v.lang.includes('en'))
-            ) || voices.find(v => v.lang.startsWith('en'));
+                currentAudioElement = audio;
+                audio.volume = db.volume;
 
-            if (targetVoice) utterance.voice = targetVoice;
+                audio.onended = () => {
+                    isSpeakingNow = false;
+                    resumeListening();
+                    if (callback) callback();
+                };
 
-            utterance.onend = () => {
+                audio.onerror = () => {
+                    isSpeakingNow = false;
+                    resumeListening();
+                    if (callback) callback();
+                };
+
+                await audio.play();
+            } catch (err) {
+                console.error("Puter AI TTS Error:", err);
                 isSpeakingNow = false;
-                if (isPerpetualListening) {
-                    setTimeout(() => {
-                        try { globalRecognition.start(); } catch(e){}
-                    }, 200);
-                }
+                resumeListening();
                 if (callback) callback();
-            };
+            }
+        }
 
-            utterance.onerror = () => {
-                isSpeakingNow = false;
-                if (isPerpetualListening) {
-                    setTimeout(() => {
-                        try { globalRecognition.start(); } catch(e){}
-                    }, 200);
-                }
-                if (callback) callback();
-            };
-
-            window.speechSynthesis.speak(utterance);
+        function resumeListening() {
+            if (isPerpetualListening) {
+                setTimeout(() => {
+                    try { globalRecognition.start(); } catch(e){}
+                }, 200);
+            }
         }
 
         function saveDatabase() { 
@@ -751,11 +701,10 @@
         }
 
         function showMenuScreen() {
-            if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
+            if (currentAudioElement) { currentAudioElement.pause(); currentAudioElement = null; }
             isSpeakingNow = false;
             voiceActiveMode = false;
             switchScreen('menu-screen');
-            verifyKey(); 
             updateCarouselUI();
         }
 
@@ -764,7 +713,6 @@
         function selectCarouselOption(index) {
             carouselIndex = index;
             updateCarouselUI();
-            
             setTimeout(() => {
                 if (index === 0) showDashboard();
                 if (index === 1) activateVoiceScreenViaManual();
@@ -781,14 +729,14 @@
         }
 
         function showDashboard() {
-            if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
+            if (currentAudioElement) { currentAudioElement.pause(); currentAudioElement = null; }
             isSpeakingNow = false;
             switchScreen('dashboard-screen');
             renderChatHistory();
         }
 
         function showTranslation() {
-            if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
+            if (currentAudioElement) { currentAudioElement.pause(); currentAudioElement = null; }
             isSpeakingNow = false;
             switchScreen('translation-screen');
         }
@@ -804,7 +752,7 @@
         }
 
         function logout() {
-            if (window.speechSynthesis) { window.speechSynthesis.cancel(); }
+            if (currentAudioElement) { currentAudioElement.pause(); currentAudioElement = null; }
             sessionStorage.removeItem('gibb_logged_in');
             renderLoginScreen();
             switchScreen('auth-screen');
@@ -822,7 +770,7 @@
             if (db.chatHistory.length === 0) {
                 const welcomeMsg = document.createElement('div');
                 welcomeMsg.className = 'message gibb';
-                welcomeMsg.innerText = `G.I.B.B. Neural Core Online. How may I assist you today, ${db.profile ? db.profile.name : 'User'}?`;
+                welcomeMsg.innerText = `G.I.B.B. Neural Core Online (Puter Keyless). How may I assist you today, ${db.profile ? db.profile.name : 'User'}?`;
                 container.appendChild(welcomeMsg);
                 return;
             }
@@ -853,54 +801,26 @@
             saveDatabase();
             renderChatHistory();
 
-            let apiKey = (db.savedKey || "").trim().replace(/[^\x20-\x7E]/g, '');
-
-            if (!apiKey || !apiKey.startsWith('gsk_')) {
-                const errText = "Error: Groq API Key missing or invalid in System Settings.";
-                db.chatHistory.push({ role: 'gibb', content: errText });
-                saveDatabase();
-                renderChatHistory();
-                if (voiceActiveMode) speak(errText);
-                return;
-            }
-
             const apiFormattedMessages = db.chatHistory.map(m => ({
                 role: m.role === 'gibb' ? 'assistant' : m.role,
                 content: m.content
             }));
 
             try {
-                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${apiKey}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
-                        messages: [
-                            { role: "system", content: "You are G.I.B.B., an advanced futuristic AI core assistant. Keep answers concise, helpful, and precise." },
-                            ...apiFormattedMessages
-                        ]
-                    })
-                });
+                // Keyless chat completion request via Puter.js AI
+                const response = await puter.ai.chat([
+                    { role: "system", content: "You are G.I.B.B., an advanced futuristic AI core assistant. Keep answers concise, helpful, and precise." },
+                    ...apiFormattedMessages
+                ], { model: "claude-3-5-sonnet" });
 
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    throw new Error(errorData.error?.message || `HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (data.choices && data.choices.length > 0) {
-                    const aiReply = data.choices[0].message.content;
-                    db.chatHistory.push({ role: 'gibb', content: aiReply });
-                    saveDatabase();
-                    renderChatHistory();
-                    if (voiceActiveMode) {
-                        speak(aiReply);
-                    }
-                } else {
-                    throw new Error("Invalid response format from Groq API");
+                const aiReply = typeof response === 'string' ? response : (response.message?.content || response.text || "Command processed.");
+                
+                db.chatHistory.push({ role: 'gibb', content: aiReply });
+                saveDatabase();
+                renderChatHistory();
+                
+                if (voiceActiveMode) {
+                    speak(aiReply);
                 }
             } catch (err) {
                 console.error("Neural Link Fetch Error:", err);
@@ -922,40 +842,16 @@
                 return;
             }
 
-            let apiKey = (db.savedKey || "").trim().replace(/[^\x20-\x7E]/g, '');
-            if (!apiKey || !apiKey.startsWith('gsk_')) {
-                outputEl.innerText = "Error: Groq API Key required.";
-                return;
-            }
-
             outputEl.innerText = "Translating...";
 
             try {
-                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${apiKey}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
-                        messages: [
-                            { role: "system", content: `Translate strictly into language code: ${targetLang}. Output only translated text.` },
-                            { role: "user", content: source }
-                        ]
-                    })
-                });
+                const response = await puter.ai.chat([
+                    { role: "system", content: `Translate strictly into language code: ${targetLang}. Output only translated text.` },
+                    { role: "user", content: source }
+                ]);
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                if (data.choices && data.choices.length > 0) {
-                    outputEl.innerText = data.choices[0].message.content;
-                } else {
-                    outputEl.innerText = "Translation failed.";
-                }
+                const translationResult = typeof response === 'string' ? response : (response.message?.content || response.text || "");
+                outputEl.innerText = translationResult || "Translation failed.";
             } catch (err) {
                 outputEl.innerText = "Translation network error: " + err.message;
             }
@@ -995,10 +891,8 @@
             globalRecognition.onend = () => {
                 if (isPerpetualListening && !isSpeakingNow) {
                     setTimeout(() => {
-                        try {
-                            globalRecognition.start();
-                        } catch (e) {}
-                    }, 250);
+                        try { globalRecognition.start(); } catch (e) {}
+                    }, 200);
                 }
             };
 
