@@ -76,11 +76,11 @@
             opacity: 1;
         }
 
-        /* Entire logo container pulses very slowly together */
+        /* Entire logo container including outer rings pulses very slowly together */
         .logo-container {
             position: relative;
-            width: clamp(220px, 30vw, 340px);
-            height: clamp(220px, 30vw, 340px);
+            width: clamp(240px, 34vw, 380px);
+            height: clamp(240px, 34vw, 380px);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -95,17 +95,18 @@
             100% { transform: scale(0.94); }
         }
 
+        /* Actual logo image made even bigger inside container */
         .gibb-img-logo {
-            width: 75%;
-            height: 75%;
+            width: 88%;
+            height: 88%;
             object-fit: contain;
             z-index: 10;
             position: absolute;
-            filter: drop-shadow(0 0 25px var(--accent-glow)) drop-shadow(0 0 50px rgba(0, 255, 0, 0.4));
+            filter: drop-shadow(0 0 30px var(--accent-glow)) drop-shadow(0 0 60px rgba(0, 255, 0, 0.45));
         }
 
         .orbit-ring-outer {
-            position: absolute; width: 95%; height: 95%; border-radius: 50%;
+            position: absolute; width: 98%; height: 98%; border-radius: 50%;
             border: 2px solid rgba(0, 255, 0, 0.6); animation: spinClockwise 12s linear infinite;
         }
         .dot-outer {
@@ -114,7 +115,7 @@
         }
 
         .orbit-ring-inner {
-            position: absolute; width: 82%; height: 82%; border-radius: 50%;
+            position: absolute; width: 84%; height: 84%; border-radius: 50%;
             border: 1px dashed rgba(0, 255, 0, 0.4); animation: spinCounterClockwise 8s linear infinite;
         }
         .dot-inner {
@@ -255,9 +256,9 @@
             <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
         </div>
         <div class="panel" style="max-width: 420px;">
-            <h2 style="margin-bottom: 12px; letter-spacing: 2px; font-size: 1.2rem;">MICROPHONE ACCESS</h2>
-            <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 20px; line-height: 1.4;">G.I.B.B. requires live microphone permission for continuous voice commands &amp; audio query recognition.</p>
-            <button class="btn" onclick="requestMicrophoneAccess()" style="padding: 14px; font-size: 1rem; box-shadow: 0 0 20px var(--accent-glow);">ACTIVATE MIC &amp; BOOT</button>
+            <h2 style="margin-bottom: 12px; letter-spacing: 2px; font-size: 1.2rem;">CHROMEBOOK AUDIO &amp; MIC</h2>
+            <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 20px; line-height: 1.4;">Click below to initialize hardware drivers and grant microphone permissions permanently for this browser.</p>
+            <button class="btn" onclick="requestMicrophoneAccess()" style="padding: 14px; font-size: 1rem; box-shadow: 0 0 20px var(--accent-glow);">CONNECT MIC &amp; START</button>
         </div>
     </div>
 
@@ -292,12 +293,12 @@
                 <div>
                     <h3 style="margin-bottom: 15px; text-shadow: 0 0 10px var(--accent-glow); font-size: 1rem;">CORE SETTINGS</h3>
                     <div class="widget-box">
-                        <div class="widget-title">Groq API Key</div>
-                        <input type="password" id="groq-key-input" placeholder="gsk_..." oninput="saveGroqKey()" style="margin-bottom: 0; font-size: 0.8rem; padding: 6px;">
+                        <div class="widget-title">Multi-Key Load Balancer</div>
+                        <p id="active-key-label" style="font-size: 0.8rem; color: #88ff88; word-break: break-all;">Key 1 Active</p>
                     </div>
                     <div class="widget-box">
                         <div class="widget-title">AI Engine Status</div>
-                        <p id="key-status" style="font-size: 0.85rem; font-weight: bold; margin-top: 4px; color: #ff4444;">🔴 API KEY REQUIRED</p>
+                        <p id="key-status" style="font-size: 0.85rem; font-weight: bold; margin-top: 4px; color: #10b981;">🟢 5 MULTI-KEYS LOADED</p>
                     </div>
                     <div class="widget-box">
                         <div class="widget-title">System Volume</div>
@@ -322,7 +323,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 10px; font-size: 0.75rem; color: #88ff88; text-align: center;">ResponsiveVoice Male TTS &amp; Groq LLM Active</p>
+                <p style="margin-top: 10px; font-size: 0.75rem; color: #88ff88; text-align: center;">ResponsiveVoice US English Male &amp; 5-Key Failover Active</p>
             </div>
 
             <div class="sidebar-panel">
@@ -397,6 +398,28 @@
     </div>
 
     <script>
+        // 5 Multi-Keys provided by user with automatic fallback rotation
+        const groqKeys = [
+            "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",
+            "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",
+            "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",
+            "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",
+            "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"
+        ];
+        let currentKeyIndex = parseInt(localStorage.getItem('gibb_key_index')) || 0;
+
+        function getActiveKey() {
+            return groqKeys[currentKeyIndex];
+        }
+
+        function rotateToNextKey() {
+            currentKeyIndex = (currentKeyIndex + 1) % groqKeys.length;
+            localStorage.setItem('gibb_key_index', currentKeyIndex);
+            const label = document.getElementById('active-key-label');
+            if(label) label.innerText = `Key ${currentKeyIndex + 1} Active`;
+            console.warn(`Rate limit reached on Key ${currentKeyIndex}. Rotating automatically to Key ${currentKeyIndex + 1}...`);
+        }
+
         const languages50 = [
             {code: "es", name: "Spanish"}, {code: "fr", name: "French"}, {code: "de", name: "German"},
             {code: "zh", name: "Chinese"}, {code: "ja", name: "Japanese"}, {code: "ar", name: "Arabic"},
@@ -417,16 +440,16 @@
         let voiceActiveMode = false;
         let isSpeakingNow = false;
 
+        // Permanent storage persistence logic specifically engineered for Chromebook browser local profiles
         let allAccounts = JSON.parse(localStorage.getItem('gibb_multi_accounts')) || {};
         let currentEmail = localStorage.getItem('gibb_current_email') || null;
-
-        let db = { profile: null, chatHistory: [], volume: 1.0, groqKey: "" };
+        let db = { profile: null, chatHistory: [], volume: 1.0 };
 
         function loadAccountData(email) {
             if (email && allAccounts[email]) {
                 db = allAccounts[email];
             } else {
-                db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { profile: null, chatHistory: [], volume: 1.0, groqKey: "" };
+                db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { profile: null, chatHistory: [], volume: 1.0 };
             }
         }
         loadAccountData(currentEmail);
@@ -436,10 +459,8 @@
             window.addEventListener('resize', updateResolution);
             
             document.getElementById('volume-slider').value = db.volume;
-            if(document.getElementById('groq-key-input')) {
-                document.getElementById('groq-key-input').value = db.groqKey || "";
-            }
-            updateKeyStatusUI();
+            const label = document.getElementById('active-key-label');
+            if(label) label.innerText = `Key ${currentKeyIndex + 1} Active`;
             
             const langSelect = document.getElementById('target-lang-select');
             if(langSelect) {
@@ -465,24 +486,6 @@
             requestAnimationFrame(countFPS);
         });
 
-        function updateKeyStatusUI() {
-            const statusEl = document.getElementById('key-status');
-            if (!statusEl) return;
-            if (db.groqKey && db.groqKey.trim() !== "") {
-                statusEl.innerText = "🟢 GROQ KEY ACTIVE";
-                statusEl.style.color = "#10b981";
-            } else {
-                statusEl.innerText = "🔴 API KEY REQUIRED";
-                statusEl.style.color = "#ff4444";
-            }
-        }
-
-        function saveGroqKey() {
-            db.groqKey = document.getElementById('groq-key-input').value.trim();
-            saveDatabase();
-            updateKeyStatusUI();
-        }
-
         async function requestMicrophoneAccess() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -496,7 +499,7 @@
                     switchScreen('auth-screen');
                 }
             } catch (err) {
-                alert("Microphone permission is required to initialize audio drivers.");
+                alert("Microphone permission was blocked. Please click the camera/mic icon in your Chromebook address bar to allow microphone access.");
             }
         }
 
@@ -570,7 +573,7 @@
 
             db = {
                 profile: { name: user, email: email, honorific: honorific, password: pass },
-                chatHistory: [], volume: 1.0, groqKey: ""
+                chatHistory: [], volume: 1.0
             };
 
             allAccounts[email] = db;
@@ -621,7 +624,7 @@
             });
         }
 
-        // --- RESPONSIVEVOICE ENHANCED MALE TTS ENGINE ("UK English Male" / Google UK English Male) ---
+        // --- RESPONSIVEVOICE HIGH-QUALITY MALE TTS ENGINE ---
         function speak(text, callback) {
             isSpeakingNow = true;
             if (globalRecognition) {
@@ -629,10 +632,10 @@
             }
 
             if (typeof responsiveVoice !== "undefined") {
-                responsiveVoice.speak(text, "UK English Male", {
+                responsiveVoice.speak(text, "US English Male", {
                     volume: db.volume,
                     rate: 1.0,
-                    pitch: 0.95,
+                    pitch: 0.9,
                     onend: () => {
                         isSpeakingNow = false;
                         resumeListening();
@@ -659,6 +662,7 @@
             }
         }
 
+        // Permanent local persistence safe for Chromebook sessions
         function saveDatabase() { 
             if (currentEmail) {
                 allAccounts[currentEmail] = db;
@@ -753,6 +757,7 @@
             renderChatHistory();
         }
 
+        // Automated multi-key fetch with rate-limit failure detection & instant failover rotation
         async function sendMessage(customText) {
             const input = document.getElementById('chat-input');
             const text = customText || (input ? input.value.trim() : '');
@@ -764,59 +769,67 @@
             saveDatabase();
             renderChatHistory();
 
-            if (!db.groqKey || db.groqKey.trim() === "") {
-                const errText = "Error: Groq API Key is missing. Please add it in Core Settings.";
-                db.chatHistory.push({ role: 'gibb', content: errText });
-                saveDatabase();
-                renderChatHistory();
-                if (voiceActiveMode) speak(errText);
-                return;
-            }
-
             const apiFormattedMessages = db.chatHistory.map(m => ({
                 role: m.role === 'gibb' ? 'assistant' : m.role,
                 content: m.content
             }));
 
-            try {
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${db.groqKey}`
-                    },
-                    body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
-                        messages: [
-                            { role: "system", content: "You are G.I.B.B., an advanced futuristic AI core assistant. Keep answers concise, helpful, and precise." },
-                            ...apiFormattedMessages
-                        ]
-                    })
-                });
-                
-                const data = await res.json();
-                let aiReply = "Command processed.";
+            let attempts = 0;
+            let success = false;
+            let aiReply = "Command processed.";
 
-                if (data.choices && data.choices[0]) {
-                    aiReply = data.choices[0].message.content;
-                } else if (data.error) {
-                    throw new Error(data.error.message);
+            while (attempts < groqKeys.length && !success) {
+                try {
+                    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${getActiveKey()}`
+                        },
+                        body: JSON.stringify({
+                            model: "llama-3.3-70b-versatile",
+                            messages: [
+                                { role: "system", content: "You are G.I.B.B., an advanced futuristic AI core assistant. Keep answers concise, helpful, and precise." },
+                                ...apiFormattedMessages
+                            ]
+                        })
+                    });
+                    
+                    const data = await res.json();
+
+                    if (data.error) {
+                        // Check if rate limit reached or token quota exhausted
+                        if (data.error.message && (data.error.message.includes("Rate limit") || data.error.message.includes("quota") || data.error.message.includes("tokens"))) {
+                            rotateToNextKey();
+                            attempts++;
+                            continue;
+                        } else {
+                            throw new Error(data.error.message);
+                        }
+                    }
+
+                    if (data.choices && data.choices[0]) {
+                        aiReply = data.choices[0].message.content;
+                        success = true;
+                    } else {
+                        throw new Error("Invalid response received from server.");
+                    }
+                } catch (err) {
+                    attempts++;
+                    if (attempts >= groqKeys.length) {
+                        aiReply = `Connection Error across all keys: ${err.message}`;
+                    } else {
+                        rotateToNextKey();
+                    }
                 }
-                
-                db.chatHistory.push({ role: 'gibb', content: aiReply });
-                saveDatabase();
-                renderChatHistory();
-                
-                if (voiceActiveMode) {
-                    speak(aiReply);
-                }
-            } catch (err) {
-                console.error("Neural Link Fetch Error:", err);
-                const errText = `Connection Error: ${err.message}`;
-                db.chatHistory.push({ role: 'gibb', content: errText });
-                saveDatabase();
-                renderChatHistory();
-                if (voiceActiveMode) speak(errText);
+            }
+            
+            db.chatHistory.push({ role: 'gibb', content: aiReply });
+            saveDatabase();
+            renderChatHistory();
+            
+            if (voiceActiveMode) {
+                speak(aiReply);
             }
         }
 
@@ -830,37 +843,51 @@
                 return;
             }
 
-            if (!db.groqKey || db.groqKey.trim() === "") {
-                outputEl.innerText = "Error: Groq API Key required for translation. Add it in Core Settings.";
-                return;
-            }
-
             outputEl.innerText = "Translating...";
 
-            try {
-                const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${db.groqKey}`
-                    },
-                    body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
-                        messages: [
-                            { role: "system", content: `Translate strictly into language code: ${targetLang}. Output ONLY the translated text and nothing else.` },
-                            { role: "user", content: source }
-                        ]
-                    })
-                });
-                
-                const data = await res.json();
-                if (data.choices && data.choices[0]) {
-                    outputEl.innerText = data.choices[0].message.content;
-                } else if (data.error) {
-                    throw new Error(data.error.message);
+            let attempts = 0;
+            let success = false;
+
+            while (attempts < groqKeys.length && !success) {
+                try {
+                    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${getActiveKey()}`
+                        },
+                        body: JSON.stringify({
+                            model: "llama-3.3-70b-versatile",
+                            messages: [
+                                { role: "system", content: `Translate strictly into language code: ${targetLang}. Output ONLY the translated text and nothing else.` },
+                                { role: "user", content: source }
+                            ]
+                        })
+                    });
+                    
+                    const data = await res.json();
+                    if (data.error) {
+                        if (data.error.message && (data.error.message.includes("Rate limit") || data.error.message.includes("quota"))) {
+                            rotateToNextKey();
+                            attempts++;
+                            continue;
+                        } else {
+                            throw new Error(data.error.message);
+                        }
+                    }
+
+                    if (data.choices && data.choices[0]) {
+                        outputEl.innerText = data.choices[0].message.content;
+                        success = true;
+                    }
+                } catch (err) {
+                    attempts++;
+                    if (attempts >= groqKeys.length) {
+                        outputEl.innerText = "Translation network error: " + err.message;
+                    } else {
+                        rotateToNextKey();
+                    }
                 }
-            } catch (err) {
-                outputEl.innerText = "Translation network error: " + err.message;
             }
         }
 
