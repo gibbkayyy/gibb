@@ -323,7 +323,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">UK Male Voice &amp; Groq Vault Rotator Active (LLaMA Instant)</p>
+                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">UK Male Voice &amp; Groq Vault Rotator Active (GPT-OSS 120B)</p>
             </div>
 
             <div class="sidebar-panel">
@@ -367,7 +367,7 @@
     <div id="dashboard-screen" class="screen">
         <div class="chat-container">
             <div class="chat-header">
-                <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. NEURAL CONNECT (LLaMA INSTANT)</span>
+                <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. NEURAL CONNECT (GPT-OSS 120B)</span>
                 <div>
                     <button class="btn" style="width: auto; padding: 6px 12px; margin-bottom: 0; display: inline-block; margin-right: 6px; background: rgba(255,0,0,0.2); border-color: var(--danger-color); color: #ff8888; font-size: 0.8rem;" onclick="clearChatMemory()">CLEAR</button>
                     <button class="btn" style="width: auto; padding: 6px 12px; margin-bottom: 0; display: inline-block; font-size: 0.8rem;" onclick="openMenu()">MENU</button>
@@ -411,7 +411,7 @@
         let groqKeys = JSON.parse(localStorage.getItem('gibb_groq_vault_keys')) || [];
         let currentKeyIndex = parseInt(localStorage.getItem('gibb_vault_index')) || 0;
         const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-        const GROQ_MODEL = "llama-3.1-8b-instant";
+        const GROQ_MODEL = "openai/gpt-oss-120b";
 
         function getActiveKey() {
             if (groqKeys.length === 0) return null;
@@ -930,7 +930,7 @@
 
         async function processVoiceAIQuery(query) {
             const hudMsg = document.getElementById('voice-hud-msg');
-            hudMsg.innerText = "PROCESSING QUERY THROUGH LLaMA INSTANT...";
+            hudMsg.innerText = "PROCESSING QUERY THROUGH GPT-OSS 120B...";
             try {
                 const reply = await callAI([{ role: 'user', content: query }]);
                 hudMsg.innerText = "VOICE CONTROL ACTIVE (SPEAK A COMMAND OR QUERY)";
