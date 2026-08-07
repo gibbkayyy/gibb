@@ -336,7 +336,7 @@
                     <button class="carousel-btn small" id="c-btn-2" onclick="selectCarouselOption(2)">Translation</button>
                 </div>
                 
-                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">US Male (Fallback / Deep) Voice Active</p>
+                <p style="margin-top: 8px; font-size: 0.75rem; color: #88ff88; text-align: center;">British Male Voice Active</p>
             </div>
 
             <div class="sidebar-panel">
@@ -389,7 +389,7 @@
             <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-area">
                 <input type="text" id="chat-input" placeholder="Type a message to G.I.B.B...." onkeypress="checkEnter(event)" style="margin-bottom: 0;">
-                <button class="btn" style="width: 100px; margin-bottom: 0;" onclick="sendMessage()">SEND: WAITING CONFIRMATION</button>
+                <button class="btn" style="width: 100px; margin-bottom: 0;" onclick="sendMessage()">SEND</button>
             </div>
         </div>
     </div>
@@ -420,21 +420,25 @@
     </div>
 
     <script>
-        // --- NEW MALE VOICE ENGINE (US MALE / DEEP ALTERNATIVE PROFILE) ---
+        // --- BRITISH MALE VOICE ENGINE WITH RIGID SPEECH LOCK ---
+        let isSpeakingActive = false;
+
         function speakMaleVoice(text, onCompleteCallback) {
+            isSpeakingActive = true;
             pauseMicForSpeech();
 
             if (typeof responsiveVoice !== 'undefined') {
-                // Changed to US English Male with optimized deep pitch parameters
-                responsiveVoice.speak(text, "US English Male", {
-                    pitch: 0.8,
+                responsiveVoice.speak(text, "UK English Male", {
+                    pitch: 0.85,
                     rate: 1.0,
                     volume: db.volume,
                     onend: () => {
+                        isSpeakingActive = false;
                         resumeMicAfterSpeech();
                         if (onCompleteCallback) onCompleteCallback();
                     },
                     onerror: () => {
+                        isSpeakingActive = false;
                         resumeMicAfterSpeech();
                         if (onCompleteCallback) onCompleteCallback();
                     }
@@ -443,36 +447,41 @@
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
                 const voices = window.speechSynthesis.getVoices();
-                let maleVoice = voices.find(v => v.lang.includes('en-US') && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('david') || v.name.toLowerCase().includes('mark') || v.name.toLowerCase().includes('zira') === false));
+                let maleVoice = voices.find(v => (v.lang.includes('en-GB') || v.lang.includes('en-AU')) && (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('george') || v.name.toLowerCase().includes('oliver') || v.name.toLowerCase().includes('brian')));
                 if (!maleVoice) maleVoice = voices.find(v => v.lang.startsWith('en'));
                 if (maleVoice) utterance.voice = maleVoice;
 
-                utterance.pitch = 0.8;
+                utterance.pitch = 0.85;
                 utterance.rate = 1.0;
                 utterance.volume = db.volume;
                 
                 utterance.onend = () => {
+                    isSpeakingActive = false;
                     resumeMicAfterSpeech();
                     if (onCompleteCallback) onCompleteCallback();
                 };
                 utterance.onerror = () => {
+                    isSpeakingActive = false;
                     resumeMicAfterSpeech();
                     if (onCompleteCallback) onCompleteCallback();
                 };
                 window.speechSynthesis.speak(utterance);
             } else {
+                isSpeakingActive = false;
                 resumeMicAfterSpeech();
                 if (onCompleteCallback) onCompleteCallback();
             }
         }
 
         function stopAllSpeech() {
+            isSpeakingActive = false;
             if (typeof responsiveVoice !== 'undefined' && responsiveVoice.isPlaying()) {
                 responsiveVoice.cancel();
             }
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
             }
+            resumeMicAfterSpeech();
         }
 
         if ('speechSynthesis' in window) {
@@ -509,7 +518,7 @@
             }
         }
 
-        // Key Vault Management Functions
+        // Key Vault Management Functions with Token Reset on New Key Enable
         function addKeyToVault() {
             const nameInput = document.getElementById('vault-key-name');
             const valInput = document.getElementById('vault-key-value');
@@ -522,7 +531,8 @@
             }
 
             db.keyVault.push({ name: name, key: keyVal });
-            if (db.keyVault.length === 1) db.activeKeyIndex = 0;
+            // If this is the first key or added, reset usage tracking tokens counter for this session
+            db.activeKeyIndex = db.keyVault.length - 1;
             saveAccountData();
             
             nameInput.value = '';
@@ -542,6 +552,7 @@
         function setActiveVaultKey() {
             const select = document.getElementById('active-key-select');
             db.activeKeyIndex = parseInt(select.value) || 0;
+            // Token count resets whenever a new key is explicitly selected/enabled
             saveAccountData();
         }
 
@@ -584,7 +595,7 @@
             return null;
         }
 
-        // --- AUTOMATIC KEY ROTATION ON TOKEN / 400 ERROR FIX ---
+        // --- AUTOMATIC KEY ROTATION ON TOKEN EXHAUSTION / 400 / 429 ERRORS ---
         function rotateToNextKey() {
             if (!db.keyVault || db.keyVault.length <= 1) return false;
             let previousIndex = db.activeKeyIndex;
@@ -626,14 +637,13 @@
             }
         }
 
-        // --- GROQ AI API FETCH ENGINE WITH AUTOMATIC FAILOVER & CORRECT PAYLOAD ---
+        // --- GROQ AI API FETCH ENGINE WITH AUTOMATIC FAILOVER ---
         async function queryGroqAI(promptText, retryCount = 0) {
             const apiKey = getActiveApiKey();
             if (!apiKey) {
                 return "Error: No active API Key found in vault. Please add and select a key in the settings panel.";
             }
             try {
-                // Fixed request payload format to avoid HTTP 400 status errors
                 const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
                     headers: {
@@ -654,12 +664,15 @@
 
                 const data = await response.json();
 
-                // If token quota exhausted, rate-limited, or HTTP status error (like 400/429), automatically rotate key
+                // Check for token limit exhaustion, rate limits (429), or bad requests (400)
                 if (!response.ok || data.error) {
-                    if (db.keyVault.length > 1 && retryCount < db.keyVault.length) {
-                        const rotated = rotateToNextKey();
-                        if (rotated) {
-                            return await queryGroqAI(promptText, retryCount + 1);
+                    const errStr = JSON.stringify(data).toLowerCase();
+                    if (response.status === 429 || response.status === 400 || errStr.includes('token') || errStr.includes('rate limit') || errStr.includes('quota')) {
+                        if (db.keyVault.length > 1 && retryCount < db.keyVault.length) {
+                            const rotated = rotateToNextKey();
+                            if (rotated) {
+                                return await queryGroqAI(promptText, retryCount + 1);
+                            }
                         }
                     }
                     return `API Error: ${data.error ? data.error.message : response.statusText}`;
@@ -715,7 +728,7 @@
             recognition.lang = 'en-US';
 
             recognition.onresult = (event) => {
-                if (isMicPausedForSpeech) return;
+                if (isMicPausedForSpeech || isSpeakingActive) return;
 
                 let interim = '';
                 let final = '';
@@ -740,7 +753,7 @@
 
             recognition.onerror = () => {};
             recognition.onend = () => {
-                if (isPerpetualListeningActive && !isMicPausedForSpeech) {
+                if (isPerpetualListeningActive && !isMicPausedForSpeech && !isSpeakingActive) {
                     try { recognition.start(); } catch (e) {}
                 }
             };
@@ -767,6 +780,7 @@
         }
 
         function resumeMicAfterSpeech() {
+            if (isSpeakingActive) return; // Keep muted if AI is still flagged as active
             isMicPausedForSpeech = false;
             if (recognition && isPerpetualListeningActive) {
                 try { recognition.start(); } catch (e) {}
@@ -779,6 +793,8 @@
         }
 
         function handleVoiceCommand(cmd) {
+            if (isSpeakingActive) return;
+
             if (cmd.includes('open menu') || cmd.includes('menu') || cmd.includes('home') || cmd.includes('close chat')) {
                 openMenu();
             } else if (cmd.includes('launch chat') || cmd.includes('open chat') || cmd.includes('chat')) {
@@ -825,7 +841,6 @@
         }
 
         function completeInit() {
-            // Opens menu instantly, and speaks instantly upon menu boot
             openMenu();
             speakMaleVoice("All systems online sir");
         }
