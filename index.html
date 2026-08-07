@@ -166,6 +166,7 @@
         .btn:hover { background: rgba(0, 255, 0, 0.4); box-shadow: 0 0 15px var(--accent-glow); }
 
         .error-msg { color: var(--danger-color); font-size: 0.85rem; margin-bottom: 15px; display: none; }
+        .success-msg { color: #10b981; font-size: 0.85rem; margin-bottom: 15px; display: none; }
 
         /* Main Menu Layout */
         .main-menu-layout {
@@ -243,7 +244,6 @@
             display: flex; padding: 20px 30px; border-top: 1px solid var(--border-color); background: var(--panel-bg); gap: 15px; backdrop-filter: blur(10px);
         }
         
-        /* Voice Screen Glide & Fade Animations */
         #voice-screen {
             opacity: 0;
             pointer-events: none;
@@ -457,9 +457,25 @@
         let voiceActiveMode = false;
         let isSpeakingNow = false;
 
-        let db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { 
+        // Global DB across multiple accounts
+        let allAccounts = JSON.parse(localStorage.getItem('gibb_multi_accounts')) || {};
+        let currentEmail = localStorage.getItem('gibb_current_email') || null;
+
+        let db = { 
             profile: null, chatHistory: [], volume: 1.0, savedKey: ''
         };
+
+        function loadAccountData(email) {
+            if (email && allAccounts[email]) {
+                db = allAccounts[email];
+            } else {
+                db = JSON.parse(localStorage.getItem('gibb_permanent_db')) || { 
+                    profile: null, chatHistory: [], volume: 1.0, savedKey: ''
+                };
+            }
+        }
+
+        loadAccountData(currentEmail);
 
         window.addEventListener('DOMContentLoaded', () => {
             updateResolution();
@@ -524,7 +540,7 @@
             panel.innerHTML = `
                 <h2 style="margin-bottom: 15px; letter-spacing: 2px;">SYSTEM LOGIN</h2>
                 <div id="auth-error" class="error-msg"></div>
-                <input type="text" id="login-username" placeholder="Username">
+                <input type="email" id="login-email" placeholder="Email Address">
                 <input type="password" id="login-password" placeholder="Password">
                 <button class="btn" onclick="verifyLogin()">SECURE LOGIN</button>
                 <button class="btn" style="background: transparent; border-color: rgba(0,255,0,0.2); font-size: 0.85rem;" onclick="renderRegisterScreen()">CREATE NEW ACCOUNT</button>
@@ -537,6 +553,7 @@
                 <h2 style="margin-bottom: 15px; letter-spacing: 2px;">CREATE ACCOUNT</h2>
                 <div id="auth-error" class="error-msg"></div>
                 <input type="text" id="reg-username" placeholder="Choose Username">
+                <input type="email" id="reg-email" placeholder="Email Address (for multi-device sync)">
                 <select id="reg-gender">
                     <option value="" disabled selected>Select Title Preference</option>
                     <option value="sir">Male (Sir)</option>
@@ -549,21 +566,26 @@
         }
 
         function verifyLogin() {
-            const user = document.getElementById('login-username').value.trim();
+            const email = document.getElementById('login-email').value.trim().toLowerCase();
             const pass = document.getElementById('login-password').value;
             const errorBox = document.getElementById('auth-error');
 
-            if (!db.profile || db.profile.name.toLowerCase() !== user.toLowerCase()) {
-                errorBox.innerText = "User account not found. Please create an account.";
+            if (!email || !allAccounts[email]) {
+                errorBox.innerText = "Email account not found. Please create an account.";
                 errorBox.style.display = 'block';
                 return;
             }
 
-            if (!db.profile.password || db.profile.password !== pass) {
+            const targetAccount = allAccounts[email];
+            if (targetAccount.profile.password !== pass) {
                 errorBox.innerText = "Incorrect password! Access denied.";
                 errorBox.style.display = 'block';
                 return;
             }
+
+            currentEmail = email;
+            localStorage.setItem('gibb_current_email', email);
+            loadAccountData(email);
 
             sessionStorage.setItem('gibb_logged_in', 'true');
             showLoadingScreen();
@@ -571,12 +593,18 @@
 
         function registerAccount() {
             const user = document.getElementById('reg-username').value.trim();
+            const email = document.getElementById('reg-email').value.trim().toLowerCase();
             const honorific = document.getElementById('reg-gender').value;
             const pass = document.getElementById('reg-password').value;
             const errorBox = document.getElementById('auth-error');
 
             if (!user) {
                 errorBox.innerText = "Please enter a valid username.";
+                errorBox.style.display = 'block';
+                return;
+            }
+            if (!email || !email.includes('@')) {
+                errorBox.innerText = "Please enter a valid email address.";
                 errorBox.style.display = 'block';
                 return;
             }
@@ -591,8 +619,24 @@
                 return;
             }
 
-            db.profile = { name: user, honorific: honorific, password: pass };
+            if (allAccounts[email]) {
+                errorBox.innerText = "An account with this email already exists. Log in instead.";
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            db = {
+                profile: { name: user, email: email, honorific: honorific, password: pass },
+                chatHistory: [],
+                volume: 1.0,
+                savedKey: ''
+            };
+
+            allAccounts[email] = db;
+            currentEmail = email;
+            localStorage.setItem('gibb_current_email', email);
             saveDatabase();
+
             sessionStorage.setItem('gibb_logged_in', 'true');
             showLoadingScreen();
         }
@@ -612,7 +656,6 @@
         function verifyKey() {
             const inputField = document.getElementById('access-key-input');
             let inputVal = inputField ? inputField.value.trim() : '';
-            // Sanitize hidden non-ascii characters out of the key string
             inputVal = inputVal.replace(/[^\x20-\x7E]/g, '');
             
             const statusEl = document.getElementById('key-status');
@@ -628,7 +671,10 @@
             }
         }
 
-        function updateVolume() { db.volume = parseFloat(document.getElementById('volume-slider').value); saveDatabase(); }
+        function updateVolume() { 
+            db.volume = parseFloat(document.getElementById('volume-slider').value); 
+            saveDatabase(); 
+        }
 
         function showLoadingScreen() {
             switchScreen('loading-screen');
@@ -649,7 +695,6 @@
             initPerpetualListeningEngine();
         }
 
-        // MALE SPEECH ENGINE (CHROMEBOOK OPTIMIZED)
         function speak(text, callback) {
             if (!window.speechSynthesis) {
                 if (callback) callback();
@@ -685,7 +730,13 @@
             }, 50);
         }
 
-        function saveDatabase() { localStorage.setItem('gibb_permanent_db', JSON.stringify(db)); }
+        function saveDatabase() { 
+            if (currentEmail) {
+                allAccounts[currentEmail] = db;
+            }
+            localStorage.setItem('gibb_multi_accounts', JSON.stringify(allAccounts));
+            localStorage.setItem('gibb_permanent_db', JSON.stringify(db));
+        }
 
         function showMenuScreen() {
             voiceActiveMode = false;
@@ -784,7 +835,6 @@
             saveDatabase();
             renderChatHistory();
 
-            // Strictly sanitize key to guarantee no non-ISO characters break the HTTP request header
             let apiKey = (db.savedKey || "").trim().replace(/[^\x20-\x7E]/g, '');
 
             if (!apiKey || !apiKey.startsWith('gsk_')) {
