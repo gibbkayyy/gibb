@@ -90,7 +90,6 @@
             transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Glided mini-logo mode for Voice screen */
         .logo-container.mini-mode {
             position: absolute;
             bottom: 30px;
@@ -268,7 +267,6 @@
         }
         @keyframes pulseText { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 
-        /* Date & Time Widget Box for Voice Screen */
         #voice-datetime-display {
             opacity: 0;
             transform: scale(0.9);
@@ -335,7 +333,7 @@
         </div>
         <div class="panel" style="max-width: 420px;">
             <h2 style="margin-bottom: 12px; letter-spacing: 2px; font-size: 1.2rem;">MIC &amp; AUDIO PERMISSION</h2>
-            <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 20px; line-height: 1.4;">Click below to grant microphone access for continuous voice command tracking.</p>
+            <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 20px; line-height: 1.4;">Click below to grant microphone access. Voice control is active only once you enter the main menu or pages.</p>
             <button class="btn" onclick="requestMicrophoneAccess()" style="padding: 14px; font-size: 1rem; box-shadow: 0 0 20px var(--accent-glow);">ENABLE MICROPHONE &amp; ENTER</button>
         </div>
     </div>
@@ -541,12 +539,8 @@
 
         function updateDateTimeValues() {
             const now = new Date();
-            
-            // Format Exact Date (e.g. Saturday, August 8, 2026)
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const dateStr = now.toLocaleDateString(undefined, options);
-            
-            // Format Exact Time updating every second (e.g. 01:48:17 AM/PM)
             const timeStr = now.toLocaleTimeString();
 
             const dateEl = document.getElementById('live-date-str');
@@ -560,13 +554,8 @@
             const logoBox = document.getElementById('voice-logo-box');
             const dtDisplay = document.getElementById('voice-datetime-display');
 
-            // Fade away status text ("say something" container)
             if (statusContainer) statusContainer.classList.add('fade-out');
-
-            // Glide logo to bottom right and shrink size
             if (logoBox) logoBox.classList.add('mini-mode');
-
-            // Show date and time display panel
             if (dtDisplay) {
                 dtDisplay.classList.add('active');
                 startLiveDateTimeTicker();
@@ -1015,22 +1004,23 @@
             recognition.lang = 'en-US';
 
             recognition.onresult = (event) => {
+                // Rule 1: Do NOT pick up voice control if we are still on the permission screen or auth screen
+                const micScreenActive = document.getElementById('mic-permission-screen').classList.contains('active');
+                const authScreenActive = document.getElementById('auth-screen').classList.contains('active');
+                if (micScreenActive || authScreenActive) return;
+
                 if (isMicPausedForSpeech || isSpeakingActive) return;
 
-                let interim = '';
                 let final = '';
-
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
                         final += event.results[i][0].transcript;
-                    } else {
-                        interim += event.results[i][0].transcript;
                     }
                 }
 
                 const transcriptEl = document.getElementById('voice-transcript');
-                if (transcriptEl) {
-                    transcriptEl.innerText = final || interim;
+                if (transcriptEl && final) {
+                    transcriptEl.innerText = final;
                 }
 
                 if (final) {
@@ -1040,7 +1030,9 @@
 
             recognition.onerror = () => {};
             recognition.onend = () => {
-                if (isPerpetualListeningActive && !isMicPausedForSpeech && !isSpeakingActive) {
+                const micScreenActive = document.getElementById('mic-permission-screen').classList.contains('active');
+                const authScreenActive = document.getElementById('auth-screen').classList.contains('active');
+                if (isPerpetualListeningActive && !isMicPausedForSpeech && !isSpeakingActive && !micScreenActive && !authScreenActive) {
                     try { recognition.start(); } catch (e) {}
                 }
             };
@@ -1069,7 +1061,9 @@
         function resumeMicAfterSpeech() {
             if (isSpeakingActive) return;
             isMicPausedForSpeech = false;
-            if (recognition && isPerpetualListeningActive) {
+            const micScreenActive = document.getElementById('mic-permission-screen').classList.contains('active');
+            const authScreenActive = document.getElementById('auth-screen').classList.contains('active');
+            if (recognition && isPerpetualListeningActive && !micScreenActive && !authScreenActive) {
                 try { recognition.start(); } catch (e) {}
             }
             const badge = document.getElementById('mic-status-badge');
@@ -1082,7 +1076,10 @@
         function handleVoiceCommand(cmd) {
             if (isSpeakingActive) return;
 
-            // Check for date and time voice command variations anywhere in speech string
+            const micScreenActive = document.getElementById('mic-permission-screen').classList.contains('active');
+            const authScreenActive = document.getElementById('auth-screen').classList.contains('active');
+            if (micScreenActive || authScreenActive) return;
+
             if (cmd.includes('date and time') || cmd.includes('show date') || cmd.includes('open date') || cmd.includes('time and date')) {
                 if (document.getElementById('voice-screen').classList.contains('active')) {
                     triggerDateAndTimeHUDView();
@@ -1257,11 +1254,15 @@
             switchScreen('auth-screen');
         }
 
+        let isSendingMessage = false;
+
         async function sendMessage() {
+            if (isSendingMessage) return; // Prevent duplicate double execution on Enter key / click events
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if (!text) return;
 
+            isSendingMessage = true;
             input.value = '';
             appendMessage(text, 'user');
             db.chatHistory.push({ role: 'user', content: text });
@@ -1276,10 +1277,14 @@
             appendMessage(reply, 'gibb');
             db.chatHistory.push({ role: 'assistant', content: reply });
             saveAccountData();
+            isSendingMessage = false;
         }
 
         function checkEnter(e) {
-            if (e.key === 'Enter') sendMessage();
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
         }
 
         function appendMessage(text, sender, isLoading = false, isHTML = false) {
