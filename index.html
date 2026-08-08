@@ -349,6 +349,35 @@
             color: var(--text-color);
         }
 
+        .news-container-hud {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 50vh;
+            overflow-y: auto;
+            text-align: left;
+        }
+        .news-card {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            border-radius: 6px;
+        }
+        .news-title {
+            font-size: 0.9rem;
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-bottom: 4px;
+            text-decoration: none;
+        }
+        .news-snippet {
+            font-size: 0.75rem;
+            color: #88ff88;
+            line-height: 1.3;
+        }
+
         .key-vault-item {
             display: flex; justify-content: space-between; align-items: center;
             background: rgba(0, 255, 0, 0.04); border: 1px solid rgba(0, 255, 0, 0.2);
@@ -376,7 +405,7 @@
         </div>
         <div class="panel" style="max-width: 420px;">
             <h2 style="margin-bottom: 12px; letter-spacing: 2px; font-size: 1.2rem;">MIC &amp; AUDIO PERMISSION</h2>
-            <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 20px; line-height: 1.4;">Click below to grant microphone access. Voice control is active only once you enter the main menu or pages.</p>
+            <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 20px; line-height: 1.4;">Click below to grant microphone access. Voice control and HUD data triggers are active once you enter the system.</p>
             <button class="btn" onclick="requestMicrophoneAccess()" style="padding: 14px; font-size: 1rem; box-shadow: 0 0 20px var(--accent-glow);">ENABLE MICROPHONE &amp; ENTER</button>
         </div>
     </div>
@@ -462,14 +491,11 @@
                         <p style="font-size: 0.85rem; margin-top: 4px;">RES: <span id="res-display" style="font-weight: bold;">--</span></p>
                     </div>
                     <div class="widget-box">
-                        <div class="widget-title">Voice Commands List</div>
+                        <div class="widget-title">Voice HUD Commands (Voice Screen Only)</div>
                         <ul style="font-size: 0.75rem; padding-left: 15px; color: #88ff88; line-height: 1.4;">
-                            <li>"Open menu" / "Menu" / "Home"</li>
-                            <li>"Launch chat" / "Open chat"</li>
-                            <li>"Open translation" / "Translate"</li>
-                            <li>"Open voice" / "Voice control"</li>
-                            <li>"Show date and time" / "What is the time"</li>
-                            <li>"Weather forecast" / "Rothbury weather"</li>
+                            <li>Date/Time/Day queries &amp; read outs</li>
+                            <li>Weather &amp; forecast (Rothbury)</li>
+                            <li>Global, Local, All, World News</li>
                         </ul>
                     </div>
                 </div>
@@ -593,7 +619,7 @@
             timeEls.forEach(el => el.innerText = timeStr);
         }
 
-        function triggerHUDView(type, mode) {
+        function triggerHUDView(type, mode, newsLocation = '') {
             const statusContainer = document.getElementById('voice-status-container');
             const logoBox = document.getElementById('voice-logo-box');
             const hudDisplay = document.getElementById('voice-hud-display');
@@ -630,18 +656,26 @@
                     </div>
                 `;
                 fetchRothburyWeather();
+            } else if (type === 'news') {
+                const locLabel = newsLocation ? newsLocation.toUpperCase() : "GLOBAL";
+                hudTitle.innerText = `${locLabel} NEWS FEED`;
+                hudContent.innerHTML = `
+                    <div class="news-container-hud" id="news-cards-container">
+                        <div class="news-card"><div class="news-title">Fetching Live Feed...</div><div class="news-snippet">Gathering latest intelligence reports.</div></div>
+                    </div>
+                `;
+                fetchNewsFeed(newsLocation);
             }
 
             if (hudDisplay) {
                 setTimeout(() => {
                     hudDisplay.classList.add('active');
-                }, 500); // 0.5 seconds delay for animation trigger as requested
+                }, 500); // 0.5 seconds delay for animation trigger
             }
         }
 
         async function fetchRothburyWeather() {
             try {
-                // Rothbury coordinates: approx 55.3129° N, 1.8906° W
                 const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=55.3129&longitude=-1.8906&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Europe/London");
                 const data = await res.json();
                 if (data && data.daily) {
@@ -649,7 +683,6 @@
                     const container = document.getElementById('weather-cards-container');
                     if (container) {
                         container.innerHTML = '';
-                        // Show tomorrow onwards or full week
                         for (let i = 1; i < daily.time.length; i++) {
                             const dateObj = new Date(daily.time[i]);
                             const dayName = dateObj.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
@@ -682,6 +715,51 @@
                 61: "Slight rain", 63: "Moderate rain", 71: "Slight snow", 95: "Thunderstorm"
             };
             return codes[code] || "Variable";
+        }
+
+        async function fetchNewsFeed(locationQuery) {
+            try {
+                let query = locationQuery ? `${locationQuery} news` : `world global news`;
+                const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-GB&gl=GB&ceid=GB:en`;
+                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`);
+                const data = await response.json();
+                
+                if (data && data.contents) {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+                    const items = xmlDoc.querySelectorAll("item");
+                    
+                    const container = document.getElementById('news-cards-container');
+                    if (container) {
+                        container.innerHTML = '';
+                        let count = 0;
+                        items.forEach(item => {
+                            if (count < 6) {
+                                const title = item.querySelector("title") ? item.querySelector("title").textContent : "News Update";
+                                const link = item.querySelector("link") ? item.querySelector("link").textContent : "#";
+                                const pubDate = item.querySelector("pubDate") ? new Date(item.querySelector("pubDate").textContent).toLocaleDateString() : "";
+                                
+                                const card = document.createElement('div');
+                                card.className = 'news-card';
+                                card.innerHTML = `
+                                    <a href="${link}" target="_blank" class="news-title">${title}</a>
+                                    <div class="news-snippet">${pubDate} - Click to read full report</div>
+                                `;
+                                container.appendChild(card);
+                                count++;
+                            }
+                        });
+                        if (count === 0) {
+                            container.innerHTML = `<div class="news-card"><div class="news-title">No recent transmissions found.</div></div>`;
+                        }
+                    }
+                }
+            } catch (e) {
+                const container = document.getElementById('news-cards-container');
+                if (container) {
+                    container.innerHTML = `<div class="news-card"><div class="news-title" style="color: var(--danger-color);">Error fetching live news feed.</div></div>`;
+                }
+            }
         }
 
         function resetVoiceScreenState() {
@@ -921,7 +999,6 @@
         function handleApiExhaustionOrFailure() {
             if (!db.keyVault || db.keyVault.length === 0) return false;
 
-            let previousIndex = db.activeKeyIndex;
             db.activeKeyIndex = (db.activeKeyIndex + 1) % db.keyVault.length;
             
             if (db.activeKeyIndex === 0) {
@@ -1126,7 +1203,6 @@
             recognition.lang = 'en-US';
 
             recognition.onresult = (event) => {
-                // Rule 1: Do NOT pick up voice control if we are still on the permission screen or auth screen
                 const micScreenActive = document.getElementById('mic-permission-screen').classList.contains('active');
                 const authScreenActive = document.getElementById('auth-screen').classList.contains('active');
                 if (micScreenActive || authScreenActive) return;
@@ -1202,29 +1278,67 @@
             const authScreenActive = document.getElementById('auth-screen').classList.contains('active');
             if (micScreenActive || authScreenActive) return;
 
-            // Check if on voice control screen for HUD commands
+            // RULE REQUIREMENT: Date, time, weather, and news can ONLY be pulled up when voice control screen is active
             const isVoiceActive = document.getElementById('voice-screen').classList.contains('active');
 
-            // Weather commands
-            if (cmd.includes('weather') || cmd.includes('forecast') || cmd.includes('rothbury')) {
-                if (!isVoiceActive) switchScreen('voice-screen');
+            // --- NAVIGATION COMMANDS (Allowed everywhere) ---
+            if (cmd.includes('open menu') || cmd.includes('menu') || cmd.includes('home') || cmd.includes('close chat') || cmd.includes('return to menu')) {
+                openMenu();
+                return;
+            } else if (cmd.includes('launch chat') || cmd.includes('open chat') || cmd.includes('chat')) {
+                switchScreen('dashboard-screen');
+                renderChatHistory();
+                return;
+            } else if (cmd.includes('open translation') || cmd.includes('translate')) {
+                switchScreen('translation-screen');
+                initTranslationModule();
+                return;
+            } else if (cmd.includes('open voice') || cmd.includes('voice control')) {
+                switchScreen('voice-screen');
+                return;
+            }
+
+            // --- DATA HUD COMMANDS (Strictly Voice Screen Only) ---
+            if (!isVoiceActive) return;
+
+            const shouldRead = cmd.includes('read out') || cmd.includes('read');
+
+            // 1. NEWS COMMANDS (Comprehensive wording coverage)
+            const isNewsCmd = cmd.includes('news') || cmd.includes('headline') || cmd.includes('headlines') || cmd.includes('report') || cmd.includes('reports');
+            if (isNewsCmd) {
+                let location = '';
+                if (cmd.includes('morpeth')) location = 'morpeth';
+                else if (cmd.includes('newcastle')) location = 'newcastle';
+                else if (cmd.includes('alnwick')) location = 'alnwick';
+                else if (cmd.includes('rothbury')) location = 'rothbury';
+                else if (cmd.includes('longframlington') || cmd.includes('long framlington')) location = 'longframlington';
+                else if (cmd.includes('local')) location = 'northumberland';
+
+                triggerHUDView('news', '', location);
+                if (shouldRead || cmd.includes('show') || cmd.includes('pull up') || cmd.includes('get') || cmd.includes('what') || cmd.includes('give')) {
+                    const locSpeech = location ? location : "global";
+                    speakMaleVoice(`Pulling up ${locSpeech} news headlines sir`);
+                }
+                return;
+            }
+
+            // 2. WEATHER COMMANDS (Comprehensive wording coverage)
+            const isWeatherCmd = cmd.includes('weather') || cmd.includes('forecast') || cmd.includes('Rothbury') || cmd.includes('temperature') || cmd.includes('rain') || cmd.includes('sun');
+            if (isWeatherCmd) {
                 triggerHUDView('weather', 'full');
-                const shouldRead = cmd.includes('read out') || cmd.includes('read');
-                if (shouldRead) {
+                if (shouldRead || cmd.includes('show') || cmd.includes('pull up') || cmd.includes('get') || cmd.includes('what') || cmd.includes('give')) {
                     speakMaleVoice("Displaying Rothbury weather forecast for tomorrow and the week ahead sir");
                 }
                 return;
             }
 
-            // Date / Time / Day combinations & read out variations
-            const asksDate = cmd.includes('date') || cmd.includes('what is the date');
-            const asksTime = cmd.includes('time') || cmd.includes('what is the time');
-            const asksDay = cmd.includes('day') || cmd.includes('what day');
-            const shouldRead = cmd.includes('read out') || cmd.includes('read');
+            // 3. DATE / TIME / DAY COMMANDS (Comprehensive wording coverage)
+            const asksDate = cmd.includes('date') || cmd.includes('what is the date') || cmd.includes('whats the date');
+            const asksTime = cmd.includes('time') || cmd.includes('what is the time') || cmd.includes('whats the time') || cmd.includes('clock');
+            const asksDay = cmd.includes('day') || cmd.includes('what day') || cmd.includes('whats the day');
+            const isDateTimeCmd = asksDate || asksTime || asksDay || cmd.includes('show date') || cmd.includes('show time') || cmd.includes('show day') || cmd.includes('calendar') || cmd.includes('clock');
 
-            if (asksDate || asksTime || asksDay || cmd.includes('show date') || cmd.includes('show time') || cmd.includes('show day')) {
-                if (!isVoiceActive) switchScreen('voice-screen');
-
+            if (isDateTimeCmd) {
                 let mode = 'both';
                 let speechResponse = "Displaying current date and time sir";
 
@@ -1250,21 +1364,8 @@
                 return;
             }
 
-            if (cmd.includes('open menu') || cmd.includes('menu') || cmd.includes('home') || cmd.includes('close chat')) {
-                openMenu();
-            } else if (cmd.includes('launch chat') || cmd.includes('open chat') || cmd.includes('chat')) {
-                switchScreen('dashboard-screen');
-                renderChatHistory();
-            } else if (cmd.includes('open translation') || cmd.includes('translate')) {
-                switchScreen('translation-screen');
-                initTranslationModule();
-            } else if (cmd.includes('open voice') || cmd.includes('voice control')) {
-                switchScreen('voice-screen');
-            } else {
-                if (isVoiceActive) {
-                    processVoiceAIQuery(cmd);
-                }
-            }
+            // Fallback conversational AI query on voice screen
+            processVoiceAIQuery(cmd);
         }
 
         async function processVoiceAIQuery(query) {
@@ -1419,7 +1520,7 @@
         let isSendingMessage = false;
 
         async function sendMessage() {
-            if (isSendingMessage) return; // Prevent duplicate double execution on Enter key / click events
+            if (isSendingMessage) return;
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
             if (!text) return;
