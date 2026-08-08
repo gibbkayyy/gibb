@@ -87,6 +87,19 @@
             margin-top: -20px;
             flex-shrink: 0;
             animation: slowHeartPulse 6s ease-in-out infinite;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Glided mini-logo mode for Voice screen */
+        .logo-container.mini-mode {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 90px;
+            height: 90px;
+            margin: 0;
+            animation: none;
+            z-index: 10;
         }
 
         @keyframes slowHeartPulse {
@@ -239,11 +252,61 @@
         #voice-screen.active {
             opacity: 1; pointer-events: auto;
         }
+        .voice-status-container {
+            transition: opacity 0.6s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .voice-status-container.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
         .voice-status-text {
             margin-top: 15px; font-size: 1rem; letter-spacing: 2px; color: var(--accent-color);
             text-shadow: 0 0 12px var(--accent-glow); animation: pulseText 2s infinite; text-align: center;
         }
         @keyframes pulseText { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+        /* Date & Time Widget Box for Voice Screen */
+        #voice-datetime-display {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--panel-bg);
+            border: 2px solid var(--border-color);
+            padding: 25px 40px;
+            border-radius: 14px;
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.25);
+            backdrop-filter: blur(12px);
+        }
+        #voice-datetime-display.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+        .date-text {
+            font-size: 1.3rem;
+            color: #88ff88;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(136, 255, 136, 0.5);
+        }
+        .time-text {
+            font-size: 2.8rem;
+            color: var(--accent-color);
+            letter-spacing: 3px;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
 
         .key-vault-item {
             display: flex; justify-content: space-between; align-items: center;
@@ -364,6 +427,7 @@
                             <li>"Launch chat" / "Open chat"</li>
                             <li>"Open translation" / "Translate"</li>
                             <li>"Open voice" / "Voice control"</li>
+                            <li>"Show date and time" / "Date and time"</li>
                         </ul>
                     </div>
                 </div>
@@ -376,15 +440,23 @@
     </div>
 
     <div id="voice-screen" class="screen">
-        <div class="logo-container" style="margin-bottom: 10px;">
+        <div class="logo-container" id="voice-logo-box" style="margin-bottom: 10px;">
             <img src="gibbailogo.png" alt="G.I.B.B. Logo" class="gibb-img-logo">
             <div class="orbit-ring-outer" style="border-color: #00ff00; box-shadow: 0 0 20px #00ff00;"><div class="dot-outer"></div></div>
             <div class="orbit-ring-inner"><div class="dot-inner"></div></div>
         </div>
-        <div class="voice-status-text" id="voice-hud-msg">VOICE CONTROL ACTIVE (SPEAK A COMMAND)</div>
-        <div id="voice-transcript" style="margin-top: 12px; font-size: 0.9rem; font-style: italic; color: #88ff88; max-width: 500px; text-align: center; height: 25px;">[Listening continuously...]</div>
+
+        <div class="voice-status-container" id="voice-status-container">
+            <div class="voice-status-text" id="voice-hud-msg">VOICE CONTROL ACTIVE (SPEAK A COMMAND)</div>
+            <div id="voice-transcript" style="margin-top: 12px; font-size: 0.9rem; font-style: italic; color: #88ff88; max-width: 500px; text-align: center; height: 25px;">[Listening continuously...]</div>
+        </div>
+
+        <div id="voice-datetime-display">
+            <div class="date-text" id="live-date-str">--</div>
+            <div class="time-text" id="live-time-str">--:--:--</div>
+        </div>
         
-        <button class="btn" style="margin-top: 25px; width: auto; padding: 10px 25px; font-size: 0.85rem;" onclick="openMenu()">RETURN TO MENU</button>
+        <button class="btn" style="position: absolute; bottom: 30px; left: 30px; width: auto; padding: 10px 20px; font-size: 0.8rem; z-index: 20;" onclick="resetVoiceScreenState(); openMenu();">RETURN TO MENU</button>
     </div>
 
     <div id="dashboard-screen" class="screen">
@@ -458,6 +530,61 @@
     </div>
 
     <script>
+        // --- LIVE DATE & TIME TICKER ENGINE ---
+        let dateTimeInterval = null;
+
+        function startLiveDateTimeTicker() {
+            if (dateTimeInterval) clearInterval(dateTimeInterval);
+            updateDateTimeValues();
+            dateTimeInterval = setInterval(updateDateTimeValues, 1000);
+        }
+
+        function updateDateTimeValues() {
+            const now = new Date();
+            
+            // Format Exact Date (e.g. Saturday, August 8, 2026)
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateStr = now.toLocaleDateString(undefined, options);
+            
+            // Format Exact Time updating every second (e.g. 01:48:17 AM/PM)
+            const timeStr = now.toLocaleTimeString();
+
+            const dateEl = document.getElementById('live-date-str');
+            const timeEl = document.getElementById('live-time-str');
+            if (dateEl) dateEl.innerText = dateStr;
+            if (timeEl) timeEl.innerText = timeStr;
+        }
+
+        function triggerDateAndTimeHUDView() {
+            const statusContainer = document.getElementById('voice-status-container');
+            const logoBox = document.getElementById('voice-logo-box');
+            const dtDisplay = document.getElementById('voice-datetime-display');
+
+            // Fade away status text ("say something" container)
+            if (statusContainer) statusContainer.classList.add('fade-out');
+
+            // Glide logo to bottom right and shrink size
+            if (logoBox) logoBox.classList.add('mini-mode');
+
+            // Show date and time display panel
+            if (dtDisplay) {
+                dtDisplay.classList.add('active');
+                startLiveDateTimeTicker();
+            }
+        }
+
+        function resetVoiceScreenState() {
+            if (dateTimeInterval) clearInterval(dateTimeInterval);
+            
+            const statusContainer = document.getElementById('voice-status-container');
+            const logoBox = document.getElementById('voice-logo-box');
+            const dtDisplay = document.getElementById('voice-datetime-display');
+
+            if (statusContainer) statusContainer.classList.remove('fade-out');
+            if (logoBox) logoBox.classList.remove('mini-mode');
+            if (dtDisplay) dtDisplay.classList.remove('active');
+        }
+
         // --- REFINED BRITISH MALE VOICE ENGINE ---
         let isSpeakingActive = false;
 
@@ -721,13 +848,11 @@
             appendMessage(noticeText, 'gibb', false, true);
         }
 
-        // --- ENHANCED BACKGROUND REGENERATION CHECK (DEMANDS HEALTHY TOKEN BUFFER) ---
         async function checkTokenRegeneration() {
             if (!isUsingWorstModel || !db.keyVault || db.keyVault.length === 0) return;
 
             const apiKey = db.keyVault[0].key;
             try {
-                // Request a substantial test payload (max_tokens: 200) to verify actual capacity headroom
                 const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
                     headers: {
@@ -745,7 +870,6 @@
                     const data = await response.json();
                     const completionTokens = data.usage ? data.usage.completion_tokens : 0;
                     
-                    // Only restore primary model if it successfully generated a meaningful response (>50 tokens) without hitting an immediate ceiling
                     if (completionTokens >= 50) {
                         isUsingWorstModel = false;
                         rotationCycleCount = 0;
@@ -756,9 +880,7 @@
                         appendMessage("Tokens have fully regenerated across your accounts. Restoring primary versatile model.", 'gibb');
                     }
                 }
-            } catch (e) {
-                // Still throttled or insufficient headroom, remain on fallback model
-            }
+            } catch (e) {}
         }
 
         setInterval(() => {
@@ -770,6 +892,7 @@
         function switchScreen(screenId) {
             if (screenId !== 'voice-screen') {
                 stopAllSpeech();
+                resetVoiceScreenState();
             }
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             const target = document.getElementById(screenId);
@@ -780,6 +903,9 @@
                 }
                 if (screenId === 'dashboard-screen') {
                     updateActiveModelBadge();
+                }
+                if (screenId === 'voice-screen') {
+                    resetVoiceScreenState();
                 }
             }
         }
@@ -956,6 +1082,15 @@
         function handleVoiceCommand(cmd) {
             if (isSpeakingActive) return;
 
+            // Check for date and time voice command variations anywhere in speech string
+            if (cmd.includes('date and time') || cmd.includes('show date') || cmd.includes('open date') || cmd.includes('time and date')) {
+                if (document.getElementById('voice-screen').classList.contains('active')) {
+                    triggerDateAndTimeHUDView();
+                    speakMaleVoice("Displaying current date and time sir");
+                }
+                return;
+            }
+
             if (cmd.includes('open menu') || cmd.includes('menu') || cmd.includes('home') || cmd.includes('close chat')) {
                 openMenu();
             } else if (cmd.includes('launch chat') || cmd.includes('open chat') || cmd.includes('chat')) {
@@ -975,14 +1110,14 @@
 
         async function processVoiceAIQuery(query) {
             const hudMsg = document.getElementById('voice-hud-msg');
-            hudMsg.innerText = "PROCESSING QUERY...";
+            if (hudMsg) hudMsg.innerText = "PROCESSING QUERY...";
             
             const reply = await queryGroqAI(query);
             db.chatHistory.push({ role: 'user', content: query });
             db.chatHistory.push({ role: 'assistant', content: reply });
             saveAccountData();
 
-            hudMsg.innerText = "VOICE CONTROL ACTIVE (SPEAK A COMMAND)";
+            if (hudMsg) hudMsg.innerText = "VOICE CONTROL ACTIVE (SPEAK A COMMAND)";
             speakMaleVoice(reply);
         }
 
