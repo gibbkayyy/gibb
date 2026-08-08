@@ -267,7 +267,7 @@
         }
         @keyframes pulseText { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 
-        #voice-datetime-display {
+        #voice-hud-display {
             opacity: 0;
             transform: scale(0.9);
             transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -279,31 +279,74 @@
             justify-content: center;
             background: var(--panel-bg);
             border: 2px solid var(--border-color);
-            padding: 25px 40px;
+            padding: 25px 35px;
             border-radius: 14px;
             box-shadow: 0 0 40px rgba(0, 255, 0, 0.25);
             backdrop-filter: blur(12px);
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
         }
-        #voice-datetime-display.active {
+        #voice-hud-display.active {
             opacity: 1;
             transform: scale(1);
             pointer-events: auto;
         }
-        .date-text {
-            font-size: 1.3rem;
+        .hud-title {
+            font-size: 1.1rem;
             color: #88ff88;
             letter-spacing: 2px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             text-align: center;
             text-shadow: 0 0 10px rgba(136, 255, 136, 0.5);
+            font-weight: bold;
+        }
+        .date-text {
+            font-size: 1.2rem;
+            color: #88ff88;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+            text-align: center;
         }
         .time-text {
-            font-size: 2.8rem;
+            font-size: 2.4rem;
             color: var(--accent-color);
             letter-spacing: 3px;
             font-weight: bold;
             text-align: center;
             text-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .weather-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .weather-card {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .weather-day {
+            font-size: 0.8rem;
+            color: #88ff88;
+            margin-bottom: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .weather-temp {
+            font-size: 1.1rem;
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .weather-desc {
+            font-size: 0.75rem;
+            color: var(--text-color);
         }
 
         .key-vault-item {
@@ -425,7 +468,8 @@
                             <li>"Launch chat" / "Open chat"</li>
                             <li>"Open translation" / "Translate"</li>
                             <li>"Open voice" / "Voice control"</li>
-                            <li>"Show date and time" / "Date and time"</li>
+                            <li>"Show date and time" / "What is the time"</li>
+                            <li>"Weather forecast" / "Rothbury weather"</li>
                         </ul>
                     </div>
                 </div>
@@ -449,9 +493,9 @@
             <div id="voice-transcript" style="margin-top: 12px; font-size: 0.9rem; font-style: italic; color: #88ff88; max-width: 500px; text-align: center; height: 25px;">[Listening continuously...]</div>
         </div>
 
-        <div id="voice-datetime-display">
-            <div class="date-text" id="live-date-str">--</div>
-            <div class="time-text" id="live-time-str">--:--:--</div>
+        <div id="voice-hud-display">
+            <div class="hud-title" id="hud-display-title">SYSTEM HUD</div>
+            <div id="hud-content-area" style="width: 100%; display: flex; flex-direction: column; align-items: center;"></div>
         </div>
         
         <button class="btn" style="position: absolute; bottom: 30px; left: 30px; width: auto; padding: 10px 20px; font-size: 0.8rem; z-index: 20;" onclick="resetVoiceScreenState(); openMenu();">RETURN TO MENU</button>
@@ -543,23 +587,101 @@
             const dateStr = now.toLocaleDateString(undefined, options);
             const timeStr = now.toLocaleTimeString();
 
-            const dateEl = document.getElementById('live-date-str');
-            const timeEl = document.getElementById('live-time-str');
-            if (dateEl) dateEl.innerText = dateStr;
-            if (timeEl) timeEl.innerText = timeStr;
+            const dateEls = document.querySelectorAll('.live-date-str');
+            const timeEls = document.querySelectorAll('.live-time-str');
+            dateEls.forEach(el => el.innerText = dateStr);
+            timeEls.forEach(el => el.innerText = timeStr);
         }
 
-        function triggerDateAndTimeHUDView() {
+        function triggerHUDView(type, mode) {
             const statusContainer = document.getElementById('voice-status-container');
             const logoBox = document.getElementById('voice-logo-box');
-            const dtDisplay = document.getElementById('voice-datetime-display');
+            const hudDisplay = document.getElementById('voice-hud-display');
+            const hudTitle = document.getElementById('hud-display-title');
+            const hudContent = document.getElementById('hud-content-area');
 
             if (statusContainer) statusContainer.classList.add('fade-out');
             if (logoBox) logoBox.classList.add('mini-mode');
-            if (dtDisplay) {
-                dtDisplay.classList.add('active');
+
+            if (type === 'datetime') {
+                if (mode === 'date') {
+                    hudTitle.innerText = "CURRENT DATE";
+                    hudContent.innerHTML = `<div class="date-text live-date-str">--</div>`;
+                } else if (mode === 'time') {
+                    hudTitle.innerText = "CURRENT TIME";
+                    hudContent.innerHTML = `<div class="time-text live-time-str">--:--:--</div>`;
+                } else if (mode === 'day') {
+                    hudTitle.innerText = "CURRENT DAY";
+                    hudContent.innerHTML = `<div class="date-text live-date-str" style="font-size: 1.8rem; font-weight: bold; color: var(--accent-color);">--</div>`;
+                } else {
+                    hudTitle.innerText = "DATE & TIME HUD";
+                    hudContent.innerHTML = `
+                        <div class="date-text live-date-str">--</div>
+                        <div class="time-text live-time-str">--:--:--</div>
+                    `;
+                }
                 startLiveDateTimeTicker();
+            } else if (type === 'weather') {
+                hudTitle.innerText = "ROTHBURY, NORTHUMBERLAND WEATHER";
+                hudContent.innerHTML = `
+                    <div style="font-size: 0.85rem; color: #88ff88; margin-bottom: 10px; text-align: center;">Tomorrow &amp; Whole Week Forecast</div>
+                    <div class="weather-grid" id="weather-cards-container">
+                        <div class="weather-card"><div class="weather-day">Loading...</div><div class="weather-temp">--</div><div class="weather-desc">Fetching forecast</div></div>
+                    </div>
+                `;
+                fetchRothburyWeather();
             }
+
+            if (hudDisplay) {
+                setTimeout(() => {
+                    hudDisplay.classList.add('active');
+                }, 500); // 0.5 seconds delay for animation trigger as requested
+            }
+        }
+
+        async function fetchRothburyWeather() {
+            try {
+                // Rothbury coordinates: approx 55.3129° N, 1.8906° W
+                const res = await fetch("https://api.open-meteo.com/v1/forecast?latitude=55.3129&longitude=-1.8906&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=Europe/London");
+                const data = await res.json();
+                if (data && data.daily) {
+                    const daily = data.daily;
+                    const container = document.getElementById('weather-cards-container');
+                    if (container) {
+                        container.innerHTML = '';
+                        // Show tomorrow onwards or full week
+                        for (let i = 1; i < daily.time.length; i++) {
+                            const dateObj = new Date(daily.time[i]);
+                            const dayName = dateObj.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+                            const maxT = daily.temperature_2m_max[i];
+                            const minT = daily.temperature_2m_min[i];
+                            const code = daily.weathercode[i];
+                            const desc = getWeatherDescription(code);
+
+                            const card = document.createElement('div');
+                            card.className = 'weather-card';
+                            card.innerHTML = `
+                                <div class="weather-day">${dayName}</div>
+                                <div class="weather-temp">${Math.round(maxT)}°C / ${Math.round(minT)}°C</div>
+                                <div class="weather-desc">${desc}</div>
+                            `;
+                            container.appendChild(card);
+                        }
+                    }
+                }
+            } catch (e) {
+                const container = document.getElementById('weather-cards-container');
+                if (container) container.innerHTML = `<div style="color: #ff8888; font-size: 0.8rem;">Failed to fetch weather data.</div>`;
+            }
+        }
+
+        function getWeatherDescription(code) {
+            const codes = {
+                0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",
+                45: "Foggy", 48: "Depositing rime fog", 51: "Light drizzle", 53: "Moderate drizzle",
+                61: "Slight rain", 63: "Moderate rain", 71: "Slight snow", 95: "Thunderstorm"
+            };
+            return codes[code] || "Variable";
         }
 
         function resetVoiceScreenState() {
@@ -567,11 +689,11 @@
             
             const statusContainer = document.getElementById('voice-status-container');
             const logoBox = document.getElementById('voice-logo-box');
-            const dtDisplay = document.getElementById('voice-datetime-display');
+            const hudDisplay = document.getElementById('voice-hud-display');
 
             if (statusContainer) statusContainer.classList.remove('fade-out');
             if (logoBox) logoBox.classList.remove('mini-mode');
-            if (dtDisplay) dtDisplay.classList.remove('active');
+            if (hudDisplay) hudDisplay.classList.remove('active');
         }
 
         // --- REFINED BRITISH MALE VOICE ENGINE ---
@@ -1080,10 +1202,50 @@
             const authScreenActive = document.getElementById('auth-screen').classList.contains('active');
             if (micScreenActive || authScreenActive) return;
 
-            if (cmd.includes('date and time') || cmd.includes('show date') || cmd.includes('open date') || cmd.includes('time and date')) {
-                if (document.getElementById('voice-screen').classList.contains('active')) {
-                    triggerDateAndTimeHUDView();
-                    speakMaleVoice("Displaying current date and time sir");
+            // Check if on voice control screen for HUD commands
+            const isVoiceActive = document.getElementById('voice-screen').classList.contains('active');
+
+            // Weather commands
+            if (cmd.includes('weather') || cmd.includes('forecast') || cmd.includes('rothbury')) {
+                if (!isVoiceActive) switchScreen('voice-screen');
+                triggerHUDView('weather', 'full');
+                const shouldRead = cmd.includes('read out') || cmd.includes('read');
+                if (shouldRead) {
+                    speakMaleVoice("Displaying Rothbury weather forecast for tomorrow and the week ahead sir");
+                }
+                return;
+            }
+
+            // Date / Time / Day combinations & read out variations
+            const asksDate = cmd.includes('date') || cmd.includes('what is the date');
+            const asksTime = cmd.includes('time') || cmd.includes('what is the time');
+            const asksDay = cmd.includes('day') || cmd.includes('what day');
+            const shouldRead = cmd.includes('read out') || cmd.includes('read');
+
+            if (asksDate || asksTime || asksDay || cmd.includes('show date') || cmd.includes('show time') || cmd.includes('show day')) {
+                if (!isVoiceActive) switchScreen('voice-screen');
+
+                let mode = 'both';
+                let speechResponse = "Displaying current date and time sir";
+
+                if (asksDay && !asksDate && !asksTime) {
+                    mode = 'day';
+                    const dayStr = new Date().toLocaleDateString(undefined, { weekday: 'long' });
+                    speechResponse = `Today is ${dayStr} sir`;
+                } else if (asksDate && !asksTime && !asksDay) {
+                    mode = 'date';
+                    const dateStr = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+                    speechResponse = `Today's date is ${dateStr} sir`;
+                } else if (asksTime && !asksDate && !asksDay) {
+                    mode = 'time';
+                    const timeStr = new Date().toLocaleTimeString();
+                    speechResponse = `The current time is ${timeStr} sir`;
+                }
+
+                triggerHUDView('datetime', mode);
+
+                if (shouldRead || asksDate || asksTime || asksDay) {
+                    speakMaleVoice(speechResponse);
                 }
                 return;
             }
@@ -1099,7 +1261,7 @@
             } else if (cmd.includes('open voice') || cmd.includes('voice control')) {
                 switchScreen('voice-screen');
             } else {
-                if (document.getElementById('voice-screen').classList.contains('active')) {
+                if (isVoiceActive) {
                     processVoiceAIQuery(cmd);
                 }
             }
