@@ -215,8 +215,9 @@
         .carousel-btn.small { transform: scale(0.85); opacity: 0.45; font-size: 0.85rem; }
         .carousel-btn.big { transform: scale(1.05); opacity: 1; font-size: 1rem; border-color: var(--accent-color); box-shadow: 0 0 20px var(--accent-glow); }
 
+        /* Full screen chat container styling */
         .chat-container {
-            width: 100%; height: 100%; max-width: 1000px; display: flex; flex-direction: column; background: transparent; overflow: hidden;
+            width: 100vw; height: 100vh; max-width: 100vw; display: flex; flex-direction: column; background: var(--bg-color); overflow: hidden; position: absolute; top: 0; left: 0;
         }
         .chat-header {
             padding: 15px 25px; background: var(--panel-bg); border-bottom: 1px solid var(--border-color);
@@ -251,7 +252,7 @@
             padding: 6px 10px; border-radius: 4px; margin-bottom: 6px; font-size: 0.8rem;
         }
 
-        /* Modal Confirmation Overlay */
+        /* Modal Confirmation Overlay & Explanation Modal */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0, 5, 0, 0.85); backdrop-filter: blur(8px);
@@ -391,7 +392,10 @@
     <div id="dashboard-screen" class="screen">
         <div class="chat-container">
             <div class="chat-header">
-                <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. CHAT INTERFACE</span>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. CHAT INTERFACE</span>
+                    <span id="active-model-badge" style="font-size: 0.75rem; padding: 3px 8px; background: rgba(0,255,0,0.15); border: 1px solid var(--border-color); border-radius: 4px; color: #88ff88;">MODEL: llama-3.3-70b-versatile</span>
+                </div>
                 <div>
                     <button class="btn" style="width: auto; padding: 6px 12px; margin-bottom: 0; display: inline-block; margin-right: 6px; background: rgba(255,0,0,0.2); border-color: var(--danger-color); color: #ff8888; font-size: 0.8rem;" onclick="clearChatMemory()">CLEAR</button>
                     <button class="btn" style="width: auto; padding: 6px 12px; margin-bottom: 0; display: inline-block; font-size: 0.8rem;" onclick="openMenu()">MENU</button>
@@ -406,7 +410,7 @@
     </div>
 
     <div id="translation-screen" class="screen">
-        <div class="chat-container">
+        <div class="chat-container" style="width: 100%; height: 100%;">
             <div class="chat-header">
                 <span style="font-weight: bold; letter-spacing: 1.5px; font-size: 0.95rem;">G.I.B.B. TRANSLATOR</span>
                 <button class="btn" style="width: auto; padding: 6px 12px; margin-bottom: 0; font-size: 0.8rem;" onclick="openMenu()">MENU</button>
@@ -441,6 +445,20 @@
         </div>
     </div>
 
+    <div id="learn-more-modal" class="modal-overlay">
+        <div class="panel" style="max-width: 480px; text-align: left;">
+            <h3 style="margin-bottom: 12px; letter-spacing: 1.5px; font-size: 1.1rem; color: var(--text-color); text-align: center;">TOKEN DEPLETION EXPLANATION</h3>
+            <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 15px; line-height: 1.5;">
+                Every Groq API key is allocated a strict quota of tokens per minute and per day. When all keys in your secure vault exhaust their token allowances, G.I.B.B. automatically falls back to the baseline model (<strong>gemma2-9b-it</strong>) using your primary account key so you can keep communicating without interruption.
+            </p>
+            <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 20px; line-height: 1.5;">
+                <strong>How to add more keys &amp; maintain capacity:</strong><br>
+                To avoid running out of tokens entirely, you can use the multi-account method. Create multiple separate accounts on Groq using different email addresses, generate a unique API key for each account, and add them all into your <strong>Groq API Key Vault</strong> in the system menu. G.I.B.B. will automatically cycle through them as needed!
+            </p>
+            <button class="btn" onclick="closeLearnMoreModal()">CLOSE EXPLANATION</button>
+        </div>
+    </div>
+
     <script>
         // --- REFINED BRITISH MALE VOICE ENGINE WITH RIGID SPEECH LOCK ---
         let isSpeakingActive = false;
@@ -450,7 +468,6 @@
             pauseMicForSpeech();
 
             if (typeof responsiveVoice !== 'undefined') {
-                // Adjusted pitch and rate slightly for a more polished British male timbre
                 responsiveVoice.speak(text, "UK English Male", {
                     pitch: 0.9,
                     rate: 1.02,
@@ -522,6 +539,10 @@
             activeKeyIndex: 0 
         };
 
+        let isUsingWorstModel = false;
+        const PRIMARY_MODEL = "llama-3.3-70b-versatile";
+        const WORST_MODEL = "gemma2-9b-it";
+
         function loadAccountData(email) {
             if (email && allAccounts[email]) {
                 db = allAccounts[email];
@@ -553,7 +574,6 @@
             textEl.innerText = text;
             modal.classList.add('active');
 
-            // Clean previous listeners by cloning
             const newConfirm = confirmBtn.cloneNode(true);
             const newCancel = cancelBtn.cloneNode(true);
             confirmBtn.parentNode.replaceChild(newConfirm, confirmBtn);
@@ -567,6 +587,14 @@
             document.getElementById('modal-cancel-btn').addEventListener('click', () => {
                 modal.classList.remove('active');
             });
+        }
+
+        function openLearnMoreModal() {
+            document.getElementById('learn-more-modal').classList.add('active');
+        }
+
+        function closeLearnMoreModal() {
+            document.getElementById('learn-more-modal').classList.remove('active');
         }
 
         // Key Vault Management Functions with Confirmation for Deletion
@@ -654,15 +682,92 @@
             return null;
         }
 
-        // --- AUTOMATIC KEY ROTATION ON TOKEN EXHAUSTION / 400 / 429 ERRORS ---
-        function rotateToNextKey() {
-            if (!db.keyVault || db.keyVault.length <= 1) return false;
+        // --- AUTOMATIC KEY ROTATION & FALLBACK TO WORST MODEL ON COMPLETE DEPLETION ---
+        let rotationCycleCount = 0;
+
+        function handleApiExhaustionOrFailure() {
+            if (!db.keyVault || db.keyVault.length === 0) return false;
+
+            // Try cycling to next key
             let previousIndex = db.activeKeyIndex;
             db.activeKeyIndex = (db.activeKeyIndex + 1) % db.keyVault.length;
+            
+            if (db.activeKeyIndex === 0) {
+                rotationCycleCount++;
+            }
+
             saveAccountData();
             renderVaultUI();
-            return db.activeKeyIndex !== previousIndex;
+
+            // If we looped through all keys and came back to 0, it means all keys are exhausted
+            if (rotationCycleCount >= 1 && db.activeKeyIndex === 0) {
+                if (!isUsingWorstModel) {
+                    isUsingWorstModel = true;
+                    db.activeKeyIndex = 0; // Set to the first key added (main account)
+                    saveAccountData();
+                    renderVaultUI();
+                    triggerWorstModelActivationNotice();
+                }
+            }
+            return true;
         }
+
+        function updateActiveModelBadge() {
+            const badge = document.getElementById('active-model-badge');
+            if (badge) {
+                const currentModel = isUsingWorstModel ? WORST_MODEL : PRIMARY_MODEL;
+                badge.innerText = `MODEL: ${currentModel}`;
+                badge.style.borderColor = isUsingWorstModel ? 'var(--danger-color)' : 'var(--border-color)';
+                badge.style.color = isUsingWorstModel ? '#ff8888' : '#88ff88';
+            }
+        }
+
+        function triggerWorstModelActivationNotice() {
+            updateActiveModelBadge();
+            const noticeText = `You have used all your available tokens on every key. You are now using a worse model until your tokens regenerate. <a href="#" onclick="openLearnMoreModal(); return false;" style="color: var(--accent-color); text-decoration: underline; font-weight: bold;">learn more</a>`;
+            appendMessage(noticeText, 'gibb', false, true);
+        }
+
+        // --- CONSTANT BACKGROUND CHECKER TO TEST IF TOKENS REGENERATED ---
+        async function checkTokenRegeneration() {
+            if (!isUsingWorstModel || !db.keyVault || db.keyVault.length === 0) return;
+
+            const apiKey = db.keyVault[0].key; // Check primary key
+            try {
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${apiKey.trim()}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: PRIMARY_MODEL,
+                        messages: [{ role: "user", content: "ping" }],
+                        max_tokens: 2
+                    })
+                });
+
+                if (response.ok) {
+                    // Tokens regenerated successfully! Restore primary model and reset rotation cycles
+                    isUsingWorstModel = false;
+                    rotationCycleCount = 0;
+                    db.activeKeyIndex = 0;
+                    saveAccountData();
+                    renderVaultUI();
+                    updateActiveModelBadge();
+                    appendMessage("Tokens have regenerated across your accounts. Restoring primary model and main key.", 'gibb');
+                }
+            } catch (e) {
+                // Still throttled, remain on worst model
+            }
+        }
+
+        // Run constant checks every 30 seconds if worst model is active
+        setInterval(() => {
+            if (isUsingWorstModel) {
+                checkTokenRegeneration();
+            }
+        }, 30000);
 
         function switchScreen(screenId) {
             if (screenId !== 'voice-screen') {
@@ -674,6 +779,9 @@
                 target.classList.add('active');
                 if (screenId === 'menu-screen') {
                     renderVaultUI();
+                }
+                if (screenId === 'dashboard-screen') {
+                    updateActiveModelBadge();
                 }
             }
         }
@@ -696,12 +804,15 @@
             }
         }
 
-        // --- GROQ AI API FETCH ENGINE WITH AUTOMATIC FAILOVER ---
+        // --- GROQ AI API FETCH ENGINE WITH AUTOMATIC FAILOVER & WORST MODEL FALLBACK ---
         async function queryGroqAI(promptText, retryCount = 0) {
             const apiKey = getActiveApiKey();
             if (!apiKey) {
                 return "Error: No active API Key found in vault. Please add and select a key in the settings panel.";
             }
+
+            const activeModel = isUsingWorstModel ? WORST_MODEL : PRIMARY_MODEL;
+
             try {
                 const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
@@ -710,7 +821,7 @@
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        model: "llama-3.3-70b-versatile",
+                        model: activeModel,
                         messages: [
                             { role: "system", content: "You are G.I.B.B., an advanced tactical male AI assistant. Keep responses sharp, precise, and professional." },
                             ...db.chatHistory.slice(-6).map(m => ({ role: m.role, content: m.content })),
@@ -726,11 +837,9 @@
                 if (!response.ok || data.error) {
                     const errStr = JSON.stringify(data).toLowerCase();
                     if (response.status === 429 || response.status === 400 || errStr.includes('token') || errStr.includes('rate limit') || errStr.includes('quota')) {
-                        if (db.keyVault.length > 1 && retryCount < db.keyVault.length) {
-                            const rotated = rotateToNextKey();
-                            if (rotated) {
-                                return await queryGroqAI(promptText, retryCount + 1);
-                            }
+                        if (!isUsingWorstModel) {
+                            handleApiExhaustionOrFailure();
+                            return await queryGroqAI(promptText, retryCount + 1);
                         }
                     }
                     return `API Error: ${data.error ? data.error.message : response.statusText}`;
@@ -741,11 +850,9 @@
                 }
                 return "Neural core encountered an unexpected response format.";
             } catch (err) {
-                if (db.keyVault.length > 1 && retryCount < db.keyVault.length) {
-                    const rotated = rotateToNextKey();
-                    if (rotated) {
-                        return await queryGroqAI(promptText, retryCount + 1);
-                    }
+                if (!isUsingWorstModel) {
+                    handleApiExhaustionOrFailure();
+                    return await queryGroqAI(promptText, retryCount + 1);
                 }
                 return "Connection error reaching Groq API servers.";
             }
@@ -1021,7 +1128,7 @@
             switchScreen('auth-screen');
         }
 
-        // --- CHAT MODULE (NO TTS) ---
+        // --- CHAT MODULE (FULL SCREEN WITH HTML SUPPORT FOR LINKS) ---
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
@@ -1047,13 +1154,19 @@
             if (e.key === 'Enter') sendMessage();
         }
 
-        function appendMessage(text, sender, isLoading = false) {
+        function appendMessage(text, sender, isLoading = false, isHTML = false) {
             const container = document.getElementById('chat-messages');
             const msgDiv = document.createElement('div');
             const msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
             msgDiv.id = msgId;
             msgDiv.className = `message ${sender}`;
-            msgDiv.innerText = text;
+            
+            if (isHTML) {
+                msgDiv.innerHTML = text;
+            } else {
+                msgDiv.innerText = text;
+            }
+
             if (isLoading) msgDiv.style.opacity = '0.6';
             
             container.appendChild(msgDiv);
