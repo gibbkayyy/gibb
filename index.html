@@ -215,7 +215,6 @@
         .carousel-btn.small { transform: scale(0.85); opacity: 0.45; font-size: 0.85rem; }
         .carousel-btn.big { transform: scale(1.05); opacity: 1; font-size: 1rem; border-color: var(--accent-color); box-shadow: 0 0 20px var(--accent-glow); }
 
-        /* Full screen chat container styling */
         .chat-container {
             width: 100vw; height: 100vh; max-width: 100vw; display: flex; flex-direction: column; background: var(--bg-color); overflow: hidden; position: absolute; top: 0; left: 0;
         }
@@ -252,7 +251,6 @@
             padding: 6px 10px; border-radius: 4px; margin-bottom: 6px; font-size: 0.8rem;
         }
 
-        /* Modal Confirmation Overlay & Explanation Modal */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background: rgba(0, 5, 0, 0.85); backdrop-filter: blur(8px);
@@ -460,7 +458,7 @@
     </div>
 
     <script>
-        // --- REFINED BRITISH MALE VOICE ENGINE WITH RIGID SPEECH LOCK ---
+        // --- REFINED BRITISH MALE VOICE ENGINE ---
         let isSpeakingActive = false;
 
         function speakMaleVoice(text, onCompleteCallback) {
@@ -562,7 +560,6 @@
             }
         }
 
-        // Confirmation Modal Utility
         function showConfirmationModal(title, text, onConfirmCallback) {
             const modal = document.getElementById('custom-modal');
             const titleEl = document.getElementById('modal-title');
@@ -597,7 +594,6 @@
             document.getElementById('learn-more-modal').classList.remove('active');
         }
 
-        // Key Vault Management Functions with Confirmation for Deletion
         function addKeyToVault() {
             const nameInput = document.getElementById('vault-key-name');
             const valInput = document.getElementById('vault-key-value');
@@ -682,13 +678,11 @@
             return null;
         }
 
-        // --- AUTOMATIC KEY ROTATION & FALLBACK TO WORST MODEL ON COMPLETE DEPLETION ---
         let rotationCycleCount = 0;
 
         function handleApiExhaustionOrFailure() {
             if (!db.keyVault || db.keyVault.length === 0) return false;
 
-            // Try cycling to next key
             let previousIndex = db.activeKeyIndex;
             db.activeKeyIndex = (db.activeKeyIndex + 1) % db.keyVault.length;
             
@@ -699,11 +693,10 @@
             saveAccountData();
             renderVaultUI();
 
-            // If we looped through all keys and came back to 0, it means all keys are exhausted
             if (rotationCycleCount >= 1 && db.activeKeyIndex === 0) {
                 if (!isUsingWorstModel) {
                     isUsingWorstModel = true;
-                    db.activeKeyIndex = 0; // Set to the first key added (main account)
+                    db.activeKeyIndex = 0;
                     saveAccountData();
                     renderVaultUI();
                     triggerWorstModelActivationNotice();
@@ -728,12 +721,13 @@
             appendMessage(noticeText, 'gibb', false, true);
         }
 
-        // --- CONSTANT BACKGROUND CHECKER TO TEST IF TOKENS REGENERATED ---
+        // --- ENHANCED BACKGROUND REGENERATION CHECK (DEMANDS HEALTHY TOKEN BUFFER) ---
         async function checkTokenRegeneration() {
             if (!isUsingWorstModel || !db.keyVault || db.keyVault.length === 0) return;
 
-            const apiKey = db.keyVault[0].key; // Check primary key
+            const apiKey = db.keyVault[0].key;
             try {
+                // Request a substantial test payload (max_tokens: 200) to verify actual capacity headroom
                 const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
                     headers: {
@@ -742,27 +736,31 @@
                     },
                     body: JSON.stringify({
                         model: PRIMARY_MODEL,
-                        messages: [{ role: "user", content: "ping" }],
-                        max_tokens: 2
+                        messages: [{ role: "user", content: "Write a short sentence confirming token availability check." }],
+                        max_tokens: 200
                     })
                 });
 
                 if (response.ok) {
-                    // Tokens regenerated successfully! Restore primary model and reset rotation cycles
-                    isUsingWorstModel = false;
-                    rotationCycleCount = 0;
-                    db.activeKeyIndex = 0;
-                    saveAccountData();
-                    renderVaultUI();
-                    updateActiveModelBadge();
-                    appendMessage("Tokens have regenerated across your accounts. Restoring primary model and main key.", 'gibb');
+                    const data = await response.json();
+                    const completionTokens = data.usage ? data.usage.completion_tokens : 0;
+                    
+                    // Only restore primary model if it successfully generated a meaningful response (>50 tokens) without hitting an immediate ceiling
+                    if (completionTokens >= 50) {
+                        isUsingWorstModel = false;
+                        rotationCycleCount = 0;
+                        db.activeKeyIndex = 0;
+                        saveAccountData();
+                        renderVaultUI();
+                        updateActiveModelBadge();
+                        appendMessage("Tokens have fully regenerated across your accounts. Restoring primary versatile model.", 'gibb');
+                    }
                 }
             } catch (e) {
-                // Still throttled, remain on worst model
+                // Still throttled or insufficient headroom, remain on fallback model
             }
         }
 
-        // Run constant checks every 30 seconds if worst model is active
         setInterval(() => {
             if (isUsingWorstModel) {
                 checkTokenRegeneration();
@@ -804,7 +802,6 @@
             }
         }
 
-        // --- GROQ AI API FETCH ENGINE WITH AUTOMATIC FAILOVER & WORST MODEL FALLBACK ---
         async function queryGroqAI(promptText, retryCount = 0) {
             const apiKey = getActiveApiKey();
             if (!apiKey) {
@@ -858,7 +855,6 @@
             }
         }
 
-        // --- MICROPHONE PERMISSIONS & CONTINUOUS VOICE RECOGNITION ---
         let recognition = null;
         let isPerpetualListeningActive = false;
         let isMicPausedForSpeech = false;
@@ -990,7 +986,6 @@
             speakMaleVoice(reply);
         }
 
-        // --- BOOT & INITIALISATION ---
         function showLoadingScreen() {
             switchScreen('loading-screen');
             const bar = document.getElementById('loading-bar');
@@ -1010,7 +1005,6 @@
             speakMaleVoice("All systems online sir");
         }
 
-        // --- AUTH SYSTEM ---
         function renderLoginScreen() {
             const panel = document.getElementById('auth-panel');
             panel.innerHTML = `
@@ -1128,7 +1122,6 @@
             switchScreen('auth-screen');
         }
 
-        // --- CHAT MODULE (FULL SCREEN WITH HTML SUPPORT FOR LINKS) ---
         async function sendMessage() {
             const input = document.getElementById('chat-input');
             const text = input.value.trim();
@@ -1190,7 +1183,6 @@
             });
         }
 
-        // --- TRANSLATION MODULE ---
         const languages = [
             "Spanish", "French", "German", "Mandarin Chinese", "Japanese", 
             "Russian", "Italian", "Portuguese", "Arabic", "Hindi", "Korean", "Dutch"
@@ -1230,7 +1222,6 @@
             outputEl.innerText = result;
         }
 
-        // --- CAROUSEL NAVIGATION ---
         let currentCarouselIndex = 1;
 
         function selectCarouselOption(index) {
@@ -1258,7 +1249,6 @@
             });
         }
 
-        // --- GLOBAL INITIALISATION ---
         window.addEventListener('load', () => {
             updateResolution();
             
