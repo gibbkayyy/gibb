@@ -449,7 +449,7 @@
         <div class="panel" style="max-width: 480px; text-align: left;">
             <h3 style="margin-bottom: 12px; letter-spacing: 1.5px; font-size: 1.1rem; color: var(--text-color); text-align: center;">TOKEN DEPLETION EXPLANATION</h3>
             <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 15px; line-height: 1.5;">
-                Every Groq API key is allocated a strict quota of tokens per minute and per day. When all keys in your secure vault exhaust their token allowances, G.I.B.B. automatically falls back to the baseline model (<strong>gemma2-9b-it</strong>) using your primary account key so you can keep communicating without interruption.
+                Every Groq API key is allocated a strict quota of tokens per minute and per day. When all keys in your secure vault exhaust their token allowances, G.I.B.B. automatically falls back to the baseline model (<strong>llama-3.1-8b-instant</strong>) using your primary account key so you can keep communicating without interruption.
             </p>
             <p style="font-size: 0.85rem; color: #88ff88; margin-bottom: 20px; line-height: 1.5;">
                 <strong>How to add more keys &amp; maintain capacity:</strong><br>
@@ -541,7 +541,7 @@
 
         let isUsingWorstModel = false;
         const PRIMARY_MODEL = "llama-3.3-70b-versatile";
-        const WORST_MODEL = "gemma2-9b-it";
+        const WORST_MODEL = "llama-3.1-8b-instant";
 
         function loadAccountData(email) {
             if (email && allAccounts[email]) {
